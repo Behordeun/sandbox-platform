@@ -12,7 +12,7 @@ from .config import settings
 class ConfigEncryption:
     """Encryption utilities for sensitive configuration data."""
 
-    def __init__(self, key: str = None):
+    def __init__(self, key: Optional[str] = None):
         self.key = key or settings.encryption_key
         self._fernet = None
 
@@ -73,7 +73,7 @@ class ConfigEncryption:
             raise ValueError(f"Failed to decrypt value: {e}")
 
     def encrypt_config(
-        self, config: Dict[str, Any], sensitive_keys: list = None
+        self, config: Dict[str, Any], sensitive_keys: Optional[list] = None
     ) -> Dict[str, Any]:
         """Encrypt sensitive keys in a configuration dictionary."""
         if not sensitive_keys:

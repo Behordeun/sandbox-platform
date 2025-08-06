@@ -72,9 +72,20 @@ class RedisStorage(ConfigStorage):
 
     async def get(self, config_id: str) -> Optional[Dict[str, Any]]:
         try:
-            data = self.redis_client.get(f"{self.key_prefix}{config_id}")
+            # Since redis_client.get is synchronous, call it in a thread executor
+            import asyncio
+
+            loop = asyncio.get_event_loop()
+            data = await loop.run_in_executor(
+                None, self.redis_client.get, f"{self.key_prefix}{config_id}"
+            )
             if data:
-                return json.loads(data)
+                if isinstance(data, bytes):
+                    return json.loads(data.decode())
+                elif isinstance(data, str):
+                    return json.loads(data)
+                else:
+                    return None
             return None
         except Exception:
             return None
@@ -90,21 +101,39 @@ class RedisStorage(ConfigStorage):
 
     async def delete(self, config_id: str) -> bool:
         try:
-            result = self.redis_client.delete(f"{self.key_prefix}{config_id}")
-            return result > 0
+            import asyncio
+
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None, self.redis_client.delete, f"{self.key_prefix}{config_id}"
+            )
+            return int(result or 0) > 0
         except Exception:
             return False
 
     async def list_all(self) -> List[str]:
         try:
-            keys = self.redis_client.keys(f"{self.key_prefix}*")
+            import asyncio
+
+            loop = asyncio.get_event_loop()
+            keys = await loop.run_in_executor(
+                None, self.redis_client.keys, f"{self.key_prefix}*"
+            )
+            if keys is None:
+                return []
             return [key.decode().replace(self.key_prefix, "") for key in keys]
         except Exception:
             return []
 
     async def exists(self, config_id: str) -> bool:
         try:
-            return self.redis_client.exists(f"{self.key_prefix}{config_id}") > 0
+            import asyncio
+
+            loop = asyncio.get_event_loop()
+            result = await loop.run_in_executor(
+                None, self.redis_client.exists, f"{self.key_prefix}{config_id}"
+            )
+            return int(result or 0) > 0
         except Exception:
             return False
 
@@ -188,7 +217,7 @@ class ConfigManager:
             return MemoryStorage()
 
     async def create_config(
-        self, config_data: ConfigCreate, created_by: str = None
+        self, config_data: ConfigCreate, created_by: Optional[list[str]] = None
     ) -> ConfigResponse:
         """Create a new configuration."""
         config_id = str(uuid.uuid4())
@@ -226,7 +255,12 @@ class ConfigManager:
 
         # Store initial version
         if settings.versioning_enabled:
-            await self._store_version(config_id, 1, processed_data, created_by)
+            created_by_str = ""
+            if isinstance(created_by, list):
+                created_by_str = ", ".join(created_by)
+            elif created_by is not None:
+                created_by_str = created_by
+            await self._store_version(config_id, 1, processed_data, created_by_str)
 
         return ConfigResponse(**config_record)
 
@@ -247,7 +281,10 @@ class ConfigManager:
         return ConfigResponse(**config_record)
 
     async def update_config(
-        self, config_id: str, update_data: ConfigUpdate, updated_by: str = None
+        self,
+        config_id: str,
+        update_data: ConfigUpdate,
+        updated_by: Optional[str] = None,
     ) -> Optional[ConfigResponse]:
         """Update an existing configuration."""
         config_record = await self.storage.get(config_id)
@@ -299,7 +336,7 @@ class ConfigManager:
         # Store new version
         if settings.versioning_enabled and update_data.data is not None:
             await self._store_version(
-                config_id, new_version, config_record["data"], updated_by
+                config_id, new_version, config_record["data"], updated_by or ""
             )
 
         # Decrypt for response
@@ -318,7 +355,10 @@ class ConfigManager:
         return success
 
     async def list_configs(
-        self, environment: str = None, config_type: str = None, tags: List[str] = None
+        self,
+        environment: Optional[str] = None,
+        config_type: Optional[str] = None,
+        tags: Optional[List[str]] = None,
     ) -> List[ConfigResponse]:
         """List configurations with optional filtering."""
         config_ids = await self.storage.list_all()
@@ -385,7 +425,11 @@ class ConfigManager:
         return self._calculate_diff(v1_data, v2_data)
 
     async def _store_version(
-        self, config_id: str, version: int, data: Dict[str, Any], created_by: str = None
+        self,
+        config_id: str,
+        version: int,
+        data: Dict[str, Any],
+        created_by: Optional[str] = None,
     ):
         """Store a configuration version."""
         version_record = await self.version_storage.get(config_id)

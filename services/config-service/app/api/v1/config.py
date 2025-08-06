@@ -37,11 +37,14 @@ async def list_configurations(
 ) -> Any:
     """List all configurations with optional filtering."""
     try:
-        configs = await config_manager.list_configs(
-            environment=environment,
-            config_type=config_type.value if config_type else None,
-            tags=tags,
-        )
+        list_configs_kwargs = {
+            "config_type": config_type.value if config_type else None,
+            "tags": tags,
+        }
+        if environment is not None:
+            list_configs_kwargs["environment"] = environment
+
+        configs = await config_manager.list_configs(**list_configs_kwargs)
         return configs
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
