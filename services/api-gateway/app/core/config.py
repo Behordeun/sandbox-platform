@@ -1,10 +1,11 @@
+from typing import Dict, List
+
 from pydantic_settings import BaseSettings
-from typing import Dict, List, Optional
-import os
 
 
 class ServiceConfig(BaseSettings):
     """Configuration for a backend service."""
+
     name: str
     url: str
     health_path: str = "/health"
@@ -19,73 +20,69 @@ class Settings(BaseSettings):
     app_name: str = "Sandbox API Gateway"
     app_version: str = "1.0.0"
     debug: bool = False
-    
+
     # Server settings
     host: str = "0.0.0.0"
     port: int = 8080
-    
+
     # CORS settings
     cors_origins: List[str] = ["*"]
     cors_allow_credentials: bool = True
     cors_allow_methods: List[str] = ["*"]
     cors_allow_headers: List[str] = ["*"]
-    
+
     # Rate limiting
     rate_limit_enabled: bool = True
     rate_limit_requests: int = 100
     rate_limit_window: int = 60  # seconds
-    
+
     # Redis settings (for rate limiting and caching)
     redis_url: str = "redis://localhost:6379/0"
-    
+
     # JWT settings for token validation
     jwt_secret_key: str = "your-secret-key-change-in-production"
     jwt_algorithm: str = "HS256"
-    
+
     # Auth service configuration
     auth_service_url: str = "http://auth-service:8000"
     auth_service_timeout: int = 30
-    
+
     # Service discovery and routing
     services: Dict[str, ServiceConfig] = {
         "auth": ServiceConfig(
-            name="auth-service",
-            url="http://auth-service:8000",
-            health_path="/health"
+            name="auth-service", url="http://auth-service:8000", health_path="/health"
         ),
         "sms": ServiceConfig(
-            name="sms-service",
-            url="http://sms-service:8000",
-            health_path="/health"
+            name="sms-service", url="http://sms-service:8000", health_path="/health"
         ),
         "llm": ServiceConfig(
-            name="llm-service",
-            url="http://llm-service:8000",
-            health_path="/health"
-        )
+            name="llm-service", url="http://llm-service:8000", health_path="/health"
+        ),
     }
-    
+
     # Load balancing
-    load_balancing_strategy: str = "round_robin"  # round_robin, least_connections, random
-    
+    load_balancing_strategy: str = (
+        "round_robin"  # round_robin, least_connections, random
+    )
+
     # Circuit breaker settings
     circuit_breaker_enabled: bool = True
     circuit_breaker_failure_threshold: int = 5
     circuit_breaker_recovery_timeout: int = 60
     circuit_breaker_expected_recovery_time: int = 30
-    
+
     # Monitoring and metrics
     metrics_enabled: bool = True
     metrics_path: str = "/metrics"
-    
+
     # Request/Response logging
     request_logging_enabled: bool = True
     response_logging_enabled: bool = True
-    
+
     # Timeout settings
     default_timeout: int = 30
     max_timeout: int = 300
-    
+
     class Config:
         env_file = ".env"
         case_sensitive = False
@@ -93,4 +90,3 @@ class Settings(BaseSettings):
 
 # Global settings instance
 settings = Settings()
-

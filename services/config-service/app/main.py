@@ -1,11 +1,11 @@
+import logging
+from contextlib import asynccontextmanager
+
+from app.api.v1.router import api_router
+from app.core.config import settings
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import logging
-
-from app.core.config import settings
-from app.api.v1.router import api_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,9 +20,9 @@ async def lifespan(app: FastAPI):
     logger.info(f"Storage type: {settings.config_storage_type}")
     logger.info(f"Versioning enabled: {settings.versioning_enabled}")
     logger.info(f"Encryption enabled: {bool(settings.encryption_key)}")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Sandbox Config Service...")
 
@@ -35,7 +35,7 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -57,7 +57,7 @@ async def health_check():
         "service": settings.app_name,
         "version": settings.app_version,
         "storage_type": settings.config_storage_type,
-        "versioning_enabled": settings.versioning_enabled
+        "versioning_enabled": settings.versioning_enabled,
     }
 
 
@@ -69,7 +69,7 @@ async def root():
         "message": f"Welcome to {settings.app_name}",
         "version": settings.app_version,
         "docs_url": "/docs",
-        "health_url": "/health"
+        "health_url": "/health",
     }
 
 
@@ -86,18 +86,18 @@ async def global_exception_handler(request, exc):
         status_code=500,
         content={
             "error": "Internal server error",
-            "message": "An unexpected error occurred"
-        }
+            "message": "An unexpected error occurred",
+        },
     )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level="info"
+        log_level="info",
     )
-

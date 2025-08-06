@@ -1,13 +1,13 @@
+import logging
+from contextlib import asynccontextmanager
+
+from app.api.v1.router import api_router
+from app.core.config import settings
+from app.core.database import engine
+from app.models import oauth_client, oauth_token, user  # Import to register models
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from contextlib import asynccontextmanager
-import logging
-
-from app.core.config import settings
-from app.core.database import engine
-from app.models import user, oauth_client, oauth_token  # Import to register models
-from app.api.v1.router import api_router
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -20,14 +20,15 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info("Starting up Sandbox Auth Service...")
     logger.info(f"Database URL: {settings.database_url}")
-    
+
     # Create tables (in production, use Alembic migrations)
     from app.core.database import Base
+
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables created/verified")
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Sandbox Auth Service...")
 
@@ -40,7 +41,7 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -60,7 +61,7 @@ async def health_check():
     return {
         "status": "healthy",
         "service": settings.app_name,
-        "version": settings.app_version
+        "version": settings.app_version,
     }
 
 
@@ -72,7 +73,7 @@ async def root():
         "message": f"Welcome to {settings.app_name}",
         "version": settings.app_version,
         "docs_url": "/docs",
-        "health_url": "/health"
+        "health_url": "/health",
     }
 
 
@@ -87,12 +88,19 @@ async def openid_configuration():
         "userinfo_endpoint": f"{settings.oauth2_issuer_url}/api/v1/auth/userinfo",
         "jwks_uri": settings.oauth2_jwks_uri,
         "response_types_supported": ["code", "token"],
-        "grant_types_supported": ["authorization_code", "refresh_token", "client_credentials"],
+        "grant_types_supported": [
+            "authorization_code",
+            "refresh_token",
+            "client_credentials",
+        ],
         "subject_types_supported": ["public"],
         "id_token_signing_alg_values_supported": ["HS256"],
         "scopes_supported": ["openid", "profile", "email"],
-        "token_endpoint_auth_methods_supported": ["client_secret_post", "client_secret_basic"],
-        "claims_supported": ["sub", "email", "name", "preferred_username"]
+        "token_endpoint_auth_methods_supported": [
+            "client_secret_post",
+            "client_secret_basic",
+        ],
+        "claims_supported": ["sub", "email", "name", "preferred_username"],
     }
 
 
@@ -101,9 +109,7 @@ async def jwks():
     """JSON Web Key Set endpoint."""
     # In a production environment, you would return actual JWKs
     # For now, return an empty set since we're using symmetric keys
-    return {
-        "keys": []
-    }
+    return {"keys": []}
 
 
 # Include API routers
@@ -116,10 +122,7 @@ async def http_exception_handler(request, exc):
     """Global HTTP exception handler."""
     return JSONResponse(
         status_code=exc.status_code,
-        content={
-            "error": exc.detail,
-            "status_code": exc.status_code
-        }
+        content={"error": exc.detail, "status_code": exc.status_code},
     )
 
 
@@ -128,21 +131,17 @@ async def general_exception_handler(request, exc):
     """Global exception handler for unhandled exceptions."""
     logger.error(f"Unhandled exception: {exc}")
     return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal server error",
-            "status_code": 500
-        }
+        status_code=500, content={"error": "Internal server error", "status_code": 500}
     )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level="info"
+        log_level="info",
     )
-

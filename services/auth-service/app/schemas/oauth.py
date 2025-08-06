@@ -1,6 +1,7 @@
-from pydantic import BaseModel, validator
-from typing import Optional, List
 from datetime import datetime
+from typing import List, Optional
+
+from pydantic import BaseModel, validator
 
 
 class OAuthClientBase(BaseModel):
@@ -26,7 +27,7 @@ class OAuthClientResponse(OAuthClientBase):
     is_active: bool
     is_confidential: bool
     created_at: datetime
-    
+
     class Config:
         from_attributes = True
 
@@ -37,11 +38,11 @@ class AuthorizeRequest(BaseModel):
     redirect_uri: str
     scope: Optional[str] = None
     state: Optional[str] = None
-    
-    @validator('response_type')
+
+    @validator("response_type")
     def validate_response_type(cls, v):
-        if v not in ['code', 'token']:
-            raise ValueError('Invalid response_type')
+        if v not in ["code", "token"]:
+            raise ValueError("Invalid response_type")
         return v
 
 
@@ -58,12 +59,12 @@ class TokenRequest(BaseModel):
     code: Optional[str] = None
     redirect_uri: Optional[str] = None
     refresh_token: Optional[str] = None
-    
-    @validator('grant_type')
+
+    @validator("grant_type")
     def validate_grant_type(cls, v):
-        valid_types = ['authorization_code', 'refresh_token', 'client_credentials']
+        valid_types = ["authorization_code", "refresh_token", "client_credentials"]
         if v not in valid_types:
-            raise ValueError('Invalid grant_type')
+            raise ValueError("Invalid grant_type")
         return v
 
 
@@ -88,4 +89,3 @@ class TokenIntrospectionResponse(BaseModel):
     exp: Optional[int] = None
     iat: Optional[int] = None
     sub: Optional[str] = None
-

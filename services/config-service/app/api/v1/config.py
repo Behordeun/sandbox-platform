@@ -1,11 +1,16 @@
-from fastapi import APIRouter, HTTPException, Query, Depends
-from typing import List, Optional, Any
+from typing import Any, List, Optional
 
 from app.models.config import (
-    ConfigCreate, ConfigUpdate, ConfigResponse, ConfigHistory, 
-    ConfigDiff, ConfigType, ConfigStatus
+    ConfigCreate,
+    ConfigDiff,
+    ConfigHistory,
+    ConfigResponse,
+    ConfigStatus,
+    ConfigType,
+    ConfigUpdate,
 )
 from app.services.config_manager import config_manager
+from fastapi import APIRouter, HTTPException, Query
 
 router = APIRouter()
 
@@ -23,15 +28,17 @@ async def create_configuration(config_data: ConfigCreate) -> Any:
 @router.get("/", response_model=List[ConfigResponse])
 async def list_configurations(
     environment: Optional[str] = Query(None, description="Filter by environment"),
-    config_type: Optional[ConfigType] = Query(None, description="Filter by configuration type"),
-    tags: Optional[List[str]] = Query(None, description="Filter by tags")
+    config_type: Optional[ConfigType] = Query(
+        None, description="Filter by configuration type"
+    ),
+    tags: Optional[List[str]] = Query(None, description="Filter by tags"),
 ) -> Any:
     """List all configurations with optional filtering."""
     try:
         configs = await config_manager.list_configs(
             environment=environment,
             config_type=config_type.value if config_type else None,
-            tags=tags
+            tags=tags,
         )
         return configs
     except Exception as e:
@@ -41,7 +48,7 @@ async def list_configurations(
 @router.get("/{config_id}", response_model=ConfigResponse)
 async def get_configuration(
     config_id: str,
-    decrypt_sensitive: bool = Query(True, description="Decrypt sensitive values")
+    decrypt_sensitive: bool = Query(True, description="Decrypt sensitive values"),
 ) -> Any:
     """Get a specific configuration by ID."""
     try:
@@ -90,8 +97,8 @@ async def get_configuration_history(config_id: str) -> Any:
         history = await config_manager.get_config_history(config_id)
         if not history:
             raise HTTPException(
-                status_code=404, 
-                detail="Configuration history not found or versioning not enabled"
+                status_code=404,
+                detail="Configuration history not found or versioning not enabled",
             )
         return history
     except HTTPException:
@@ -104,15 +111,14 @@ async def get_configuration_history(config_id: str) -> Any:
 async def get_configuration_diff(
     config_id: str,
     version1: int = Query(..., description="First version to compare"),
-    version2: int = Query(..., description="Second version to compare")
+    version2: int = Query(..., description="Second version to compare"),
 ) -> Any:
     """Get difference between two configuration versions."""
     try:
         diff = await config_manager.get_config_diff(config_id, version1, version2)
         if not diff:
             raise HTTPException(
-                status_code=404, 
-                detail="Configuration versions not found"
+                status_code=404, detail="Configuration versions not found"
             )
         return diff
     except HTTPException:
@@ -125,21 +131,21 @@ async def get_configuration_diff(
 async def get_configuration_data(
     config_id: str,
     key: Optional[str] = Query(None, description="Specific key to retrieve"),
-    decrypt_sensitive: bool = Query(True, description="Decrypt sensitive values")
+    decrypt_sensitive: bool = Query(True, description="Decrypt sensitive values"),
 ) -> Any:
     """Get configuration data (or specific key) in raw format."""
     try:
         config = await config_manager.get_config(config_id, decrypt_sensitive)
         if not config:
             raise HTTPException(status_code=404, detail="Configuration not found")
-        
+
         if key:
             # Return specific key
             if key in config.data:
                 return {"key": key, "value": config.data[key]}
             else:
                 raise HTTPException(status_code=404, detail=f"Key '{key}' not found")
-        
+
         # Return all data
         return config.data
     except HTTPException:
@@ -149,10 +155,7 @@ async def get_configuration_data(
 
 
 @router.patch("/{config_id}/status")
-async def update_configuration_status(
-    config_id: str,
-    status: ConfigStatus
-) -> Any:
+async def update_configuration_status(config_id: str, status: ConfigStatus) -> Any:
     """Update configuration status."""
     try:
         update_data = ConfigUpdate(status=status)
@@ -164,4 +167,3 @@ async def update_configuration_status(
         raise
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
-

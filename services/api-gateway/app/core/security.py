@@ -1,6 +1,8 @@
 from typing import Optional
-from jose import jwt, JWTError
+
 from fastapi import HTTPException, status
+from jose import JWTError, jwt
+
 from .config import settings
 
 
@@ -8,9 +10,7 @@ def verify_token(token: str) -> Optional[dict]:
     """Verify JWT token and return payload."""
     try:
         payload = jwt.decode(
-            token, 
-            settings.jwt_secret_key, 
-            algorithms=[settings.jwt_algorithm]
+            token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
         )
         return payload
     except JWTError:
@@ -34,14 +34,14 @@ def validate_api_key(api_key: str) -> bool:
 
 class SecurityError(Exception):
     """Custom security exception."""
-    pass
 
 
-def create_auth_exception(detail: str = "Could not validate credentials") -> HTTPException:
+def create_auth_exception(
+    detail: str = "Could not validate credentials",
+) -> HTTPException:
     """Create authentication exception."""
     return HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail=detail,
         headers={"WWW-Authenticate": "Bearer"},
     )
-

@@ -1,17 +1,16 @@
-from fastapi import APIRouter, Request, HTTPException
-from fastapi.responses import Response
 from typing import Any
 
-from app.services.proxy import proxy_service
-from app.services.health import health_service
 from app.services.discovery import service_discovery
+from app.services.health import health_service
+from app.services.proxy import proxy_service
+from fastapi import APIRouter, HTTPException, Request
+from fastapi.responses import Response
 
 router = APIRouter()
 
 
 @router.api_route(
-    "/auth/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 )
 async def proxy_auth_service(request: Request, path: str) -> Response:
     """Proxy requests to auth service."""
@@ -19,8 +18,7 @@ async def proxy_auth_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/sms/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/sms/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 )
 async def proxy_sms_service(request: Request, path: str) -> Response:
     """Proxy requests to SMS service."""
@@ -28,8 +26,7 @@ async def proxy_sms_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/llm/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/llm/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
 )
 async def proxy_llm_service(request: Request, path: str) -> Response:
     """Proxy requests to LLM service."""
@@ -61,4 +58,3 @@ async def get_service_health(service_name: str) -> Any:
 async def get_service_metrics(service_name: str) -> Any:
     """Get metrics for a specific service."""
     return health_service.get_service_metrics(service_name)
-

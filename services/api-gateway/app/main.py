@@ -1,19 +1,19 @@
+import asyncio
+import logging
+from contextlib import asynccontextmanager
+
+from app.api.v1.router import api_router
+from app.core.config import settings
+from app.middleware.auth import AuthMiddleware
+from app.middleware.logging import LoggingMiddleware
+from app.middleware.metrics import MetricsMiddleware, get_metrics
+from app.middleware.rate_limit import RateLimitMiddleware
+from app.services.discovery import service_discovery
+from app.services.health import health_service
+from app.services.proxy import proxy_service
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
-from contextlib import asynccontextmanager
-import asyncio
-import logging
-
-from app.core.config import settings
-from app.api.v1.router import api_router
-from app.middleware.auth import AuthMiddleware
-from app.middleware.rate_limit import RateLimitMiddleware
-from app.middleware.logging import LoggingMiddleware
-from app.middleware.metrics import MetricsMiddleware, get_metrics
-from app.services.health import health_service
-from app.services.discovery import service_discovery
-from app.services.proxy import proxy_service
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -25,12 +25,12 @@ async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
     logger.info("Starting up Sandbox API Gateway...")
-    
+
     # Start background tasks
     health_check_task = asyncio.create_task(periodic_health_checks())
-    
+
     yield
-    
+
     # Shutdown
     logger.info("Shutting down Sandbox API Gateway...")
     health_check_task.cancel()
@@ -58,7 +58,7 @@ app = FastAPI(
     openapi_url="/api/v1/openapi.json",
     docs_url="/docs",
     redoc_url="/redoc",
-    lifespan=lifespan
+    lifespan=lifespan,
 )
 
 # Add CORS middleware
@@ -96,10 +96,7 @@ async def health_check():
 async def metrics():
     """Prometheus metrics endpoint."""
     if not settings.metrics_enabled:
-        return JSONResponse(
-            status_code=404,
-            content={"error": "Metrics not enabled"}
-        )
+        return JSONResponse(status_code=404, content={"error": "Metrics not enabled"})
     return get_metrics()
 
 
@@ -112,7 +109,7 @@ async def root():
         "version": settings.app_version,
         "docs_url": "/docs",
         "health_url": "/health",
-        "metrics_url": "/metrics" if settings.metrics_enabled else None
+        "metrics_url": "/metrics" if settings.metrics_enabled else None,
     }
 
 
@@ -129,18 +126,18 @@ async def global_exception_handler(request: Request, exc: Exception):
         status_code=500,
         content={
             "error": "Internal server error",
-            "message": "An unexpected error occurred"
-        }
+            "message": "An unexpected error occurred",
+        },
     )
 
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=settings.port,
         reload=settings.debug,
-        log_level="info"
+        log_level="info",
     )
-
