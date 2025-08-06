@@ -33,7 +33,7 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
             db.query(OAuthToken)
             .filter(
                 OAuthToken.authorization_code == code,
-                OAuthToken.code_expires_at > datetime.utcnow(),
+                OAuthToken.code_expires_at > datetime.now(),
             )
             .first()
         )
@@ -44,12 +44,12 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
         *,
         user_id: int,
         client_id: str,
-        scope: str = None,
+        scope: Optional[str] = None,
         expires_in: int = 600  # 10 minutes
     ) -> OAuthToken:
         """Create authorization code for OAuth2 flow."""
         code = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
 
         db_obj = OAuthToken(
             authorization_code=code,
@@ -76,7 +76,9 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
     ) -> Optional[OAuthToken]:
         """Exchange authorization code for access and refresh tokens."""
         token_obj = self.get_by_authorization_code(db, code=code)
-        if not token_obj or token_obj.client_id != client_id:
+        if token_obj is None:
+            return None
+        if getattr(token_obj, "client_id", None) != client_id:
             return None
 
         # Generate new tokens
@@ -84,13 +86,15 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
         refresh_token = create_refresh_token(subject=token_obj.user_id)
 
         # Update token object
-        token_obj.access_token = access_token
-        token_obj.refresh_token = refresh_token
-        token_obj.expires_at = datetime.utcnow() + timedelta(
-            seconds=access_token_expires_in
+        setattr(token_obj, "access_token", access_token)
+        setattr(token_obj, "refresh_token", refresh_token)
+        setattr(
+            token_obj,
+            "expires_at",
+            datetime.now() + timedelta(seconds=access_token_expires_in),
         )
-        token_obj.authorization_code = None  # Clear the code
-        token_obj.code_expires_at = None
+        setattr(token_obj, "authorization_code", None)  # Clear the code
+        setattr(token_obj, "code_expires_at", None)
 
         db.add(token_obj)
         db.commit()
@@ -98,11 +102,16 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
         return token_obj
 
     def create_client_credentials_token(
-        self, db: Session, *, client_id: str, scope: str = None, expires_in: int = 3600
+        self,
+        db: Session,
+        *,
+        client_id: str,
+        scope: Optional[str] = None,
+        expires_in: int = 3600
     ) -> OAuthToken:
         """Create token for client credentials grant."""
         access_token = create_access_token(subject=client_id)
-        expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
 
         db_obj = OAuthToken(
             access_token=access_token,
@@ -129,8 +138,9 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
         access_token = create_access_token(subject=token_obj.user_id)
 
         # Update token object
-        token_obj.access_token = access_token
-        token_obj.expires_at = datetime.utcnow() + timedelta(seconds=expires_in)
+        setattr(token_obj, "access_token", access_token)
+        expires_at = datetime.now() + timedelta(seconds=expires_in)
+        token_obj.__setattr__("expires_at", expires_at)
 
         db.add(token_obj)
         db.commit()
@@ -142,7 +152,10 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
         token_obj = self.get_by_access_token(db, access_token=access_token)
         if not token_obj:
             return False
-        return token_obj.expires_at > datetime.utcnow()
+        expires_at = getattr(token_obj, "expires_at", None)
+        if expires_at is None:
+            return False
+        return bool(expires_at > datetime.now())
 
     def revoke_token(self, db: Session, *, access_token: str) -> bool:
         """Revoke access token."""

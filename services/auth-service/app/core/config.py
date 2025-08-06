@@ -10,7 +10,10 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database settings
-    database_url: str = "postgresql://sandbox_user:changeme@localhost:5432/sandbox_auth"
+    database_url: str = (
+        "postgresql://sandbox_user:"
+        "${SANDBOX_AUTH_DB_PASSWORD}@localhost:5432/sandbox_auth"
+    )
 
     # JWT settings
     jwt_secret_key: str = "your-secret-key-change-in-production"
@@ -32,10 +35,23 @@ class Settings(BaseSettings):
     cors_allow_methods: list = ["*"]
     cors_allow_headers: list = ["*"]
 
-    # Server settings
+    # App settings
     host: str = "0.0.0.0"
     port: int = 8000
 
+    # Logging settings
+    log_level: str = "info"
+    log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+
+    # Security settings
+    enable_oauth2: bool = True
+    enable_nin_bvn_integration: bool = False
+
+    # Environment management
+    default_environment: str = "development"
+    supported_environments: list = ["development", "staging", "production"]
+
+    # Server settings
     class Config:
         env_file = ".env"
         case_sensitive = False

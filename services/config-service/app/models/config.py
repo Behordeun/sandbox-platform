@@ -4,6 +4,9 @@ from typing import Any, Dict, List, Optional
 
 from pydantic import BaseModel, Field, field_validator
 
+CONFIGURATION_TYPE = "Configuration type"
+CREATION_TIMESTAMP = "Creation timestamp"
+
 
 class ConfigType(str, Enum):
     """Configuration types."""
@@ -40,7 +43,7 @@ class ConfigBase(BaseModel):
 
     name: str = Field(..., description="Configuration name")
     description: Optional[str] = Field(None, description="Configuration description")
-    config_type: ConfigType = Field(ConfigType.CUSTOM, description="Configuration type")
+    config_type: ConfigType = Field(ConfigType.CUSTOM, description=CONFIGURATION_TYPE)
     environment: str = Field("development", description="Target environment")
     tags: List[str] = Field(default_factory=list, description="Configuration tags")
 
@@ -91,7 +94,7 @@ class ConfigResponse(ConfigBase):
     format: ConfigFormat = Field(..., description="Configuration format")
     status: ConfigStatus = Field(..., description="Configuration status")
     version: int = Field(..., description="Configuration version")
-    created_at: datetime = Field(..., description="Creation timestamp")
+    created_at: datetime = Field(..., description=CREATION_TIMESTAMP)
     updated_at: Optional[datetime] = Field(None, description="Last update timestamp")
     created_by: Optional[str] = Field(None, description="Created by user")
     updated_by: Optional[str] = Field(None, description="Updated by user")
@@ -122,7 +125,7 @@ class ConfigTemplate(BaseModel):
 
     name: str = Field(..., description="Template name")
     description: Optional[str] = Field(None, description="Template description")
-    config_type: ConfigType = Field(..., description="Configuration type")
+    config_type: ConfigType = Field(..., description=CONFIGURATION_TYPE)
     template_data: Dict[str, Any] = Field(..., description="Template structure")
     variables: List[str] = Field(default_factory=list, description="Template variables")
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -141,12 +144,12 @@ class ConfigSchema(BaseModel):
     """Configuration schema for validation."""
 
     name: str = Field(..., description="Schema name")
-    config_type: ConfigType = Field(..., description="Configuration type")
+    config_type: ConfigType = Field(..., description=CONFIGURATION_TYPE)
     schema_data: Dict[str, Any] = Field(..., description="JSON schema")
     validation_rules: List[ConfigValidationRule] = Field(
         default_factory=list, description="Custom validation rules"
     )
-    created_at: datetime = Field(..., description="Creation timestamp")
+    created_at: datetime = Field(..., description=CREATION_TIMESTAMP)
 
 
 class ConfigDiff(BaseModel):

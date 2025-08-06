@@ -12,6 +12,8 @@ from app.models.config import (
 from app.services.config_manager import config_manager
 from fastapi import APIRouter, HTTPException, Query
 
+CONFIGURATION_ERROR = "Configuration not found"
+
 router = APIRouter()
 
 
@@ -54,7 +56,7 @@ async def get_configuration(
     try:
         config = await config_manager.get_config(config_id, decrypt_sensitive)
         if not config:
-            raise HTTPException(status_code=404, detail="Configuration not found")
+            raise HTTPException(status_code=404, detail=CONFIGURATION_ERROR)
         return config
     except HTTPException:
         raise
@@ -68,7 +70,7 @@ async def update_configuration(config_id: str, update_data: ConfigUpdate) -> Any
     try:
         config = await config_manager.update_config(config_id, update_data)
         if not config:
-            raise HTTPException(status_code=404, detail="Configuration not found")
+            raise HTTPException(status_code=404, detail=CONFIGURATION_ERROR)
         return config
     except HTTPException:
         raise
@@ -82,7 +84,7 @@ async def delete_configuration(config_id: str) -> Any:
     try:
         success = await config_manager.delete_config(config_id)
         if not success:
-            raise HTTPException(status_code=404, detail="Configuration not found")
+            raise HTTPException(status_code=404, detail=CONFIGURATION_ERROR)
         return {"message": "Configuration deleted successfully"}
     except HTTPException:
         raise
@@ -137,7 +139,7 @@ async def get_configuration_data(
     try:
         config = await config_manager.get_config(config_id, decrypt_sensitive)
         if not config:
-            raise HTTPException(status_code=404, detail="Configuration not found")
+            raise HTTPException(status_code=404, detail=CONFIGURATION_ERROR)
 
         if key:
             # Return specific key
@@ -161,7 +163,7 @@ async def update_configuration_status(config_id: str, status: ConfigStatus) -> A
         update_data = ConfigUpdate(status=status)
         config = await config_manager.update_config(config_id, update_data)
         if not config:
-            raise HTTPException(status_code=404, detail="Configuration not found")
+            raise HTTPException(status_code=404, detail=CONFIGURATION_ERROR)
         return {"message": f"Configuration status updated to {status.value}"}
     except HTTPException:
         raise

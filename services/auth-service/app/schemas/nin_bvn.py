@@ -1,13 +1,13 @@
 from typing import Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class NINBVNVerificationRequest(BaseModel):
     nin: Optional[str] = None
     bvn: Optional[str] = None
 
-    @validator("nin")
+    @field_validator("nin")
     def validate_nin(cls, v):
         if v and len(v) != 11:
             raise ValueError("NIN must be 11 digits")
@@ -15,7 +15,7 @@ class NINBVNVerificationRequest(BaseModel):
             raise ValueError("NIN must contain only digits")
         return v
 
-    @validator("bvn")
+    @field_validator("bvn")
     def validate_bvn(cls, v):
         if v and len(v) != 11:
             raise ValueError("BVN must be 11 digits")

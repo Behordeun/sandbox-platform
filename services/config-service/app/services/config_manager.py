@@ -134,8 +134,8 @@ class FileStorage(ConfigStorage):
     async def set(self, config_id: str, data: Dict[str, Any]) -> bool:
         try:
             file_path = self._get_file_path(config_id)
-            with open(file_path, "w") as f:
-                json.dump(data, f, indent=2, default=str)
+            async with aiofiles.open(file_path, "w") as f:
+                await f.write(json.dumps(data, indent=2, default=str))
             return True
         except Exception:
             return False
@@ -192,7 +192,7 @@ class ConfigManager:
     ) -> ConfigResponse:
         """Create a new configuration."""
         config_id = str(uuid.uuid4())
-        now = datetime.utcnow()
+        now = datetime.now()
 
         # Process configuration data
         processed_data = config_data.data.copy()
@@ -254,7 +254,7 @@ class ConfigManager:
         if not config_record:
             return None
 
-        now = datetime.utcnow()
+        now = datetime.now()
         old_version = config_record["version"]
         new_version = old_version + 1
 
@@ -397,7 +397,7 @@ class ConfigManager:
         new_version = {
             "version": version,
             "data": data,
-            "created_at": datetime.utcnow(),
+            "created_at": datetime.now(),
             "created_by": created_by,
         }
 

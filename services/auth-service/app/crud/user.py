@@ -34,27 +34,36 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         user = self.get_by_email(db, email=email)
         if not user:
             return None
-        if not verify_password(password, user.hashed_password):
+        hashed_password = getattr(user, "hashed_password", None)
+        if not isinstance(hashed_password, str) or not verify_password(
+            password, hashed_password
+        ):
             return None
         return user
 
     def is_active(self, user: User) -> bool:
-        return user.is_active
+        return bool(user.is_active)
 
     def verify_nin(
-        self, db: Session, *, user: User, nin: str, verification_data: dict = None
+        self,
+        db: Session,
+        *,
+        user: User,
+        nin: str,
+        verification_data: Optional[dict] = None
     ) -> User:
         """Verify and store NIN for user."""
         # Hash the NIN for privacy
         nin_hash = hashlib.sha256(nin.encode()).hexdigest()
-        user.nin_hash = nin_hash
-        user.nin_verified = True
+        setattr(user, "nin_hash", nin_hash)
+        setattr(user, "nin_verified", True)
 
         # Store verification data if provided
         if verification_data:
-            profile_data = json.loads(user.profile_data) if user.profile_data else {}
+            profile_data_value = getattr(user, "profile_data", None)
+            profile_data = json.loads(profile_data_value) if profile_data_value else {}
             profile_data["nin_verification"] = verification_data
-            user.profile_data = json.dumps(profile_data)
+            setattr(user, "profile_data", json.dumps(profile_data))
 
         db.add(user)
         db.commit()
@@ -62,19 +71,25 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         return user
 
     def verify_bvn(
-        self, db: Session, *, user: User, bvn: str, verification_data: dict = None
+        self,
+        db: Session,
+        *,
+        user: User,
+        bvn: str,
+        verification_data: Optional[dict] = None
     ) -> User:
         """Verify and store BVN for user."""
         # Hash the BVN for privacy
         bvn_hash = hashlib.sha256(bvn.encode()).hexdigest()
-        user.bvn_hash = bvn_hash
-        user.bvn_verified = True
+        setattr(user, "bvn_hash", bvn_hash)
+        setattr(user, "bvn_verified", True)
 
         # Store verification data if provided
         if verification_data:
-            profile_data = json.loads(user.profile_data) if user.profile_data else {}
+            profile_data_value = getattr(user, "profile_data", None)
+            profile_data = json.loads(profile_data_value) if profile_data_value else {}
             profile_data["bvn_verification"] = verification_data
-            user.profile_data = json.dumps(profile_data)
+            setattr(user, "profile_data", json.dumps(profile_data))
 
         db.add(user)
         db.commit()
@@ -85,7 +100,9 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         """Update user's last login timestamp."""
         from datetime import datetime
 
-        user.last_login = datetime.utcnow()
+        # Ensure we set the value, not the Column object
+        if hasattr(user, "last_login"):
+            setattr(user, "last_login", datetime.now())
         db.add(user)
         db.commit()
         db.refresh(user)

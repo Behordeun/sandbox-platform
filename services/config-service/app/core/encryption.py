@@ -1,6 +1,6 @@
 import base64
 import json
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
@@ -38,7 +38,7 @@ class ConfigEncryption:
             self._fernet = Fernet(key)
         return self._fernet
 
-    def encrypt_value(self, value: Any) -> str:
+    def encrypt_value(self, value: Any) -> Optional[str]:
         """Encrypt a configuration value."""
         if value is None:
             return None

@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import List, Optional
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class OAuthClientBase(BaseModel):
@@ -39,7 +39,7 @@ class AuthorizeRequest(BaseModel):
     scope: Optional[str] = None
     state: Optional[str] = None
 
-    @validator("response_type")
+    @field_validator("response_type")
     def validate_response_type(cls, v):
         if v not in ["code", "token"]:
             raise ValueError("Invalid response_type")
@@ -60,7 +60,7 @@ class TokenRequest(BaseModel):
     redirect_uri: Optional[str] = None
     refresh_token: Optional[str] = None
 
-    @validator("grant_type")
+    @field_validator("grant_type")
     def validate_grant_type(cls, v):
         valid_types = ["authorization_code", "refresh_token", "client_credentials"]
         if v not in valid_types:
