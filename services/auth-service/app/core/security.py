@@ -67,11 +67,11 @@ def verify_token(token: str, token_type: str = "access") -> Optional[str]:
         if payload.get("type") != token_type:
             return None
 
-        subject: str = payload.get("sub")
+        subject = payload.get("sub")
         if subject is None:
             return None
 
-        return subject
+        return str(subject)
 
     except JWTError:
         return None
