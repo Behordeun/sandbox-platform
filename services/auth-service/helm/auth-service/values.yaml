@@ -1,0 +1,157 @@
+# Default values for auth-service.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+replicaCount: 1
+
+image:
+  repository: your-dockerhub-username/sandbox-auth-service
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "1.0.0"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: true
+  # Annotations to add to the service account
+  annotations: {}
+  # The name of the service account to use.
+  # If not set and create is true, a name is generated using the fullname template
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext:
+  fsGroup: 2000
+
+securityContext:
+  capabilities:
+    drop:
+    - ALL
+  readOnlyRootFilesystem: true
+  runAsNonRoot: true
+  runAsUser: 1000
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8000
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+    # kubernetes.io/ingress.class: nginx
+    # kubernetes.io/tls-acme: "true"
+  hosts:
+    - host: auth.sandbox.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  #  - secretName: auth-tls
+  #    hosts:
+  #      - auth.sandbox.local
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+  # targetMemoryUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+# Application configuration
+config:
+  appName: "Sandbox Auth Service"
+  appVersion: "1.0.0"
+  debug: false
+  
+  # JWT settings
+  jwtAlgorithm: "HS256"
+  jwtAccessTokenExpireMinutes: 30
+  jwtRefreshTokenExpireDays: 7
+  
+  # OAuth2 settings
+  oauth2IssuerUrl: "http://auth.sandbox.local"
+  oauth2JwksUri: "http://auth.sandbox.local/.well-known/jwks.json"
+  
+  # NIN/BVN Integration settings
+  dojaBaseUrl: "https://api.dojah.io"
+  
+  # CORS settings
+  corsOrigins: ["*"]
+  corsAllowCredentials: true
+  corsAllowMethods: ["*"]
+  corsAllowHeaders: ["*"]
+  
+  # Server settings
+  host: "0.0.0.0"
+  port: 8000
+
+# Secrets (these should be created separately or via external secret management)
+secrets:
+  # Database connection
+  databaseUrl: "postgresql://sandbox_user:changeme@auth-service-postgresql:5432/sandbox_auth"
+  
+  # JWT secret key
+  jwtSecretKey: "your-secret-key-change-in-production"
+  
+  # Doja API key for NIN/BVN verification
+  dojaApiKey: ""
+
+# PostgreSQL dependency configuration
+postgresql:
+  enabled: true
+  auth:
+    postgresPassword: "postgres"
+    username: "sandbox_user"
+    password: "changeme"
+    database: "sandbox_auth"
+  primary:
+    persistence:
+      enabled: true
+      size: 8Gi
+    resources:
+      limits:
+        memory: 256Mi
+        cpu: 250m
+      requests:
+        memory: 128Mi
+        cpu: 100m
+
+# Health checks
+healthCheck:
+  enabled: true
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# Monitoring
+monitoring:
+  enabled: false
+  serviceMonitor:
+    enabled: false
+    namespace: monitoring
+    interval: 30s
+    path: /metrics
+
