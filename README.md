@@ -54,7 +54,7 @@ helmfile -e prod apply
 ### Infrastructure
 
 - **PostgreSQL** - Primary database
-- **Redis** - Caching and session storage  
+- **Redis** - Caching and session storage
 - **Prometheus** - Metrics collection
 - **Grafana** - Monitoring dashboards
 
@@ -86,7 +86,7 @@ cd services/auth-service
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# API Gateway  
+# API Gateway
 cd services/api-gateway
 pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8080
