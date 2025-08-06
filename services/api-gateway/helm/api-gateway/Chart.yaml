@@ -1,0 +1,21 @@
+apiVersion: v2
+name: api-gateway
+description: A Helm chart for Sandbox Platform API Gateway
+type: application
+version: 1.0.0
+appVersion: "1.0.0"
+keywords:
+  - api-gateway
+  - microservices
+  - fastapi
+  - sandbox
+home: https://github.com/your-org/sandbox-platform
+sources:
+  - https://github.com/your-org/sandbox-platform
+maintainers:
+  - name: Sandbox Platform Team
+    email: team@sandbox.example.com
+dependencies: []
+annotations:
+  category: Application
+
