@@ -74,11 +74,13 @@ The Sandbox Platform consists of three core microservices designed for modularit
 ### Resource Requirements
 
 #### Minimum (Development)
+
 - 4 CPU cores
 - 8GB RAM
 - 50GB storage
 
 #### Recommended (Production)
+
 - 8 CPU cores
 - 16GB RAM
 - 200GB storage
@@ -91,7 +93,7 @@ The Sandbox Platform consists of three core microservices designed for modularit
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Behordeun/sandbox-platform.git
 cd sandbox-platform
 
 # Create environment files
@@ -286,7 +288,7 @@ helm install api-gateway ./services/api-gateway/helm/api-gateway \
 
 Each service includes a comprehensive Helm chart:
 
-```
+```plain text
 helm/
 ├── Chart.yaml           # Chart metadata
 ├── values.yaml          # Default configuration values
@@ -1019,4 +1021,3 @@ helm list -n sandbox-prod -o yaml > backup/helm-releases-$(date +%Y%m%d).yaml
    ```
 
 This deployment guide provides a comprehensive foundation for deploying and managing the Sandbox Platform in various environments, from local development to production Kubernetes clusters. The modular architecture and Helm-based automation ensure consistent, repeatable deployments while maintaining the flexibility needed for startup environments.
-

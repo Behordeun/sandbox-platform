@@ -2,7 +2,7 @@ from datetime import datetime
 from enum import Enum
 from typing import Any, Dict, List, Optional
 
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, field_validator
 
 
 class ConfigType(str, Enum):
@@ -44,7 +44,7 @@ class ConfigBase(BaseModel):
     environment: str = Field("development", description="Target environment")
     tags: List[str] = Field(default_factory=list, description="Configuration tags")
 
-    @validator("name")
+    @field_validator("name")
     def validate_name(cls, v):
         if not v or len(v.strip()) == 0:
             raise ValueError("Configuration name cannot be empty")
@@ -52,7 +52,7 @@ class ConfigBase(BaseModel):
             raise ValueError("Configuration name cannot exceed 100 characters")
         return v.strip()
 
-    @validator("environment")
+    @field_validator("environment")
     def validate_environment(cls, v):
         from app.core.config import settings
 

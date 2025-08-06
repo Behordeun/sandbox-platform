@@ -10,13 +10,12 @@ keywords:
   - microservices
   - fastapi
   - sandbox
-home: https://github.com/your-org/sandbox-platform
+home: https://github.com/Behordeun/sandbox-platform
 sources:
-  - https://github.com/your-org/sandbox-platform
+  - https://github.com/Behordeun/sandbox-platform
 maintainers:
   - name: Sandbox Platform Team
     email: team@sandbox.example.com
 dependencies: []
 annotations:
   category: Application
-

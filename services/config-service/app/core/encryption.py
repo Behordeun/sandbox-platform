@@ -20,10 +20,18 @@ class ConfigEncryption:
         """Get or create Fernet instance."""
         if self._fernet is None:
             # Derive key from password
+            # Use a random, securely stored salt from settings or environment variable
+            salt = getattr(settings, "encryption_salt", None)
+            if not salt:
+                raise ValueError(
+                    "Encryption salt must be set in settings for secure key derivation."
+                )
+            if isinstance(salt, str):
+                salt = salt.encode()
             kdf = PBKDF2HMAC(
                 algorithm=hashes.SHA256(),
                 length=32,
-                salt=b"sandbox_config_salt",  # In production, use random salt
+                salt=salt,  # Secure, unpredictable salt
                 iterations=100000,
             )
             key = base64.urlsafe_b64encode(kdf.derive(self.key.encode()))

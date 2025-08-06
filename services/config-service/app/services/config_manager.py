@@ -4,6 +4,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict, List, Optional
 
+import aiofiles
 import redis
 from app.core.config import settings
 from app.core.encryption import config_encryption
@@ -122,10 +123,12 @@ class FileStorage(ConfigStorage):
         try:
             file_path = self._get_file_path(config_id)
             if os.path.exists(file_path):
-                with open(file_path, "r") as f:
-                    return json.load(f)
+                async with aiofiles.open(file_path, "r") as f:
+                    content = await f.read()
+                    return json.loads(content)
             return None
         except Exception:
+            return None
             return None
 
     async def set(self, config_id: str, data: Dict[str, Any]) -> bool:

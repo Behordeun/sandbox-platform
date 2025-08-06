@@ -5,11 +5,13 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Docker Desktop with Kubernetes enabled
 - kubectl and Helm 3.8+
 - Python 3.11+ (for local development)
 
 ### Local Development
+
 ```bash
 # Clone the repository
 git clone <repository-url>
@@ -20,7 +22,7 @@ docker-compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgre
 
 # Start application services (in separate terminals)
 cd services/auth-service && uvicorn app.main:app --reload --port 8000
-cd services/config-service && uvicorn app.main:app --reload --port 8001  
+cd services/config-service && uvicorn app.main:app --reload --port 8001
 cd services/api-gateway && uvicorn app.main:app --reload --port 8080
 
 # Verify setup
@@ -28,6 +30,7 @@ curl http://localhost:8080/health
 ```
 
 ### Production Deployment
+
 ```bash
 # Build and push images
 ./deployment/scripts/build-images.sh -r your-registry/ -t v1.0.0
@@ -57,7 +60,7 @@ helmfile -e prod apply
 
 ## 📁 Project Structure
 
-```
+```plain text
 sandbox-platform/
 ├── services/
 │   ├── auth-service/          # Authentication & authorization
@@ -74,6 +77,7 @@ sandbox-platform/
 ## 🔧 Development
 
 ### Service Development
+
 Each service is independently developed and deployed:
 
 ```bash
@@ -94,6 +98,7 @@ uvicorn app.main:app --reload --port 8001
 ```
 
 ### Docker Development
+
 ```bash
 # Build all services
 ./deployment/scripts/build-images.sh
@@ -113,11 +118,12 @@ docker-compose -f deployment/docker-compose/docker-compose.dev.yml up
 | Production | sandbox-prod | 3 each | 1000m CPU, 1Gi RAM |
 
 ### Helmfile Deployment
+
 ```bash
 # Development
 helmfile -e dev apply
 
-# Staging  
+# Staging
 helmfile -e staging apply
 
 # Production
@@ -128,6 +134,7 @@ helmfile -e prod apply
 ```
 
 ### Manual Helm Deployment
+
 ```bash
 # Install dependencies
 helm install postgres bitnami/postgresql --set auth.postgresPassword=postgres123
@@ -135,24 +142,28 @@ helm install redis bitnami/redis --set auth.password=redis123
 
 # Install services
 helm install auth-service ./services/auth-service/helm/auth-service
-helm install config-service ./services/config-service/helm/config-service  
+helm install config-service ./services/config-service/helm/config-service
 helm install api-gateway ./services/api-gateway/helm/api-gateway
 ```
 
 ## 📊 Monitoring
 
 ### Health Checks
+
 - Auth Service: `http://localhost:8000/health`
-- API Gateway: `http://localhost:8080/health`  
+- API Gateway: `http://localhost:8080/health`
 - Config Service: `http://localhost:8001/health`
 
 ### Metrics
+
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001` (admin/admin123)
 - Service Metrics: `http://localhost:8080/metrics`
 
 ### Logging
+
 Structured JSON logging with correlation IDs:
+
 ```json
 {
   "timestamp": "2024-01-01T00:00:00Z",
@@ -166,12 +177,14 @@ Structured JSON logging with correlation IDs:
 ## 🔒 Security
 
 ### Authentication Flow
+
 1. User registers/logs in via Auth Service
 2. JWT token issued with user claims
 3. API Gateway validates tokens on all requests
 4. Services receive authenticated user context
 
 ### NIN/BVN Verification
+
 ```bash
 # Verify Nigerian identity
 curl -X POST http://localhost:8000/api/v1/identity/verify-nin-bvn \
@@ -180,7 +193,9 @@ curl -X POST http://localhost:8000/api/v1/identity/verify-nin-bvn \
 ```
 
 ### Configuration Encryption
+
 Sensitive configuration values are automatically encrypted:
+
 ```json
 {
   "database_password": {
@@ -195,6 +210,7 @@ Sensitive configuration values are automatically encrypted:
 ### Environment Variables
 
 #### Auth Service
+
 ```env
 DATABASE_URL=postgresql://user:pass@host:5432/db
 JWT_SECRET_KEY=your-secret-key
@@ -202,6 +218,7 @@ DOJA_API_KEY=your-doja-api-key
 ```
 
 #### API Gateway
+
 ```env
 AUTH_SERVICE_URL=http://auth-service:8000
 REDIS_URL=redis://redis:6379/0
@@ -209,6 +226,7 @@ RATE_LIMIT_REQUESTS=100
 ```
 
 #### Config Service
+
 ```env
 CONFIG_STORAGE_TYPE=redis
 ENCRYPTION_KEY=your-encryption-key
@@ -218,14 +236,16 @@ VERSIONING_ENABLED=true
 ## 🧪 Testing
 
 ### Unit Tests
+
 ```bash
 # Run tests for all services
 cd services/auth-service && pytest
-cd services/api-gateway && pytest  
+cd services/api-gateway && pytest
 cd services/config-service && pytest
 ```
 
 ### Integration Tests
+
 ```bash
 # Start test environment
 docker-compose -f deployment/docker-compose/docker-compose.dev.yml up -d
@@ -235,6 +255,7 @@ pytest tests/integration/
 ```
 
 ### Load Testing
+
 ```bash
 # Install k6
 brew install k6
@@ -247,6 +268,7 @@ k6 run tests/load/api-gateway.js
 ## 📚 API Documentation
 
 ### Interactive Documentation
+
 - Auth Service: `http://localhost:8000/docs`
 - API Gateway: `http://localhost:8080/docs`
 - Config Service: `http://localhost:8001/docs`
@@ -254,6 +276,7 @@ k6 run tests/load/api-gateway.js
 ### Key Endpoints
 
 #### Authentication
+
 ```bash
 # Register user
 POST /api/v1/auth/register
@@ -266,6 +289,7 @@ GET /api/v1/auth/me
 ```
 
 #### Configuration
+
 ```bash
 # Create config
 POST /api/v1/configs
@@ -273,11 +297,12 @@ POST /api/v1/configs
 # Get config
 GET /api/v1/configs/{id}
 
-# Update config  
+# Update config
 PUT /api/v1/configs/{id}
 ```
 
 #### Gateway
+
 ```bash
 # Route to auth service
 GET /api/v1/auth/*
@@ -292,6 +317,7 @@ GET /api/v1/services/health
 ## 🤝 Contributing
 
 ### Development Workflow
+
 1. Fork the repository
 2. Create feature branch: `git checkout -b feature/amazing-feature`
 3. Make changes and add tests
@@ -301,11 +327,13 @@ GET /api/v1/services/health
 7. Open Pull Request
 
 ### Code Standards
+
 - Python: Black formatting, flake8 linting, mypy type checking
 - Docker: Multi-stage builds, non-root users, health checks
 - Kubernetes: Resource limits, security contexts, probes
 
 ### Release Process
+
 1. Update version numbers
 2. Create release branch
 3. Build and test images
@@ -327,6 +355,7 @@ GET /api/v1/services/health
 ### Common Issues
 
 #### Service Won't Start
+
 ```bash
 # Check logs
 kubectl logs -f deployment/auth-service
@@ -340,6 +369,7 @@ kubectl get secret
 ```
 
 #### Database Connection Issues
+
 ```bash
 # Test database connectivity
 kubectl run postgres-client --image=postgres:14 -it --rm --restart=Never -- \
@@ -347,6 +377,7 @@ kubectl run postgres-client --image=postgres:14 -it --rm --restart=Never -- \
 ```
 
 #### Gateway Routing Issues
+
 ```bash
 # Check service discovery
 kubectl get endpoints
@@ -357,6 +388,7 @@ kubectl run debug --image=busybox -it --rm --restart=Never -- \
 ```
 
 ### Performance Issues
+
 ```bash
 # Check resource usage
 kubectl top pods
@@ -380,12 +412,11 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Support
 
-- 📧 Email: support@sandbox.example.com
+- 📧 Email: [support@sandbox.example.com](mailto:support@sandbox.example.com)
 - 💬 Slack: #sandbox-platform
 - 📖 Wiki: [Internal Documentation](https://wiki.sandbox.example.com)
 - 🐛 Issues: [GitHub Issues](https://github.com/your-org/sandbox-platform/issues)
 
 ---
 
-**Built with ❤️ for Nigerian startups**
-
+### Built with ❤️ for Nigerian startups

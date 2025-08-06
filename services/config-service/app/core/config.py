@@ -24,6 +24,7 @@ class Settings(BaseSettings):
 
     # Encryption settings
     encryption_key: str = "your-encryption-key-change-in-production"
+    encryption_salt: str = "your-encryption-salt-change-in-production"
 
     # Configuration storage
     config_storage_type: str = "memory"  # memory, redis, file
