@@ -172,14 +172,14 @@ releases:
           persistence:
             enabled: true
             size: "{{ .Values.postgres.primary.persistence.size }}"
-          {{- with .Values.postgres.primary.resources }}
+          {{- if .Values.postgres.primary.resources }}
           resources:
-{{ toYaml . | nindent 12 }}
+            {{- toYaml .Values.postgres.primary.resources | nindent 12 }}
           {{- end }}
-        metrics:
-          enabled: {{ .Values.monitoring.enabled }}
-          serviceMonitor:
+          metrics:
             enabled: {{ .Values.monitoring.enabled }}
+            serviceMonitor:
+              enabled: {{ .Values.monitoring.enabled }}
 
   # Infrastructure - Redis
   - name: redis
@@ -195,9 +195,9 @@ releases:
           persistence:
             enabled: true
             size: "{{ .Values.redis.master.persistence.size }}"
-          {{- with .Values.redis.master.resources }}
+          {{- if .Values.redis.master.resources }}
           resources:
-{{ toYaml . | nindent 12 }}
+            {{- toYaml .Values.redis.master.resources | nindent 12 }}
           {{- end }}
         replica:
           replicaCount: {{ ternary 2 0 (eq .Environment.Name "prod") }}
@@ -222,7 +222,7 @@ releases:
           pullPolicy: "{{ .Values.image.pullPolicy }}"
         replicaCount: {{ .Values.replicas.auth }}
         resources:
-{{ toYaml .Values.resources | nindent 10 }}
+          {{- toYaml .Values.resources | nindent 10 }}
         env:
           DATABASE_URL: "postgresql://postgres:{{ .Values.postgres.auth.postgresPassword }}@postgres:5432/{{ .Values.postgres.auth.database }}"
           REDIS_URL: "redis://:{{ .Values.redis.auth.password }}@redis-master:6379/0"
@@ -277,7 +277,7 @@ releases:
           pullPolicy: "{{ .Values.image.pullPolicy }}"
         replicaCount: {{ .Values.replicas.config }}
         resources:
-{{ toYaml .Values.resources | nindent 10 }}
+          {{- toYaml .Values.resources | nindent 10 }}
         env:
           REDIS_URL: "redis://:{{ .Values.redis.auth.password }}@redis-master:6379/1"
           CONFIG_STORAGE_TYPE: "redis"
@@ -319,7 +319,7 @@ releases:
           pullPolicy: "{{ .Values.image.pullPolicy }}"
         replicaCount: {{ .Values.replicas.gateway }}
         resources:
-{{ toYaml .Values.resources | nindent 10 }}
+          {{- toYaml .Values.resources | nindent 10 }}
         env:
           AUTH_SERVICE_URL: "http://auth-service:5000"
           CONFIG_SERVICE_URL: "http://config-service:5000"
