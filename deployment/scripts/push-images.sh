@@ -37,21 +37,21 @@ log_error() {
 push_service() {
     local service_name=$1
     local image_name="${DOCKER_REGISTRY}sandbox-${service_name}"
-    
+
     log_info "Pushing ${service_name} image..."
-    
+
     # Check if image exists locally
     if ! docker images "${image_name}:${IMAGE_TAG}" --format "table {{.Repository}}:{{.Tag}}" | grep -q "${image_name}:${IMAGE_TAG}"; then
         log_error "Image ${image_name}:${IMAGE_TAG} not found locally. Please build it first."
         return 1
     fi
-    
+
     # Push the tagged image
     docker push "${image_name}:${IMAGE_TAG}"
-    
+
     if [ $? -eq 0 ]; then
         log_success "Successfully pushed ${image_name}:${IMAGE_TAG}"
-        
+
         # Also push latest tag if not already latest
         if [ "${IMAGE_TAG}" != "latest" ]; then
             docker push "${image_name}:latest"
@@ -137,12 +137,12 @@ if [ -n "${SPECIFIC_SERVICE}" ]; then
         log_info "Available services: ${SERVICES[@]}"
         exit 1
     fi
-    
+
     log_info "Pushing specific service: ${SPECIFIC_SERVICE}"
     push_service "${SPECIFIC_SERVICE}"
 else
     log_info "Pushing all services..."
-    
+
     # Push all services
     for service in "${SERVICES[@]}"; do
         push_service "${service}"
@@ -157,12 +157,11 @@ for service in "${SERVICES[@]}"; do
     if [ -n "${SPECIFIC_SERVICE}" ] && [ "${service}" != "${SPECIFIC_SERVICE}" ]; then
         continue
     fi
-    
+
     image_name="${DOCKER_REGISTRY}sandbox-${service}:${IMAGE_TAG}"
     log_success "  ${image_name}"
-    
+
     if [ "${IMAGE_TAG}" != "latest" ]; then
         log_success "  ${DOCKER_REGISTRY}sandbox-${service}:latest"
     fi
 done
-

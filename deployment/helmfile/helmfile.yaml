@@ -9,200 +9,206 @@ repositories:
 environments:
   dev:
     values:
-      - environment: development
-      - namespace: sandbox-dev
-      - image:
-          tag: dev-latest
-          pullPolicy: Always
-      - replicas:
-          auth: 1
-          gateway: 1
-          config: 1
-      - resources:
-          limits:
-            cpu: 200m
-            memory: 256Mi
-          requests:
-            cpu: 100m
-            memory: 128Mi
-      - postgres:
-          auth:
-            postgresPassword: dev-postgres-123
-            database: sandbox_dev
-          primary:
-            persistence:
-              size: 1Gi
-      - redis:
-          auth:
-            password: dev-redis-123
-          master:
-            persistence:
-              size: 1Gi
-      - ingress:
-          enabled: false
-          className: nginx
-          hosts:
-            auth: auth-dev.sandbox.local
-            gateway: api-dev.sandbox.local
-      - monitoring:
-          enabled: false
+      environment: development
+      namespace: sandbox-dev
+      image:
+        tag: dev-latest
+        pullPolicy: Always
+      replicas:
+        auth: 1
+        gateway: 1
+        config: 1
+      resources:
+        limits:
+          cpu: 200m
+          memory: 256Mi
+        requests:
+          cpu: 100m
+          memory: 128Mi
+      postgres:
+        auth:
+          postgresPassword: {{ env "DEV_POSTGRES_PASSWORD" | default "dev-postgres-123" }}
+          database: sandbox_dev
+        primary:
+          persistence:
+            size: 1Gi
+      redis:
+        auth:
+          password: {{ env "DEV_REDIS_PASSWORD" | default "dev-redis-123" }}
+        master:
+          persistence:
+            size: 1Gi
+      ingress:
+        enabled: false
+        className: nginx
+        hosts:
+          auth: auth-dev.sandbox.local
+          gateway: api-dev.sandbox.local
+      monitoring:
+        enabled: false
+      autoscaling:
+        enabled: false
 
   staging:
     values:
-      - environment: staging
-      - namespace: sandbox-staging
-      - image:
-          tag: staging-latest
-          pullPolicy: Always
-      - replicas:
-          auth: 2
-          gateway: 2
-          config: 1
-      - resources:
-          limits:
-            cpu: 500m
-            memory: 512Mi
-          requests:
-            cpu: 250m
-            memory: 256Mi
-      - postgres:
-          auth:
-            postgresPassword: {{ requiredEnv "STAGING_POSTGRES_PASSWORD" }}
-            database: sandbox_staging
-          primary:
-            persistence:
-              size: 10Gi
-      - redis:
-          auth:
-            password: {{ requiredEnv "STAGING_REDIS_PASSWORD" }}
-          master:
-            persistence:
-              size: 5Gi
-      - ingress:
+      environment: staging
+      namespace: sandbox-staging
+      image:
+        tag: staging-latest
+        pullPolicy: Always
+      replicas:
+        auth: 2
+        gateway: 2
+        config: 1
+      resources:
+        limits:
+          cpu: 500m
+          memory: 512Mi
+        requests:
+          cpu: 250m
+          memory: 256Mi
+      postgres:
+        auth:
+          postgresPassword: {{ requiredEnv "STAGING_POSTGRES_PASSWORD" }}
+          database: sandbox_staging
+        primary:
+          persistence:
+            size: 10Gi
+      redis:
+        auth:
+          password: {{ requiredEnv "STAGING_REDIS_PASSWORD" }}
+        master:
+          persistence:
+            size: 5Gi
+      ingress:
+        enabled: true
+        className: nginx
+        hosts:
+          auth: auth-staging.sandbox.example.com
+          gateway: api-staging.sandbox.example.com
+        tls:
           enabled: true
-          className: nginx
-          hosts:
-            auth: auth-staging.sandbox.example.com
-            gateway: api-staging.sandbox.example.com
-          tls:
-            enabled: true
-            secretName: sandbox-staging-tls
-      - monitoring:
-          enabled: true
+          secretName: sandbox-staging-tls
+      monitoring:
+        enabled: true
+      autoscaling:
+        enabled: false
 
   prod:
     values:
-      - environment: production
-      - namespace: sandbox-prod
-      - image:
-          tag: {{ requiredEnv "PROD_IMAGE_TAG" }}
-          pullPolicy: IfNotPresent
-      - replicas:
-          auth: 3
-          gateway: 3
-          config: 2
-      - resources:
-          limits:
-            cpu: 1000m
-            memory: 1Gi
-          requests:
-            cpu: 500m
-            memory: 512Mi
-      - postgres:
-          auth:
-            postgresPassword: {{ requiredEnv "PROD_POSTGRES_PASSWORD" }}
-            database: sandbox_prod
-          primary:
-            persistence:
-              size: 50Gi
-            resources:
-              limits:
-                cpu: 1000m
-                memory: 2Gi
-              requests:
-                cpu: 500m
-                memory: 1Gi
-      - redis:
-          auth:
-            password: {{ requiredEnv "PROD_REDIS_PASSWORD" }}
-          master:
-            persistence:
-              size: 20Gi
-            resources:
-              limits:
-                cpu: 500m
-                memory: 1Gi
-              requests:
-                cpu: 250m
-                memory: 512Mi
-      - ingress:
+      environment: production
+      namespace: sandbox-prod
+      image:
+        tag: {{ requiredEnv "PROD_IMAGE_TAG" }}
+        pullPolicy: IfNotPresent
+      replicas:
+        auth: 3
+        gateway: 3
+        config: 2
+      resources:
+        limits:
+          cpu: 1000m
+          memory: 1Gi
+        requests:
+          cpu: 500m
+          memory: 512Mi
+      postgres:
+        auth:
+          postgresPassword: {{ requiredEnv "PROD_POSTGRES_PASSWORD" }}
+          database: sandbox_prod
+        primary:
+          persistence:
+            size: 50Gi
+          resources:
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+            requests:
+              cpu: 500m
+              memory: 1Gi
+      redis:
+        auth:
+          password: {{ requiredEnv "PROD_REDIS_PASSWORD" }}
+        master:
+          persistence:
+            size: 20Gi
+          resources:
+            limits:
+              cpu: 500m
+              memory: 1Gi
+            requests:
+              cpu: 250m
+              memory: 512Mi
+      ingress:
+        enabled: true
+        className: nginx
+        hosts:
+          auth: auth.sandbox.example.com
+          gateway: api.sandbox.example.com
+        tls:
           enabled: true
-          className: nginx
-          hosts:
-            auth: auth.sandbox.example.com
-            gateway: api.sandbox.example.com
-          tls:
-            enabled: true
-            secretName: sandbox-prod-tls
-      - monitoring:
-          enabled: true
-      - autoscaling:
-          enabled: true
-          minReplicas: 3
-          maxReplicas: 10
-          targetCPUUtilizationPercentage: 70
+          secretName: sandbox-prod-tls
+      monitoring:
+        enabled: true
+      autoscaling:
+        enabled: true
+        minReplicas: 3
+        maxReplicas: 10
+        targetCPUUtilizationPercentage: 70
 
 releases:
   # Infrastructure - PostgreSQL
   - name: postgres
-    namespace: {{ .Values.namespace }}
+    namespace: "{{ .Values.namespace }}"
     chart: bitnami/postgresql
-    version: ~12.12.0
+    version: "~12.12.0"
     wait: true
     timeout: 600
     values:
       - auth:
-          postgresPassword: {{ .Values.postgres.auth.postgresPassword }}
-          database: {{ .Values.postgres.auth.database }}
-      - primary:
+          postgresPassword: "{{ .Values.postgres.auth.postgresPassword }}"
+          database: "{{ .Values.postgres.auth.database }}"
+        primary:
           persistence:
             enabled: true
-            size: {{ .Values.postgres.primary.persistence.size }}
-          {{- if .Values.postgres.primary.resources }}
-          resources: {{ .Values.postgres.primary.resources | toYaml | nindent 12 }}
+            size: "{{ .Values.postgres.primary.persistence.size }}"
+          {{- with .Values.postgres.primary.resources }}
+          resources:
+{{ toYaml . | nindent 12 }}
           {{- end }}
-      - metrics:
+        metrics:
           enabled: {{ .Values.monitoring.enabled }}
           serviceMonitor:
             enabled: {{ .Values.monitoring.enabled }}
 
   # Infrastructure - Redis
   - name: redis
-    namespace: {{ .Values.namespace }}
+    namespace: "{{ .Values.namespace }}"
     chart: bitnami/redis
-    version: ~18.4.0
+    version: "~18.4.0"
     wait: true
     timeout: 600
     values:
       - auth:
-          password: {{ .Values.redis.auth.password }}
-      - master:
+          password: "{{ .Values.redis.auth.password }}"
+        master:
           persistence:
             enabled: true
-            size: {{ .Values.redis.master.persistence.size }}
-          {{- if .Values.redis.master.resources }}
-          resources: {{ .Values.redis.master.resources | toYaml | nindent 12 }}
+            size: "{{ .Values.redis.master.persistence.size }}"
+          {{- with .Values.redis.master.resources }}
+          resources:
+{{ toYaml . | nindent 12 }}
           {{- end }}
-      - replica:
-          replicaCount: {{ .Environment.Name == "prod" | ternary 2 0 }}
-      - metrics:
+        replica:
+          replicaCount: {{ ternary 2 0 (eq .Environment.Name "prod") }}
+        metrics:
           enabled: {{ .Values.monitoring.enabled }}
           serviceMonitor:
             enabled: {{ .Values.monitoring.enabled }}
 
   # Application - Auth Service
   - name: auth-service
-    namespace: {{ .Values.namespace }}
+    namespace: "{{ .Values.namespace }}"
     chart: ../../services/auth-service/helm/auth-service
     wait: true
     timeout: 600
@@ -211,55 +217,54 @@ releases:
       - redis
     values:
       - image:
-          repository: {{ requiredEnv "DOCKER_REGISTRY" }}sandbox-auth-service
-          tag: {{ .Values.image.tag }}
-          pullPolicy: {{ .Values.image.pullPolicy }}
-      - replicaCount: {{ .Values.replicas.auth }}
-      - resources: {{ .Values.resources | toYaml | nindent 10 }}
-      - env:
-          - name: DATABASE_URL
-            value: postgresql://postgres:{{ .Values.postgres.auth.postgresPassword }}@postgres:5432/{{ .Values.postgres.auth.database }}
-          - name: REDIS_URL
-            value: redis://:{{ .Values.redis.auth.password }}@redis-master:6379/0
-          - name: JWT_SECRET_KEY
+          repository: "{{ requiredEnv "DOCKER_REGISTRY" }}/sandbox-auth-service"
+          tag: "{{ .Values.image.tag }}"
+          pullPolicy: "{{ .Values.image.pullPolicy }}"
+        replicaCount: {{ .Values.replicas.auth }}
+        resources:
+{{ toYaml .Values.resources | nindent 10 }}
+        env:
+          DATABASE_URL: "postgresql://postgres:{{ .Values.postgres.auth.postgresPassword }}@postgres:5432/{{ .Values.postgres.auth.database }}"
+          REDIS_URL: "redis://:{{ .Values.redis.auth.password }}@redis-master:6379/0"
+          JWT_SECRET_KEY:
             valueFrom:
               secretKeyRef:
                 name: auth-secrets
                 key: jwt-secret-key
-          - name: ENVIRONMENT
-            value: {{ .Values.environment }}
-          - name: DEBUG
-            value: {{ .Environment.Name != "prod" | quote }}
-      - secrets:
-          jwtSecretKey: {{ requiredEnv "JWT_SECRET_KEY" }}
-          dojaApiKey: {{ env "DOJA_API_KEY" | default "" }}
-      - ingress:
+          ENVIRONMENT: "{{ .Values.environment }}"
+          DEBUG: "{{ ternary "false" "true" (eq .Environment.Name "prod") }}"
+        secrets:
+          jwtSecretKey: "{{ requiredEnv "JWT_SECRET_KEY" }}"
+          dojaApiKey: "{{ env "DOJA_API_KEY" | default "" }}"
+        ingress:
           enabled: {{ .Values.ingress.enabled }}
-          className: {{ .Values.ingress.className }}
+          className: "{{ .Values.ingress.className }}"
           hosts:
-            - host: {{ .Values.ingress.hosts.auth }}
+            - host: "{{ .Values.ingress.hosts.auth }}"
               paths:
                 - path: /
                   pathType: Prefix
           {{- if .Values.ingress.tls.enabled }}
           tls:
-            - secretName: {{ .Values.ingress.tls.secretName }}
+            - secretName: "{{ .Values.ingress.tls.secretName }}"
               hosts:
-                - {{ .Values.ingress.hosts.auth }}
+                - "{{ .Values.ingress.hosts.auth }}"
           {{- end }}
-      - serviceMonitor:
-          enabled: {{ .Values.monitoring.enabled }}
-      {{- if .Values.autoscaling.enabled }}
-      - autoscaling:
+        {{- if .Values.monitoring.enabled }}
+        serviceMonitor:
+          enabled: true
+        {{- end }}
+        {{- if .Values.autoscaling.enabled }}
+        autoscaling:
           enabled: true
           minReplicas: {{ .Values.autoscaling.minReplicas }}
           maxReplicas: {{ .Values.autoscaling.maxReplicas }}
           targetCPUUtilizationPercentage: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
-      {{- end }}
+        {{- end }}
 
   # Application - Config Service
   - name: config-service
-    namespace: {{ .Values.namespace }}
+    namespace: "{{ .Values.namespace }}"
     chart: ../../services/config-service/helm/config-service
     wait: true
     timeout: 600
@@ -267,33 +272,39 @@ releases:
       - redis
     values:
       - image:
-          repository: {{ requiredEnv "DOCKER_REGISTRY" }}sandbox-config-service
-          tag: {{ .Values.image.tag }}
-          pullPolicy: {{ .Values.image.pullPolicy }}
-      - replicaCount: {{ .Values.replicas.config }}
-      - resources: {{ .Values.resources | toYaml | nindent 10 }}
-      - env:
-          - name: REDIS_URL
-            value: redis://:{{ .Values.redis.auth.password }}@redis-master:6379/1
-          - name: CONFIG_STORAGE_TYPE
-            value: redis
-          - name: ENCRYPTION_KEY
+          repository: "{{ requiredEnv "DOCKER_REGISTRY" }}/sandbox-config-service"
+          tag: "{{ .Values.image.tag }}"
+          pullPolicy: "{{ .Values.image.pullPolicy }}"
+        replicaCount: {{ .Values.replicas.config }}
+        resources:
+{{ toYaml .Values.resources | nindent 10 }}
+        env:
+          REDIS_URL: "redis://:{{ .Values.redis.auth.password }}@redis-master:6379/1"
+          CONFIG_STORAGE_TYPE: "redis"
+          ENCRYPTION_KEY:
             valueFrom:
               secretKeyRef:
                 name: config-secrets
                 key: encryption-key
-          - name: ENVIRONMENT
-            value: {{ .Values.environment }}
-          - name: DEBUG
-            value: {{ .Environment.Name != "prod" | quote }}
-      - secrets:
-          encryptionKey: {{ requiredEnv "CONFIG_ENCRYPTION_KEY" }}
-      - serviceMonitor:
-          enabled: {{ .Values.monitoring.enabled }}
+          ENVIRONMENT: "{{ .Values.environment }}"
+          DEBUG: "{{ ternary "false" "true" (eq .Environment.Name "prod") }}"
+        secrets:
+          encryptionKey: "{{ requiredEnv "CONFIG_ENCRYPTION_KEY" }}"
+        {{- if .Values.monitoring.enabled }}
+        serviceMonitor:
+          enabled: true
+        {{- end }}
+        {{- if .Values.autoscaling.enabled }}
+        autoscaling:
+          enabled: true
+          minReplicas: {{ .Values.autoscaling.minReplicas }}
+          maxReplicas: {{ .Values.autoscaling.maxReplicas }}
+          targetCPUUtilizationPercentage: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
+        {{- end }}
 
   # Application - API Gateway
   - name: api-gateway
-    namespace: {{ .Values.namespace }}
+    namespace: "{{ .Values.namespace }}"
     chart: ../../services/api-gateway/helm/api-gateway
     wait: true
     timeout: 600
@@ -303,63 +314,59 @@ releases:
       - redis
     values:
       - image:
-          repository: {{ requiredEnv "DOCKER_REGISTRY" }}sandbox-api-gateway
-          tag: {{ .Values.image.tag }}
-          pullPolicy: {{ .Values.image.pullPolicy }}
-      - replicaCount: {{ .Values.replicas.gateway }}
-      - resources: {{ .Values.resources | toYaml | nindent 10 }}
-      - env:
-          - name: AUTH_SERVICE_URL
-            value: http://auth-service:8000
-          - name: CONFIG_SERVICE_URL
-            value: http://config-service:8000
-          - name: REDIS_URL
-            value: redis://:{{ .Values.redis.auth.password }}@redis-master:6379/2
-          - name: JWT_SECRET_KEY
+          repository: "{{ requiredEnv "DOCKER_REGISTRY" }}/sandbox-api-gateway"
+          tag: "{{ .Values.image.tag }}"
+          pullPolicy: "{{ .Values.image.pullPolicy }}"
+        replicaCount: {{ .Values.replicas.gateway }}
+        resources:
+{{ toYaml .Values.resources | nindent 10 }}
+        env:
+          AUTH_SERVICE_URL: "http://auth-service:5000"
+          CONFIG_SERVICE_URL: "http://config-service:5000"
+          REDIS_URL: "redis://:{{ .Values.redis.auth.password }}@redis-master:6379/2"
+          JWT_SECRET_KEY:
             valueFrom:
               secretKeyRef:
                 name: gateway-secrets
                 key: jwt-secret-key
-          - name: ENVIRONMENT
-            value: {{ .Values.environment }}
-          - name: DEBUG
-            value: {{ .Environment.Name != "prod" | quote }}
-          - name: RATE_LIMIT_ENABLED
-            value: "true"
-          - name: METRICS_ENABLED
-            value: "true"
-      - secrets:
-          jwtSecretKey: {{ requiredEnv "JWT_SECRET_KEY" }}
-      - ingress:
+          ENVIRONMENT: "{{ .Values.environment }}"
+          DEBUG: "{{ ternary "false" "true" (eq .Environment.Name "prod") }}"
+          RATE_LIMIT_ENABLED: "true"
+          METRICS_ENABLED: "true"
+        secrets:
+          jwtSecretKey: "{{ requiredEnv "JWT_SECRET_KEY" }}"
+        ingress:
           enabled: {{ .Values.ingress.enabled }}
-          className: {{ .Values.ingress.className }}
+          className: "{{ .Values.ingress.className }}"
           hosts:
-            - host: {{ .Values.ingress.hosts.gateway }}
+            - host: "{{ .Values.ingress.hosts.gateway }}"
               paths:
                 - path: /
                   pathType: Prefix
           {{- if .Values.ingress.tls.enabled }}
           tls:
-            - secretName: {{ .Values.ingress.tls.secretName }}
+            - secretName: "{{ .Values.ingress.tls.secretName }}"
               hosts:
-                - {{ .Values.ingress.hosts.gateway }}
+                - "{{ .Values.ingress.hosts.gateway }}"
           {{- end }}
-      - serviceMonitor:
-          enabled: {{ .Values.monitoring.enabled }}
-      {{- if .Values.autoscaling.enabled }}
-      - autoscaling:
+        {{- if .Values.monitoring.enabled }}
+        serviceMonitor:
+          enabled: true
+        {{- end }}
+        {{- if .Values.autoscaling.enabled }}
+        autoscaling:
           enabled: true
           minReplicas: {{ .Values.autoscaling.minReplicas }}
           maxReplicas: {{ .Values.autoscaling.maxReplicas }}
           targetCPUUtilizationPercentage: {{ .Values.autoscaling.targetCPUUtilizationPercentage }}
-      {{- end }}
+        {{- end }}
 
   # Monitoring - Prometheus Stack (Optional)
   - name: prometheus-stack
     namespace: monitoring
     chart: prometheus-community/kube-prometheus-stack
-    version: ~55.0.0
-    condition: monitoring.enabled
+    version: "~55.0.0"
+    condition: {{ .Values.monitoring.enabled }}
     wait: true
     timeout: 600
     values:
@@ -369,13 +376,13 @@ releases:
             storageSpec:
               volumeClaimTemplate:
                 spec:
-                  storageClassName: {{ .Environment.Name == "prod" | ternary "fast-ssd" "standard" }}
+                  storageClassName: "{{ ternary "fast-ssd" "standard" (eq .Environment.Name "prod") }}"
                   accessModes: ["ReadWriteOnce"]
                   resources:
                     requests:
-                      storage: {{ .Environment.Name == "prod" | ternary "50Gi" "10Gi" }}
-      - grafana:
-          adminPassword: {{ requiredEnv "GRAFANA_ADMIN_PASSWORD" }}
+                      storage: "{{ ternary "50Gi" "10Gi" (eq .Environment.Name "prod") }}"
+        grafana:
+          adminPassword: "{{ requiredEnv "GRAFANA_ADMIN_PASSWORD" }}"
           persistence:
             enabled: true
             size: 5Gi
@@ -400,14 +407,14 @@ releases:
   - name: ingress-nginx
     namespace: ingress-nginx
     chart: ingress-nginx/ingress-nginx
-    version: ~4.8.0
-    condition: ingress.enabled
+    version: "~4.8.0"
+    condition: {{ .Values.ingress.enabled }}
     wait: true
     timeout: 600
     values:
       - controller:
           service:
-            type: {{ .Environment.Name == "prod" | ternary "LoadBalancer" "NodePort" }}
+            type: "{{ ternary "LoadBalancer" "NodePort" (eq .Environment.Name "prod") }}"
           metrics:
             enabled: {{ .Values.monitoring.enabled }}
             serviceMonitor:
@@ -416,11 +423,16 @@ releases:
 hooks:
   - events: ["presync"]
     showlogs: true
-    command: "kubectl"
-    args: ["create", "namespace", "{{ .Values.namespace }}", "--dry-run=client", "-o", "yaml", "|", "kubectl", "apply", "-f", "-"]
-
+    command: "bash"
+    args: 
+      - "-c"
+      - "kubectl create namespace {{ .Values.namespace }} --dry-run=client -o yaml | kubectl apply -f -"
+  
   - events: ["postsync"]
     showlogs: true
     command: "kubectl"
-    args: ["get", "pods", "-n", "{{ .Values.namespace }}"]
-
+    args: 
+      - "get"
+      - "pods"
+      - "-n"
+      - "{{ .Values.namespace }}"

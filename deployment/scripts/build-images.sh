@@ -40,15 +40,15 @@ build_service() {
     local service_name=$1
     local service_path=$2
     local image_name="${DOCKER_REGISTRY}sandbox-${service_name}"
-    
+
     log_info "Building ${service_name} image..."
-    
+
     # Check if Dockerfile exists
     if [ ! -f "${service_path}/Dockerfile" ]; then
         log_error "Dockerfile not found in ${service_path}"
         return 1
     fi
-    
+
     # Build the image
     docker build \
         --build-arg BUILD_DATE="${BUILD_DATE}" \
@@ -56,10 +56,10 @@ build_service() {
         --tag "${image_name}:${IMAGE_TAG}" \
         --tag "${image_name}:latest" \
         "${service_path}"
-    
+
     if [ $? -eq 0 ]; then
         log_success "Successfully built ${image_name}:${IMAGE_TAG}"
-        
+
         # Show image size
         local image_size=$(docker images "${image_name}:${IMAGE_TAG}" --format "table {{.Size}}" | tail -n 1)
         log_info "Image size: ${image_size}"
@@ -148,12 +148,12 @@ if [ -n "${SPECIFIC_SERVICE}" ]; then
         log_info "Available services: ${!SERVICES[@]}"
         exit 1
     fi
-    
+
     log_info "Building specific service: ${SPECIFIC_SERVICE}"
     build_service "${SPECIFIC_SERVICE}" "${SERVICES[${SPECIFIC_SERVICE}]}"
 else
     log_info "Building all services..."
-    
+
     # Build all services
     for service in "${!SERVICES[@]}"; do
         build_service "${service}" "${SERVICES[${service}]}"
@@ -168,7 +168,7 @@ for service in "${!SERVICES[@]}"; do
     if [ -n "${SPECIFIC_SERVICE}" ] && [ "${service}" != "${SPECIFIC_SERVICE}" ]; then
         continue
     fi
-    
+
     image_name="${DOCKER_REGISTRY}sandbox-${service}:${IMAGE_TAG}"
     if docker images "${image_name}" --format "table {{.Repository}}:{{.Tag}}" | grep -q "${image_name}"; then
         log_success "  ${image_name}"
@@ -176,4 +176,3 @@ for service in "${!SERVICES[@]}"; do
 done
 
 log_info "To push images to registry, run: ./push-images.sh"
-
