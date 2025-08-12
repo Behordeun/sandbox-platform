@@ -1,15 +1,12 @@
-version: '3.8'
-
 services:
   # PostgreSQL Database
   postgres:
-    image: postgres:14-alpine
-    container_name: sandbox-postgres
+    env_file: .env
     environment:
-      POSTGRES_DB: sandbox
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres123
-      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+      POSTGRES_DB: ${POSTGRES_DB}
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
     ports:
       - "5432:5432"
     volumes:
@@ -28,7 +25,7 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sandbox-redis
-    command: redis-server --appendonly yes --requirepass redis123
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
       - "6379:6379"
     volumes:
@@ -46,14 +43,14 @@ services:
     build:
       context: ../../services/auth-service
       dockerfile: Dockerfile
-    container_name: sandbox-auth-service
+    env_file: .env
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/sandbox
-      - REDIS_URL=redis://:redis123@redis:6379/0
-      - JWT_SECRET_KEY=dev-jwt-secret-key-change-in-production
-      - CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]
-      - DEBUG=true
-      - DOJA_API_KEY=${DOJA_API_KEY:-}
+      - DATABASE_URL=${DATABASE_URL}
+      - REDIS_URL=${REDIS_URL}
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - DEBUG=${DEBUG}
+      - DOJA_API_KEY=${DOJA_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
@@ -79,13 +76,14 @@ services:
       context: ../../services/config-service
       dockerfile: Dockerfile
     container_name: sandbox-config-service
+    env_file: .env
     environment:
-      - REDIS_URL=redis://:redis123@redis:6379/1
-      - CONFIG_STORAGE_TYPE=redis
-      - ENCRYPTION_KEY=dev-encryption-key-change-in-production
-      - CORS_ORIGINS=["http://localhost:3000", "http://localhost:8080"]
-      - DEBUG=true
-      - VERSIONING_ENABLED=true
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
+      - CONFIG_STORAGE_TYPE=${CONFIG_STORAGE_TYPE}
+      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
+      - CORS_ORIGINS=${CORS_ORIGINS}
+      - DEBUG=${DEBUG}
+      - VERSIONING_ENABLED=${VERSIONING_ENABLED}
     ports:
       - "8001:8000"
     depends_on:
@@ -109,15 +107,16 @@ services:
       context: ../../services/api-gateway
       dockerfile: Dockerfile
     container_name: sandbox-api-gateway
+    env_file: .env
     environment:
-      - AUTH_SERVICE_URL=http://auth-service:8000
-      - CONFIG_SERVICE_URL=http://config-service:8000
-      - REDIS_URL=redis://:redis123@redis:6379/2
-      - JWT_SECRET_KEY=dev-jwt-secret-key-change-in-production
+      - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
+      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/2
+      - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CORS_ORIGINS=["http://localhost:3000"]
-      - DEBUG=true
-      - RATE_LIMIT_ENABLED=true
-      - METRICS_ENABLED=true
+      - DEBUG=${DEBUG}
+      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - METRICS_ENABLED=${METRICS_ENABLED}
     ports:
       - "8080:8080"
     depends_on:
@@ -166,8 +165,9 @@ services:
     container_name: sandbox-grafana
     ports:
       - "3001:3000"
+    env_file: .env
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin123
+      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
@@ -192,4 +192,3 @@ networks:
     ipam:
       config:
         - subnet: 172.20.0.0/16
-
