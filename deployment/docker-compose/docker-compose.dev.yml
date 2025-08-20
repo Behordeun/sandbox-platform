@@ -1,6 +1,8 @@
 services:
   # PostgreSQL Database
   postgres:
+    image: postgres:14-alpine
+    container_name: sandbox-postgres
     env_file: .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
