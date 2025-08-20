@@ -35,6 +35,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/api/v1/services/",
             "/.well-known/",
             "/.well-known/",
+            "/.well-known/",
         ]
 
     async def dispatch(self, request: Request, call_next):
