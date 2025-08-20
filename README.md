@@ -348,7 +348,6 @@ Comprehensive user activity tracking with structured JSON logging:
 - **Alembic Migrations**: Database version control and schema management
 
 ### Security Features
-
 - **Bcrypt Password Hashing**: Secure password storage
 - **JWT Signing**: Configurable secret keys and algorithms
 - **Identity Privacy**: NIN/BVN data hashing for privacy protection
