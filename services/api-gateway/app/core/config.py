@@ -5,6 +5,8 @@ from pydantic_settings import BaseSettings
 
 HEALTH_PATH = "/health"
 
+HEALTH_PATH = "/health"
+
 class ServiceConfig(BaseSettings):
     """Configuration for a backend service."""
 
