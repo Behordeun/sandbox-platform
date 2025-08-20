@@ -22,19 +22,17 @@ Think of the API Gateway as the **front door** to all DPI services. Instead of c
 - **AI Services**: Content generation and data analysis
 - **IVR Services**: Interactive Voice Response systems
 
-### 📊 **Built-in Analytics**
+3. **Start Redis** (for rate limiting):
 
-- Track your API usage patterns
-- Monitor service performance
-- Security event detection
-- User engagement metrics
+   ```bash
+   docker run -d -p 6379:6379 redis:7-alpine
+   ```
 
-### 🛡️ **Enterprise Security**
+4. **Run the gateway**:
 
-- Rate limiting (100 requests/minute by default)
-- Request logging and audit trails
-- Circuit breaker for service reliability
-- CORS protection for web applications
+   ```bash
+   uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
+   ```
 
 ## 🚀 Quick Start Guide (5 Minutes)
 
@@ -238,7 +236,108 @@ docker run -p 8080:8080 \
   sandbox-api-gateway:1.0.0
 ```
 
-### Kubernetes Deployment
+## API Endpoints
+
+### Gateway Routes
+
+- `GET|POST|PUT|DELETE /api/v1/auth/*` - Route to auth service
+- `GET|POST|PUT|DELETE /api/v1/sms/*` - Route to SMS service
+- `GET|POST|PUT|DELETE /api/v1/llm/*` - Route to LLM service
+
+### Management
+
+- `GET /api/v1/services/health` - Get health of all services
+- `GET /api/v1/services/status` - Get detailed service status
+- `GET /api/v1/services/{service}/health` - Get specific service health
+- `GET /api/v1/services/{service}/metrics` - Get service metrics
+
+### System
+
+- `GET /health` - Gateway health check
+- `GET /metrics` - Prometheus metrics
+- `GET /docs` - API documentation
+
+## Configuration
+
+### Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `HOST` | Server host | `0.0.0.0` |
+| `PORT` | Server port | `8080` |
+| `REDIS_URL` | Redis connection URL | `redis://localhost:6379/0` |
+| `JWT_SECRET_KEY` | JWT secret for token validation | Required |
+| `RATE_LIMIT_REQUESTS` | Requests per window | `100` |
+| `RATE_LIMIT_WINDOW` | Rate limit window (seconds) | `60` |
+| `CIRCUIT_BREAKER_FAILURE_THRESHOLD` | Failures before opening circuit | `5` |
+| `METRICS_ENABLED` | Enable Prometheus metrics | `true` |
+
+### Service Configuration
+
+Services are configured in `app/core/config.py`:
+
+```python
+services = {
+    "auth": ServiceConfig(
+        name="auth-service",
+        url="http://auth-service:8000",
+        health_path="/health"
+    ),
+    "sms": ServiceConfig(
+        name="sms-service", 
+        url="http://sms-service:8000",
+        health_path="/health"
+    )
+}
+```
+
+## Architecture
+
+### Middleware Stack
+
+1. **CORS Middleware**: Handle cross-origin requests
+2. **Metrics Middleware**: Collect Prometheus metrics
+3. **Logging Middleware**: Request/response logging
+4. **Rate Limit Middleware**: Redis-based rate limiting
+5. **Auth Middleware**: JWT/API key authentication
+
+### Circuit Breaker
+
+The gateway implements circuit breaker pattern for each backend service:
+
+- **Closed**: Normal operation, requests pass through
+- **Open**: Service is failing, requests are blocked
+- **Half-Open**: Testing if service has recovered
+
+### Load Balancing
+
+Supports multiple load balancing strategies:
+
+- **Round Robin**: Distribute requests evenly
+- **Least Connections**: Route to least busy instance
+- **Random**: Random selection
+
+### Health Monitoring
+
+- Continuous health checks every 30 seconds
+- Circuit breaker state tracking
+- Service response time monitoring
+- Automatic service discovery updates
+
+## Monitoring
+
+### Prometheus Metrics
+
+The gateway exposes the following metrics:
+
+- `api_gateway_requests_total` - Total requests by method/endpoint/status
+- `api_gateway_request_duration_seconds` - Request duration histogram
+- `api_gateway_active_requests` - Current active requests
+- `api_gateway_service_requests_total` - Backend service requests
+- `api_gateway_circuit_breaker_state` - Circuit breaker states
+- `api_gateway_rate_limit_hits_total` - Rate limit violations
+
+### Health Checks
 
 ```bash
 # Deploy with Helm

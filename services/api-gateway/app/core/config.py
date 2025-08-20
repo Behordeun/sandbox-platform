@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # JWT settings for token validation
-    jwt_secret_key: str = "default-secret-key-change-in-production"
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
 
     # Service URLs
