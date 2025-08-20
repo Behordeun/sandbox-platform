@@ -27,6 +27,7 @@ class ServiceDiscovery:
         self.services: Dict[str, List[ServiceInstance]] = {}
         self.health_check_interval = 30  # seconds
         self.max_failures = 3
+        self._round_robin_counters: Dict[str, int] = {}
         self._initialize_services()
 
     def _initialize_services(self):
@@ -66,8 +67,12 @@ class ServiceDiscovery:
         self, instances: List[ServiceInstance]
     ) -> ServiceInstance:
         """Round-robin load balancing."""
-        # Simple round-robin based on current time
-        index = int(time.time()) % len(instances)
+        service_name = instances[0].name
+        if service_name not in self._round_robin_counters:
+            self._round_robin_counters[service_name] = 0
+        
+        index = self._round_robin_counters[service_name] % len(instances)
+        self._round_robin_counters[service_name] += 1
         return instances[index]
 
     def _least_response_time_selection(

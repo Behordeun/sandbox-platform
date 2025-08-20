@@ -1,5 +1,5 @@
 import re
-from typing import List
+from typing import List, Optional
 
 from app.core.security import validate_api_key, verify_token
 from fastapi import Request, status
@@ -10,7 +10,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 class AuthMiddleware(BaseHTTPMiddleware):
     """Authentication middleware for API Gateway."""
 
-    def __init__(self, app, excluded_paths: List[str] = None):
+    def __init__(self, app, excluded_paths: Optional[List[str]] = None):
         super().__init__(app)
         self.excluded_paths = excluded_paths or [
             "/health",
@@ -18,8 +18,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/redoc",
             "/openapi.json",
+            "/api/v1/openapi.json",  # <-- Add this line
             "/api/v1/auth/register",
             "/api/v1/auth/login",
+            "/.well-known/",
             "/.well-known/",
         ]
 

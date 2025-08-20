@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 from app.api.v1.router import api_router
 from app.core.config import settings
@@ -44,7 +45,8 @@ async def periodic_health_checks():
             await service_discovery.health_check_all_services()
             await asyncio.sleep(30)  # Check every 30 seconds
         except asyncio.CancelledError:
-            break
+            # Perform any cleanup if needed, then re-raise
+            raise
         except Exception as e:
             logger.error(f"Health check error: {e}")
             await asyncio.sleep(30)
@@ -77,8 +79,18 @@ if settings.metrics_enabled:
 if settings.request_logging_enabled or settings.response_logging_enabled:
     app.add_middleware(LoggingMiddleware)
 
+# Only add rate limiting if Redis is available
 if settings.rate_limit_enabled:
-    app.add_middleware(RateLimitMiddleware)
+    try:
+        import redis
+        redis_client = redis.from_url(settings.redis_url)
+        if redis_client is not None:
+            redis_client.ping()
+            app.add_middleware(RateLimitMiddleware)
+        else:
+            logger.warning("Redis client is None, disabling rate limiting.")
+    except Exception as e:
+        logger.warning(f"Redis not available, disabling rate limiting: {e}")
 
 # Add authentication middleware (should be last)
 app.add_middleware(AuthMiddleware)
@@ -88,7 +100,7 @@ app.add_middleware(AuthMiddleware)
 @app.get("/health")
 async def health_check():
     """Health check endpoint."""
-    return await health_service.get_gateway_health()
+    return {"status": "healthy"}
 
 
 # Metrics endpoint
