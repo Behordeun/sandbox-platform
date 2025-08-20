@@ -57,12 +57,9 @@ helmfile -e prod apply
 
 | Service                  | Port | Description                                             |
 | ------------------------ | ---- | ------------------------------------------------------- |
-| **AI Service**     | 8002 | AI content generation and data analysis                |
-| **SMS Service**    | 8003 | SMS messaging and notifications                         |
-| **IVR Service**    | 8004 | Interactive Voice Response system                       |
-| **NIN Service**    | 8005 | Nigerian Identity Number verification                   |
-| **BVN Service**    | 8006 | Bank Verification Number validation                     |
-| **Two-Way SMS**    | 8007 | Bidirectional SMS communication                         |
+| **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens, NIN/BVN verification |
+| **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
+| **Config Service** | 8000 | Centralized configuration management with encryption    |
 
 ### Platform Services
 
