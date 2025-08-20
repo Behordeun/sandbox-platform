@@ -7,7 +7,7 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 ### Prerequisites
 
 - Docker Desktop (for infrastructure)
-- Python 3.11+ 
+- Python 3.11+
 - Git
 
 ### One-Command Setup
@@ -15,14 +15,16 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 ```bash
 # Clone the repository
 git clone https://github.com/Behordeun/sandbox-platform.git
+
 cd sandbox-platform
 
-# Start everything with one command
-./sandbox-start.sh
+# Start infrastructure services
+docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
 
-# Verify DPI services are ready
-./check-services.sh
-```
+# Start application services (in separate terminals)
+cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
+cd services/config-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
+cd services/api-gateway && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8080
 
 ### Test Your Setup
 
@@ -283,6 +285,7 @@ Comprehensive user activity tracking with structured JSON logging:
 ## 🔐 Auth Service Features
 
 ### Core Capabilities
+
 - **OAuth2 Authorization Server**: Full OAuth2 authorization code flow
 - **JWT Token Management**: Secure token generation, validation, and refresh
 - **User Management**: Registration, authentication, and profile management
@@ -291,12 +294,14 @@ Comprehensive user activity tracking with structured JSON logging:
 - **Multi-login Support**: OAuth2 and JSON-based authentication
 
 ### Database Schema
+
 - **Users Table**: User accounts with hashed passwords and profile data
 - **OAuth Clients**: Registered OAuth2 client applications
 - **OAuth Tokens**: Access tokens, refresh tokens, and authorization codes
 - **Alembic Migrations**: Database version control and schema management
 
 ### Security Features
+
 - **Bcrypt Password Hashing**: Secure password storage
 - **JWT Signing**: Configurable secret keys and algorithms
 - **Identity Privacy**: NIN/BVN data hashing for privacy protection
@@ -304,6 +309,7 @@ Comprehensive user activity tracking with structured JSON logging:
 - **Input Validation**: Pydantic models for request/response validation
 
 ### Integration Points
+
 - **API Gateway**: Token validation for all platform services
 - **NIN/BVN Services**: Dedicated sandbox services for identity verification
 - **PostgreSQL**: Primary data storage
@@ -314,6 +320,7 @@ Comprehensive user activity tracking with structured JSON logging:
 ### Authentication Flow
 
 #### OAuth2 Authentication
+
 1. **Client Registration**: OAuth2 clients register via `/api/v1/oauth2/clients`
 2. **Authorization**: Users authorize via `/api/v1/oauth2/authorize`
 3. **Token Exchange**: Authorization codes exchanged for JWT tokens at `/api/v1/oauth2/token`
@@ -321,6 +328,7 @@ Comprehensive user activity tracking with structured JSON logging:
 5. **Token Refresh**: Refresh tokens used to obtain new access tokens
 
 #### User Authentication
+
 1. **Registration**: Users register via `/api/v1/auth/register`
 2. **Login**: Multiple login methods:
    - OAuth2 compatible: `/api/v1/auth/login`
@@ -328,6 +336,7 @@ Comprehensive user activity tracking with structured JSON logging:
 3. **User Info**: Access user data via `/api/v1/auth/userinfo` or `/api/v1/auth/me`
 
 #### Identity Verification
+
 1. **NIN Verification**: Dedicated NIN service at `/api/v1/nin/verify`
 2. **BVN Verification**: Dedicated BVN service at `/api/v1/bvn/verify`
 3. **Dojah API Integration**: Real-time verification through Dojah API
@@ -553,18 +562,21 @@ GET /api/v1/services/health
 ## 📖 Documentation
 
 ### Quick Reference for Nigerian Developers
+
 - [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
 - [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
 - [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
 - [Service Health Checker](check-services.sh) - Monitor all services
 
 ### Detailed Documentation
+
 - [Deployment Guide](deployment/README.md) - Comprehensive deployment instructions
 - [Auth Service](services/auth-service/README.md) - OAuth2, JWT, and password management
 - [API Gateway](services/api-gateway/README.md) - Gateway configuration and usage
 - [Services Overview](services/README.md) - Platform services management
 
 ### Service-Specific Documentation
+
 - **Auth Service**: OAuth2 flows, Nigerian phone validation, JWT management
 - **API Gateway**: Request routing, rate limiting, DPI health monitoring
 - **NIN Service**: Nigerian Identity Number verification via Dojah API

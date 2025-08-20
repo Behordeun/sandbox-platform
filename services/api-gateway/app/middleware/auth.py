@@ -1,6 +1,5 @@
 import logging
 import re
-import time
 from typing import List, Optional
 
 from app.core.security import validate_api_key, verify_token
@@ -27,13 +26,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/redoc",
             "/openapi.json",
-            "/api/v1/openapi.json",
+            "/api/v1/openapi.json",  # <-- Add this line
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/login/json",
             "/api/v1/services/health",
             "/api/v1/services/status",
             "/api/v1/services/",
+            "/.well-known/",
             "/.well-known/",
         ]
 
