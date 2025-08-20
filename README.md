@@ -14,16 +14,17 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 
 ```bash
 # Clone the repository
-git clone <repository-url>
+git clone https://github.com/Behordeun/sandbox-platform.git
+
 cd sandbox-platform
 
 # Start infrastructure services
-docker-compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
+docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
 
 # Start application services (in separate terminals)
-cd services/auth-service && uvicorn app.main:app --reload --port 8000
-cd services/config-service && uvicorn app.main:app --reload --port 8001
-cd services/api-gateway && uvicorn app.main:app --reload --port 8080
+cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
+cd services/config-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
+cd services/api-gateway && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8080
 
 # Verify setup
 curl http://localhost:8080/health
@@ -45,11 +46,11 @@ helmfile -e prod apply
 
 ### Core Services
 
-| Service | Port | Description |
-|---------|------|-------------|
-| **Auth Service** | 8000 | OAuth2 authentication, JWT tokens, NIN/BVN verification |
-| **API Gateway** | 8080 | Request routing, rate limiting, circuit breaking |
-| **Config Service** | 8000 | Centralized configuration management with encryption |
+| Service                  | Port | Description                                             |
+| ------------------------ | ---- | ------------------------------------------------------- |
+| **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens, NIN/BVN verification |
+| **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
+| **Config Service** | 8000 | Centralized configuration management with encryption    |
 
 ### Infrastructure
 
@@ -60,7 +61,7 @@ helmfile -e prod apply
 
 ## 📁 Project Structure
 
-```plain text
+```plain
 sandbox-platform/
 ├── services/
 │   ├── auth-service/          # Authentication & authorization
@@ -111,11 +112,11 @@ docker-compose -f deployment/docker-compose/docker-compose.dev.yml up
 
 ### Environment Configuration
 
-| Environment | Namespace | Replicas | Resources |
-|-------------|-----------|----------|-----------|
-| Development | sandbox-dev | 1 each | 200m CPU, 256Mi RAM |
-| Staging | sandbox-staging | 2 each | 500m CPU, 512Mi RAM |
-| Production | sandbox-prod | 3 each | 1000m CPU, 1Gi RAM |
+| Environment | Namespace       | Replicas | Resources           |
+| ----------- | --------------- | -------- | ------------------- |
+| Development | sandbox-dev     | 1 each   | 200m CPU, 256Mi RAM |
+| Staging     | sandbox-staging | 2 each   | 500m CPU, 512Mi RAM |
+| Production  | sandbox-prod    | 3 each   | 1000m CPU, 1Gi RAM  |
 
 ### Helmfile Deployment
 

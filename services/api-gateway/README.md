@@ -20,6 +20,7 @@ A high-performance API Gateway built with FastAPI for the Sandbox Platform. This
 ### Local Development
 
 1. **Setup environment**:
+
    ```bash
    cd api-gateway
    cp .env.example .env
@@ -27,24 +28,27 @@ A high-performance API Gateway built with FastAPI for the Sandbox Platform. This
    ```
 
 2. **Install dependencies**:
+
    ```bash
    pip install -r requirements.txt
    ```
 
 3. **Start Redis** (for rate limiting):
+
    ```bash
    docker run -d -p 6379:6379 redis:7-alpine
    ```
 
 4. **Run the gateway**:
+
    ```bash
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
    ```
 
 5. **Access the gateway**:
-   - API Documentation: http://localhost:8080/docs
-   - Health Check: http://localhost:8080/health
-   - Metrics: http://localhost:8080/metrics
+   - API Documentation: [http://localhost:8080/docs](http://localhost:8080/docs)
+   - Health Check: [http://localhost:8080/health](http://localhost:8080/health)
+   - Metrics: [http://localhost:8080/metrics](http://localhost:8080/metrics)
 
 ### Docker Deployment
 
@@ -59,17 +63,20 @@ docker run -p 8080:8080 \
 ## API Endpoints
 
 ### Gateway Routes
+
 - `GET|POST|PUT|DELETE /api/v1/auth/*` - Route to auth service
 - `GET|POST|PUT|DELETE /api/v1/sms/*` - Route to SMS service
 - `GET|POST|PUT|DELETE /api/v1/llm/*` - Route to LLM service
 
 ### Management
+
 - `GET /api/v1/services/health` - Get health of all services
 - `GET /api/v1/services/status` - Get detailed service status
 - `GET /api/v1/services/{service}/health` - Get specific service health
 - `GET /api/v1/services/{service}/metrics` - Get service metrics
 
 ### System
+
 - `GET /health` - Gateway health check
 - `GET /metrics` - Prometheus metrics
 - `GET /docs` - API documentation
@@ -196,7 +203,7 @@ Configurable CORS policies:
 
 ### Project Structure
 
-```
+```plain text
 app/
 ├── api/v1/          # API endpoints
 ├── core/            # Core utilities and configuration
@@ -208,6 +215,7 @@ app/
 ### Adding New Services
 
 1. **Update configuration**:
+
    ```python
    # In app/core/config.py
    services["new_service"] = ServiceConfig(
@@ -218,6 +226,7 @@ app/
    ```
 
 2. **Add routing**:
+
    ```python
    # In app/api/v1/gateway.py
    @router.api_route("/new/{path:path}", methods=["GET", "POST"])
@@ -295,4 +304,3 @@ docker logs <container-id>
 ## License
 
 This project is licensed under the MIT License.
-

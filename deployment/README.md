@@ -24,19 +24,20 @@ The Sandbox Platform consists of three core microservices designed for modularit
 ### Core Services
 
 1. **Auth Service** - Authentication and authorization service
+
    - OAuth2 implementation with JWT tokens
    - Nigerian identity verification (NIN/BVN)
    - User management and profile handling
    - Port: 8000
-
 2. **API Gateway** - Central entry point for all requests
+
    - Request routing and load balancing
    - Rate limiting and circuit breaking
    - Authentication middleware
    - Metrics collection
    - Port: 8080
-
 3. **Config Service** - Centralized configuration management
+
    - Environment-specific configurations
    - Encrypted sensitive data storage
    - Configuration versioning
@@ -106,7 +107,7 @@ cp services/config-service/.env.example services/config-service/.env
 
 ```bash
 # Start PostgreSQL and Redis
-docker-compose -f deployment/docker-compose.dev.yml up -d postgres redis
+docker-compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
 
 # Wait for services to be ready
 sleep 10
@@ -191,16 +192,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
-    
+  
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
-    
+  
     - name: Login to Docker Hub
       uses: docker/login-action@v2
       with:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
-    
+  
     - name: Build and push images
       run: |
         ./deployment/scripts/build-and-push.sh
@@ -288,7 +289,7 @@ helm install api-gateway ./services/api-gateway/helm/api-gateway \
 
 Each service includes a comprehensive Helm chart:
 
-```plain text
+```plain
 helm/
 ├── Chart.yaml           # Chart metadata
 ├── values.yaml          # Default configuration values
@@ -424,9 +425,13 @@ environments:
 Deploy with Helmfile:
 
 ```bash
-# Install helmfile
+# Install helmfile (Linux)
 curl -L https://github.com/roboll/helmfile/releases/download/v0.157.0/helmfile_linux_amd64 -o helmfile
 chmod +x helmfile && sudo mv helmfile /usr/local/bin/
+
+or (MacOS)
+
+brew install helmfile
 
 # Deploy to development
 helmfile -e dev apply
@@ -587,7 +592,7 @@ data:
       tag kubernetes.*
       format json
     </source>
-    
+  
     <match kubernetes.**>
       @type elasticsearch
       host elasticsearch.logging.svc.cluster.local
@@ -615,7 +620,7 @@ spec:
           periodSeconds: 10
           timeoutSeconds: 5
           failureThreshold: 3
-        
+  
         readinessProbe:
           httpGet:
             path: /health
@@ -984,29 +989,30 @@ helm list -n sandbox-prod -o yaml > backup/helm-releases-$(date +%Y%m%d).yaml
 ### Disaster Recovery Plan
 
 1. **Data Recovery**:
+
    ```bash
    # Restore database from backup
    kubectl exec -it postgres-0 -n sandbox-prod -- psql -U postgres -c "DROP DATABASE IF EXISTS sandbox;"
    kubectl exec -it postgres-0 -n sandbox-prod -- psql -U postgres -c "CREATE DATABASE sandbox;"
    gunzip -c backup/sandbox-20240101-020000.sql.gz | kubectl exec -i postgres-0 -n sandbox-prod -- psql -U postgres -d sandbox
    ```
-
 2. **Service Recovery**:
+
    ```bash
    # Redeploy services
    helmfile -e prod apply
-   
+
    # Verify service health
    kubectl get pods -n sandbox-prod
    kubectl get ingress -n sandbox-prod
    ```
-
 3. **Data Validation**:
+
    ```bash
    # Run health checks
    curl -f https://auth.sandbox.example.com/health
    curl -f https://api.sandbox.example.com/health
-   
+
    # Verify database connectivity
    kubectl exec -it deployment/auth-service -n sandbox-prod -- python -c "
    import asyncpg
