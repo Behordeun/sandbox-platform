@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from datetime import datetime
 
 from app.api.v1.router import api_router
 from app.core.config import settings
@@ -81,7 +82,6 @@ if settings.request_logging_enabled or settings.response_logging_enabled:
 if settings.rate_limit_enabled:
     try:
         import redis
-
         redis_client = redis.from_url(settings.redis_url)
         if redis_client is not None:
             redis_client.ping()
