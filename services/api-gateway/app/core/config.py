@@ -1,3 +1,4 @@
+import os
 from typing import Dict, List
 
 from pydantic_settings import BaseSettings
@@ -6,6 +7,8 @@ HEALTH_PATH = "/health"
 
 HEALTH_PATH = "/health"
 
+
+HEALTH_PATH = "/health"
 
 class ServiceConfig(BaseSettings):
     """Configuration for a backend service."""
@@ -53,19 +56,13 @@ class Settings(BaseSettings):
     auth_service_timeout: int = 30
     services: Dict[str, ServiceConfig] = {
         "auth": ServiceConfig(
-            name="auth-service", url="http://localhost:8000", health_path=HEALTH_PATH
+            name="auth-service", url="http://auth-service:8000", health_path=HEALTH_PATH
         ),
         "sms": ServiceConfig(
-            name="sms-service", url="http://localhost:8003", health_path=HEALTH_PATH
+            name="sms-service", url="http://sms-service:8000", health_path=HEALTH_PATH
         ),
         "llm": ServiceConfig(
-            name="llm-service", url="http://localhost:8002", health_path=HEALTH_PATH
-        ),
-        "nin": ServiceConfig(
-            name="nin-service", url="http://localhost:8005", health_path=HEALTH_PATH
-        ),
-        "bvn": ServiceConfig(
-            name="bvn-service", url="http://localhost:8006", health_path=HEALTH_PATH
+            name="llm-service", url="http://llm-service:8000", health_path=HEALTH_PATH
         ),
     }
 
@@ -98,4 +95,7 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-settings = Settings()
+jwt_secret = os.getenv("JWT_SECRET_KEY")
+if jwt_secret is None:
+    raise ValueError("JWT_SECRET_KEY environment variable is not set")
+settings = Settings(jwt_secret_key=jwt_secret)
