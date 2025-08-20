@@ -1,6 +1,8 @@
 services:
   # PostgreSQL Database
   postgres:
+    image: postgres:14-alpine
+    container_name: sandbox-postgres
     env_file: .env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
@@ -27,7 +29,7 @@ services:
     container_name: sandbox-redis
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
-      - "6379:6379"
+      - "6378:6379"
     volumes:
       - redis_data:/data
     networks:

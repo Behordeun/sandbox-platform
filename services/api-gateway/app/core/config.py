@@ -26,8 +26,8 @@ class Settings(BaseSettings):
     port: int = 8080
 
     # CORS settings
-    cors_origins: List[str] = ["*"]
-    cors_allow_credentials: bool = True
+    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    cors_allow_credentials: bool = False
     cors_allow_methods: List[str] = ["*"]
     cors_allow_headers: List[str] = ["*"]
 
@@ -40,7 +40,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # JWT settings for token validation
-    jwt_secret_key: str = "your-secret-key-change-in-production"
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
 
     # Auth service configuration
