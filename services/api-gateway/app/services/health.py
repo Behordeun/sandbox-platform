@@ -19,7 +19,7 @@ class HealthService:
         """Get API Gateway health status."""
         return {
             "status": "healthy",
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "version": settings.app_version,
             "uptime": self._get_uptime(),
             "services": await self.get_services_health(),
@@ -31,7 +31,7 @@ class HealthService:
         # Check if we have cached results
         if (
             self.last_check_time
-            and (datetime.utcnow() - self.last_check_time).seconds < self.cache_duration
+            and (datetime.now() - self.last_check_time).seconds < self.cache_duration
         ):
             return self.cached_health_status
 
@@ -59,16 +59,16 @@ class HealthService:
                 overall_status = "degraded"
             else:
                 services_health[service_name] = result
-                if result["status"] != "healthy":
+                if isinstance(result, dict) and result.get("status") != "healthy":
                     overall_status = "degraded"
 
         # Cache results
         self.cached_health_status = {
             "overall_status": overall_status,
             "services": services_health,
-            "last_check": datetime.utcnow().isoformat(),
+            "last_check": datetime.now().isoformat(),
         }
-        self.last_check_time = datetime.utcnow()
+        self.last_check_time = datetime.now()
 
         return self.cached_health_status
 

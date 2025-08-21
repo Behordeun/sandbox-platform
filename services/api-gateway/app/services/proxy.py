@@ -1,5 +1,5 @@
 import time
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import httpx
 from app.core.circuit_breaker import (
@@ -20,7 +20,7 @@ class ProxyService:
         self.client = httpx.AsyncClient(timeout=settings.default_timeout)
 
     async def proxy_request(
-        self, request: Request, service_name: str, path: str = None
+        self, request: Request, service_name: str, path: Optional[str] = None
     ) -> Response:
         """Proxy request to backend service."""
         # Get service configuration
