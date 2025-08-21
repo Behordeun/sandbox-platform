@@ -1,7 +1,6 @@
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from datetime import datetime
 
 from app.api.v1.router import api_router
 from app.core.config import settings
@@ -10,7 +9,6 @@ from app.middleware.logging import LoggingMiddleware
 from app.middleware.metrics import MetricsMiddleware, get_metrics
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.services.discovery import service_discovery
-from app.services.health import health_service
 from app.services.proxy import proxy_service
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
