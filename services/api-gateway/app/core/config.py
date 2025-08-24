@@ -43,27 +43,28 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # JWT settings for token validation
-    jwt_secret_key: str
+    jwt_secret_key: str = "default-secret-key-change-in-production"
     jwt_algorithm: str = "HS256"
 
-    # Auth service configuration
-    auth_service_url: str = "http://auth-service:8000"
+    # Service URLs
+    auth_service_url: str = "http://localhost:8000"
+    config_service_url: str = "http://localhost:8001"
     auth_service_timeout: int = 30
     services: Dict[str, ServiceConfig] = {
         "auth": ServiceConfig(
-            name="auth-service", url="http://auth-service:8000", health_path=HEALTH_PATH
+            name="auth-service", url="http://localhost:8000", health_path=HEALTH_PATH
         ),
         "sms": ServiceConfig(
-            name="sms-service", url="http://sms-service:8000", health_path=HEALTH_PATH
+            name="sms-service", url="http://localhost:8003", health_path=HEALTH_PATH
         ),
         "llm": ServiceConfig(
-            name="llm-service", url="http://llm-service:8000", health_path=HEALTH_PATH
+            name="llm-service", url="http://localhost:8002", health_path=HEALTH_PATH
         ),
         "nin": ServiceConfig(
-            name="nin-service", url="http://nin-service:8005", health_path=HEALTH_PATH
+            name="nin-service", url="http://localhost:8005", health_path=HEALTH_PATH
         ),
         "bvn": ServiceConfig(
-            name="bvn-service", url="http://bvn-service:8006", health_path=HEALTH_PATH
+            name="bvn-service", url="http://localhost:8006", health_path=HEALTH_PATH
         ),
     }
 
@@ -96,7 +97,4 @@ class Settings(BaseSettings):
 
 
 # Global settings instance
-jwt_secret = os.getenv("JWT_SECRET_KEY")
-if jwt_secret is None:
-    raise ValueError("JWT_SECRET_KEY environment variable is not set")
-settings = Settings(jwt_secret_key=jwt_secret)
+settings = Settings()
