@@ -33,6 +33,22 @@ async def proxy_llm_service(request: Request, path: str) -> Response:
     return await proxy_service.proxy_request(request, "llm", f"/{path}")
 
 
+@router.api_route(
+    "/nin/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+)
+async def proxy_nin_service(request: Request, path: str) -> Response:
+    """Proxy requests to NIN service."""
+    return await proxy_service.proxy_request(request, "nin", f"/{path}")
+
+
+@router.api_route(
+    "/bvn/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+)
+async def proxy_bvn_service(request: Request, path: str) -> Response:
+    """Proxy requests to BVN service."""
+    return await proxy_service.proxy_request(request, "bvn", f"/{path}")
+
+
 @router.get("/services/health")
 async def get_services_health() -> Any:
     """Get health status of all backend services."""
