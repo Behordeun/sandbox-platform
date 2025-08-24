@@ -1,37 +1,21 @@
 from typing import Optional
-
 from pydantic import BaseModel, field_validator
 
 
-class NINBVNVerificationRequest(BaseModel):
-    nin: Optional[str] = None
-    bvn: Optional[str] = None
+class NINVerificationRequest(BaseModel):
+    nin: str
 
     @field_validator("nin")
     def validate_nin(cls, v):
-        if v and len(v) != 11:
+        if len(v) != 11:
             raise ValueError("NIN must be 11 digits")
-        if v and not v.isdigit():
+        if not v.isdigit():
             raise ValueError("NIN must contain only digits")
         return v
 
-    @field_validator("bvn")
-    def validate_bvn(cls, v):
-        if v and len(v) != 11:
-            raise ValueError("BVN must be 11 digits")
-        if v and not v.isdigit():
-            raise ValueError("BVN must contain only digits")
-        return v
 
-    def __init__(self, **data):
-        super().__init__(**data)
-        if not self.nin and not self.bvn:
-            raise ValueError("Either NIN or BVN must be provided")
-
-
-class NINBVNVerificationResponse(BaseModel):
+class NINVerificationResponse(BaseModel):
     nin_verified: bool = False
-    bvn_verified: bool = False
     verification_data: Optional[dict] = None
     message: str
 
@@ -39,7 +23,7 @@ class NINBVNVerificationResponse(BaseModel):
         from_attributes = True
 
 
-class IdentityVerificationData(BaseModel):
+class IdentityData(BaseModel):
     first_name: Optional[str] = None
     last_name: Optional[str] = None
     middle_name: Optional[str] = None
@@ -50,6 +34,8 @@ class IdentityVerificationData(BaseModel):
     address: Optional[str] = None
     state_of_origin: Optional[str] = None
     lga_of_origin: Optional[str] = None
+    nin: Optional[str] = None
+    photo: Optional[str] = None
 
     class Config:
         from_attributes = True

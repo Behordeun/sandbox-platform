@@ -59,6 +59,12 @@ class Settings(BaseSettings):
         "llm": ServiceConfig(
             name="llm-service", url="http://llm-service:8000", health_path=HEALTH_PATH
         ),
+        "nin": ServiceConfig(
+            name="nin-service", url="http://nin-service:8005", health_path=HEALTH_PATH
+        ),
+        "bvn": ServiceConfig(
+            name="bvn-service", url="http://bvn-service:8006", health_path=HEALTH_PATH
+        ),
     }
 
     # Load balancing
