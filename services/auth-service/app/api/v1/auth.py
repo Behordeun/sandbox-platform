@@ -50,12 +50,12 @@ def login_user(
 ) -> Any:
     """OAuth2 compatible token login, get an access token for future requests."""
     user = user_crud.authenticate(
-        db, email=form_data.username, password=form_data.password
+        db, identifier=form_data.username, password=form_data.password
     )
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect email/username or password",
         )
     elif not user_crud.is_active(user):
         raise HTTPException(
@@ -86,12 +86,12 @@ def login_user_json(
     db: Session = Depends(get_db),
     user_in: UserLogin,
 ) -> Any:
-    """Login with JSON payload."""
-    user = user_crud.authenticate(db, email=user_in.email, password=user_in.password)
+    """Login with JSON payload using email or username."""
+    user = user_crud.authenticate(db, identifier=user_in.identifier, password=user_in.password)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Incorrect email or password",
+            detail="Incorrect email/username or password",
         )
     elif not user_crud.is_active(user):
         raise HTTPException(

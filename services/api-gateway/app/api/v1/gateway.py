@@ -10,7 +10,8 @@ router = APIRouter()
 
 
 @router.api_route(
-    "/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_auth_service_{method}"
 )
 async def proxy_auth_service(request: Request, path: str) -> Response:
     """Proxy requests to auth service."""
@@ -18,7 +19,8 @@ async def proxy_auth_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/sms/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/sms/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_sms_service_{method}"
 )
 async def proxy_sms_service(request: Request, path: str) -> Response:
     """Proxy requests to SMS service."""
@@ -26,7 +28,8 @@ async def proxy_sms_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/llm/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/llm/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_llm_service_{method}"
 )
 async def proxy_llm_service(request: Request, path: str) -> Response:
     """Proxy requests to LLM service."""
@@ -34,7 +37,8 @@ async def proxy_llm_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/nin/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/nin/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_nin_service_{method}"
 )
 async def proxy_nin_service(request: Request, path: str) -> Response:
     """Proxy requests to NIN service."""
@@ -42,7 +46,8 @@ async def proxy_nin_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/bvn/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    "/bvn/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_bvn_service_{method}"
 )
 async def proxy_bvn_service(request: Request, path: str) -> Response:
     """Proxy requests to BVN service."""
@@ -74,3 +79,9 @@ async def get_service_health(service_name: str) -> Any:
 async def get_service_metrics(service_name: str) -> Any:
     """Get metrics for a specific service."""
     return health_service.get_service_metrics(service_name)
+
+
+@router.post("/auth/login")
+async def system_login(request: Request) -> Response:
+    """System-wide authentication endpoint."""
+    return await proxy_service.proxy_request(request, "auth", "/api/v1/auth/login/json")
