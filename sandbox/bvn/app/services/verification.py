@@ -28,7 +28,7 @@ async def verify_bvn_with_doja(bvn: str) -> dict:
             )
 
             response_data = response.json()
-            
+
             if response.status_code == 200 and response_data.get("success"):
                 entity = response_data.get("entity", {})
                 return {
