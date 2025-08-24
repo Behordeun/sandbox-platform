@@ -273,4 +273,4 @@ helmfile -e prod apply
 
 **Ready to build the next generation of Nigerian digital services?** These sandbox services provide everything you need to create world-class applications for the Nigerian market.
 
-*Powering Nigerian digital transformation* 🚀🇳🇬
+## Powering Nigerian digital transformation 🚀🇳🇬

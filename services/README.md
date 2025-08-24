@@ -5,12 +5,14 @@ The services directory contains platform maintenance services that support the c
 ## 🚀 Quick Start for DPI Development
 
 ### One-Command Setup
+
 ```bash
 # From project root - starts everything
 ./sandbox-start.sh
 ```
 
 ### Individual Commands
+
 ```bash
 # Infrastructure only (databases & Redis)
 ./start-infrastructure.sh
@@ -50,7 +52,9 @@ The services directory contains platform maintenance services that support the c
 ## 🔧 Management Scripts
 
 ### `dev-setup.sh`
+
 Complete development environment setup
+
 ```bash
 ./dev-setup.sh                    # Full setup
 ./dev-setup.sh --infrastructure-only  # Infrastructure only
@@ -58,27 +62,35 @@ Complete development environment setup
 ```
 
 ### `start-all.sh`
+
 Start all platform services
+
 - Installs dependencies automatically
 - Runs services in background
 - Creates PID files for management
 - Generates service logs
 
 ### `stop-all.sh`
+
 Stop all platform services
+
 ```bash
 ./stop-all.sh                # Stop services
 ./stop-all.sh --clean-logs   # Stop and clean logs
 ```
 
 ### `start-infrastructure.sh`
+
 Start infrastructure with Docker
+
 - PostgreSQL database
 - Redis cache
 - MongoDB document store
 
 ### `stop-infrastructure.sh`
+
 Stop infrastructure services
+
 ```bash
 ./stop-infrastructure.sh              # Stop containers
 ./stop-infrastructure.sh --clean-volumes  # Stop and clean volumes
@@ -87,6 +99,7 @@ Stop infrastructure services
 ## 📊 Monitoring
 
 ### Service Health
+
 ```bash
 # Check all DPI services at once
 ./check-services.sh
@@ -103,6 +116,7 @@ curl http://localhost:8003/health  # SMS
 ```
 
 ### Logs
+
 ```bash
 # View all logs
 tail -f logs/*.log
@@ -113,6 +127,7 @@ tail -f logs/api-gateway.log
 ```
 
 ### Process Management
+
 ```bash
 # Check running services
 ps aux | grep uvicorn
@@ -124,13 +139,16 @@ ls -la logs/*.pid
 ## 🔧 Development
 
 ### Adding New Services
+
 1. Create service directory in `services/`
 2. Add to `start-all.sh` and `stop-all.sh`
 3. Update port assignments
 4. Add health check endpoint
 
 ### Environment Setup
+
 Each service uses `.env` files for configuration:
+
 ```bash
 # Copy environment templates
 cd auth-service && cp .env.example .env
@@ -138,6 +156,7 @@ cd api-gateway && cp .env.example .env
 ```
 
 ### Database Migrations
+
 ```bash
 # Auth service migrations
 cd auth-service
@@ -147,12 +166,14 @@ alembic upgrade head
 ## 🐳 Docker Alternative
 
 ### Using Docker Compose
+
 ```bash
 # From project root
 docker-compose -f deployment/docker-compose/docker-compose.dev.yml up services
 ```
 
 ### Individual Service Containers
+
 ```bash
 # Build and run auth service
 cd auth-service
@@ -165,6 +186,7 @@ docker run -p 8000:8000 sandbox-auth:latest
 ### Common Issues
 
 **Port Already in Use**:
+
 ```bash
 # Find process using port
 lsof -i :8000
@@ -172,6 +194,7 @@ kill -9 <PID>
 ```
 
 **Service Won't Start**:
+
 ```bash
 # Check logs
 cat logs/auth-service.log
@@ -181,6 +204,7 @@ cd auth-service && pip install -r requirements.txt
 ```
 
 **Database Connection Issues**:
+
 ```bash
 # Test PostgreSQL
 psql -h localhost -U sandbox_user -d sandbox_db
@@ -193,6 +217,7 @@ mongo mongodb://sandbox_user:sandbox_password@localhost:27017/sandbox_db
 ```
 
 ### Clean Reset
+
 ```bash
 # Stop everything and clean up
 ./stop-all.sh --clean-logs
@@ -211,4 +236,4 @@ mongo mongodb://sandbox_user:sandbox_password@localhost:27017/sandbox_db
 
 ---
 
-**Platform services for Nigerian startup innovation** 🇳🇬
+## Platform services for Nigerian startup innovation 🇳🇬
