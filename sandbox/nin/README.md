@@ -438,4 +438,4 @@ console.log(`Verified: ${result.data.first_name} ${result.data.last_name}`);
 
 **Ready to verify Nigerian identities?** This NIN service integrates seamlessly with your application to provide instant, reliable identity verification for your Nigerian users.
 
-*Built for Nigerian developers, by Nigerian developers* 🇳🇬
+## Built for Nigerian developers, by Nigerian developers 🇳🇬
