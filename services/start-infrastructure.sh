@@ -39,7 +39,7 @@ docker run -d \
   -e POSTGRES_USER=sandbox_user \
   -e POSTGRES_PASSWORD=sandbox_password \
   -p 5432:5432 \
-  postgres:14 || log_warning "PostgreSQL container may already be running"
+  postgres:16 || log_warning "PostgreSQL container may already be running"
 
 # Start Redis
 log_info "Starting Redis..."
