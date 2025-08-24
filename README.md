@@ -26,11 +26,11 @@ cp .env.template .env
 export ENVIRONMENT=development
 
 # Start infrastructure services
-docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
+docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis mongo
 
-# Start application services (in separate terminals)
+# Start platform services (in separate terminals)
 cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-cd services/config-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
+cd config && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
 cd services/api-gateway && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8080
 
 ### Test Your Setup
@@ -64,9 +64,23 @@ helmfile -e prod apply
 
 | Service                  | Port | Description                                             |
 | ------------------------ | ---- | ------------------------------------------------------- |
-| **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens, NIN/BVN verification |
+| **AI Service**     | 8002 | AI content generation and data analysis                |
+| **SMS Service**    | 8003 | SMS messaging and notifications                         |
+| **IVR Service**    | 8004 | Interactive Voice Response system                       |
+| **NIN Service**    | 8005 | Nigerian Identity Number verification                   |
+| **BVN Service**    | 8006 | Bank Verification Number validation                     |
+| **Two-Way SMS**    | 8007 | Bidirectional SMS communication                         |
+
+### Platform Services
+
+| Service                  | Port | Description                                             |
+| ------------------------ | ---- | ------------------------------------------------------- |
+| **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens                      |
 | **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
-| **Config Service** | 8000 | Centralized configuration management with encryption    |
+| **Rate Limiter**   | 8008 | Advanced rate limiting and throttling                   |
+| **Health Service** | 8009 | Service health monitoring and checks                    |
+| **Logging Service**| 8010 | Centralized logging and audit trails                   |
+| **Monitoring**     | 8011 | Metrics collection and alerting                         |
 
 ### Platform Services
 
@@ -317,6 +331,38 @@ Comprehensive user activity tracking with structured JSON logging:
 - **PostgreSQL**: Primary data storage
 - **Redis**: Session and token caching (via API Gateway)
 
+## 🔐 Auth Service Features
+
+### Core Capabilities
+
+- **OAuth2 Authorization Server**: Full OAuth2 authorization code flow
+- **JWT Token Management**: Secure token generation, validation, and refresh
+- **User Management**: Registration, authentication, and profile management
+- **Integration with Identity Services**: Connects to dedicated NIN/BVN sandbox services
+- **OpenID Connect**: Discovery endpoints and JWKS support
+- **Multi-login Support**: OAuth2 and JSON-based authentication
+
+### Database Schema
+
+- **Users Table**: User accounts with hashed passwords and profile data
+- **OAuth Clients**: Registered OAuth2 client applications
+- **OAuth Tokens**: Access tokens, refresh tokens, and authorization codes
+- **Alembic Migrations**: Database version control and schema management
+
+### Security Features
+- **Bcrypt Password Hashing**: Secure password storage
+- **JWT Signing**: Configurable secret keys and algorithms
+- **Identity Privacy**: NIN/BVN data hashing for privacy protection
+- **CORS Protection**: Configurable cross-origin policies
+- **Input Validation**: Pydantic models for request/response validation
+
+### Integration Points
+
+- **API Gateway**: Token validation for all platform services
+- **NIN/BVN Services**: Dedicated sandbox services for identity verification
+- **PostgreSQL**: Primary data storage
+- **Redis**: Session and token caching (via API Gateway)
+
 ## 🔒 Security
 
 ### Authentication Flow
@@ -390,7 +436,7 @@ Sensitive configuration values are automatically encrypted:
 
 The platform uses a centralized YAML configuration system for better maintainability:
 
-```
+```plain text
 config.yaml                    # Base configuration for all services
 config/environments/
 ├── development.yaml          # Development overrides
@@ -596,6 +642,13 @@ GET /api/v1/services/health
 - **BVN Service**: Bank Verification Number validation
 - **SMS Service**: Nigerian SMS messaging and notifications
 - **AI Service**: Content generation and data analysis
+
+### Service-Specific Documentation
+
+- **Auth Service**: OAuth2 flows, identity verification, JWT management
+- **API Gateway**: Request routing, rate limiting, circuit breaking
+- **Config Service**: Encrypted configuration, versioning, environment management
+- **Sandbox Services**: AI, SMS, IVR, NIN, BVN, Two-Way SMS capabilities
 
 ## 🐛 Troubleshooting
 
