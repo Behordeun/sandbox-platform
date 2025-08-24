@@ -32,7 +32,7 @@ class UserUpdate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    identifier: str  # Can be email or username
     password: str
 
 
