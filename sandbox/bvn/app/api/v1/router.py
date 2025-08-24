@@ -11,7 +11,7 @@ async def verify_bvn(verification_request: BVNVerificationRequest) -> Any:
     """Verify BVN using Doja API."""
     try:
         result = await verify_bvn_with_doja(verification_request.bvn)
-        
+
         return BVNVerificationResponse(
             bvn_verified=result["success"],
             verification_data=result["data"] if result["success"] else None,
@@ -33,7 +33,7 @@ async def lookup_bvn_basic(verification_request: BVNVerificationRequest) -> Any:
     try:
         # For basic lookup, we can use the same verification but with different messaging
         result = await verify_bvn_with_doja(verification_request.bvn)
-        
+
         return BVNVerificationResponse(
             bvn_verified=result["success"],
             verification_data=result["data"] if result["success"] else None,
