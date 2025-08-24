@@ -3,17 +3,14 @@
 # Declare variables to be passed into your templates.
 
 replicaCount: 2
-
 image:
   repository: sandbox-config-service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "1.0.0"
-
 imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
-
 serviceAccount:
   # Specifies whether a service account should be created
   create: true
@@ -22,35 +19,30 @@ serviceAccount:
   # The name of the service account to use.
   # If not set and create is true, a name is generated using the fullname template
   name: ""
-
 podAnnotations: {}
-
 podSecurityContext:
   fsGroup: 2000
   runAsNonRoot: true
   runAsUser: 1000
-
 securityContext:
   allowPrivilegeEscalation: false
   capabilities:
     drop:
-    - ALL
+      - ALL
   readOnlyRootFilesystem: true
   runAsNonRoot: true
   runAsUser: 1000
-
 service:
   type: ClusterIP
   port: 8000
   targetPort: 8000
-
 ingress:
   enabled: false
   className: ""
   annotations: {}
-    # kubernetes.io/ingress.class: nginx
-    # kubernetes.io/tls-acme: "true"
-    # cert-manager.io/cluster-issuer: letsencrypt-prod
+  # kubernetes.io/ingress.class: nginx
+  # kubernetes.io/tls-acme: "true"
+  # cert-manager.io/cluster-issuer: letsencrypt-prod
   hosts:
     - host: config-service.local
       paths:
@@ -60,7 +52,6 @@ ingress:
   #  - secretName: config-service-tls
   #    hosts:
   #      - config-service.local
-
 resources:
   limits:
     cpu: 500m
@@ -68,25 +59,19 @@ resources:
   requests:
     cpu: 250m
     memory: 256Mi
-
 autoscaling:
   enabled: false
   minReplicas: 2
   maxReplicas: 5
   targetCPUUtilizationPercentage: 70
   targetMemoryUtilizationPercentage: 80
-
 nodeSelector: {}
-
 tolerations: []
-
 affinity: {}
-
 # Pod Disruption Budget
 podDisruptionBudget:
   enabled: true
   minAvailable: 1
-
 # Environment variables
 env:
   - name: HOST
@@ -121,12 +106,10 @@ env:
     value: '["*"]'
   - name: DEBUG
     value: "false"
-
 # Secrets
 secrets:
   encryptionKey: "your-encryption-key-change-in-production"
   jwtSecretKey: "your-jwt-secret-key-change-in-production"
-
 # Health checks
 healthCheck:
   enabled: true
@@ -136,7 +119,6 @@ healthCheck:
   timeoutSeconds: 5
   failureThreshold: 3
   successThreshold: 1
-
 readinessCheck:
   enabled: true
   path: /health
@@ -145,7 +127,6 @@ readinessCheck:
   timeoutSeconds: 3
   failureThreshold: 3
   successThreshold: 1
-
 # Service Monitor for Prometheus
 serviceMonitor:
   enabled: false
@@ -154,27 +135,25 @@ serviceMonitor:
   scrapeTimeout: 10s
   path: /metrics
   labels: {}
-
 # Network Policy
 networkPolicy:
   enabled: false
   ingress:
     - from:
-      - podSelector:
-          matchLabels:
-            app.kubernetes.io/name: api-gateway
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: api-gateway
       ports:
-      - protocol: TCP
-        port: 8000
+        - protocol: TCP
+          port: 8000
   egress:
     - to:
-      - podSelector:
-          matchLabels:
-            app.kubernetes.io/name: redis
+        - podSelector:
+            matchLabels:
+              app.kubernetes.io/name: redis
       ports:
-      - protocol: TCP
-        port: 6379
-
+        - protocol: TCP
+          port: 6379
 # Persistent Volume for file storage (when using file storage backend)
 persistence:
   enabled: false
@@ -182,22 +161,18 @@ persistence:
   accessMode: ReadWriteOnce
   size: 1Gi
   mountPath: /app/configs
-
 # Volume mounts for temporary files
 volumeMounts:
   - name: tmp
     mountPath: /tmp
   - name: var-cache
     mountPath: /var/cache
-
 volumes:
   - name: tmp
     emptyDir: {}
   - name: var-cache
     emptyDir: {}
-
 # Configuration for file storage backend
 fileStorage:
   enabled: false
   path: /app/configs
-
