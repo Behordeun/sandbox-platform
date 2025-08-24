@@ -19,56 +19,64 @@ A FastAPI-based authentication and authorization service designed for the Sandbo
 ### Local Development
 
 1. **Clone and setup**:
-   ```bash
-   cd auth-service
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+
+```bash
+cd auth-service
+cp .env.example .env
+# Edit .env with your configuration
+```
 
 2. **Install dependencies**:
-   ```bash
-   pip install -r requirements.txt
-   ```
+
+```bash
+pip install -r requirements.txt
+```
 
 3. **Run the service**:
+
    ```bash
    uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
    ```
 
 4. **Access the API**:
-   - API Documentation: http://localhost:8000/docs
-   - Health Check: http://localhost:8000/health
-   - OpenID Configuration: http://localhost:8000/.well-known/openid_configuration
+
+   - API Documentation: [http://localhost:8000/docs](http://localhost:8000/docs)
+   - Health Check: [http://localhost:8000/health](http://localhost:8000/health)
+   - OpenID Configuration: [http://localhost:8000/.well-known/openid_configuration](http://localhost:8000/.well-known/openid_configuration)
 
 ### Docker Deployment
 
 1. **Build the image**:
-   ```bash
-   docker build -t your-dockerhub-username/sandbox-auth-service:1.0.0 .
-   ```
+
+```bash
+docker build -t your-dockerhub-username/sandbox-auth-service:1.0.0 .
+```
 
 2. **Run with Docker**:
-   ```bash
-   docker run -p 8000:8000 \
-     -e DATABASE_URL="postgresql://user:pass@host:5432/db" \
-     -e JWT_SECRET_KEY="your-secret-key" \
-     your-dockerhub-username/sandbox-auth-service:1.0.0
-   ```
+
+```bash
+docker run -p 8000:8000 \
+   -e DATABASE_URL="postgresql://user:pass@host:5432/db" \
+   -e JWT_SECRET_KEY="your-secret-key" \
+   your-dockerhub-username/sandbox-auth-service:1.0.0
+```
 
 ### Kubernetes Deployment
 
 1. **Install with Helm**:
-   ```bash
-   cd helm/auth-service
-   helm install auth-service . \
-     --set secrets.jwtSecretKey="your-secure-jwt-secret" \
-     --set ingress.enabled=true \
-     --set ingress.hosts[0].host=auth.yourdomain.com
-   ```
+
+```bash
+cd helm/auth-service
+helm install auth-service . \
+   --set secrets.jwtSecretKey="your-secure-jwt-secret" \
+   --set ingress.enabled=true \
+   --set ingress.hosts[0].host=auth.yourdomain.com
+```
 
 ## API Endpoints
 
 ### Authentication
+
 - `POST /api/v1/auth/register` - User registration
 - `POST /api/v1/auth/login` - User login (OAuth2 compatible)
 - `POST /api/v1/auth/login/json` - User login (JSON payload)
@@ -76,16 +84,19 @@ A FastAPI-based authentication and authorization service designed for the Sandbo
 - `GET /api/v1/auth/me` - Get current user
 
 ### OAuth2
+
 - `GET /api/v1/oauth2/authorize` - OAuth2 authorization endpoint
 - `POST /api/v1/oauth2/token` - OAuth2 token endpoint
 - `POST /api/v1/oauth2/clients` - Create OAuth2 client
 - `GET /api/v1/oauth2/clients/{client_id}` - Get OAuth2 client
 
 ### Identity Verification
+
 - `POST /api/v1/identity/verify-nin-bvn` - Verify NIN/BVN
 - `GET /api/v1/identity/verification-status` - Get verification status
 
 ### System
+
 - `GET /health` - Health check
 - `GET /.well-known/openid_configuration` - OpenID Connect discovery
 - `GET /.well-known/jwks.json` - JSON Web Key Set
@@ -126,7 +137,7 @@ Database migrations are handled by Alembic (setup in `alembic/` directory).
 
 ### Project Structure
 
-```
+```plain text
 app/
 ├── api/v1/           # API endpoints
 ├── core/             # Core utilities (config, security, database)
@@ -161,10 +172,11 @@ mypy app/
 ### Docker Hub
 
 1. **Build and push**:
-   ```bash
-   docker build -t your-dockerhub-username/sandbox-auth-service:1.0.0 .
-   docker push your-dockerhub-username/sandbox-auth-service:1.0.0
-   ```
+
+```bash
+docker build -t your-dockerhub-username/sandbox-auth-service:1.0.0 .
+docker push your-dockerhub-username/sandbox-auth-service:1.0.0
+```
 
 ### Kubernetes
 
@@ -209,7 +221,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## Support
 
 For support and questions:
+
 - Create an issue in the repository
 - Contact the Sandbox Platform team
 - Check the API documentation at `/docs`
-
