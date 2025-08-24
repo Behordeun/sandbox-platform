@@ -33,7 +33,7 @@ build
 *.coverage.json
 *.coverage.html
 *.coverage.txt
-
+logs/
 
 #Ignore vscode AI rules
 .github/copilot-instructions.md
