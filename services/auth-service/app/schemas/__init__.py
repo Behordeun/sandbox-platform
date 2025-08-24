@@ -1,4 +1,3 @@
-from .nin_bvn import NINBVNVerificationRequest, NINBVNVerificationResponse
 from .oauth import (
     AuthorizeRequest,
     AuthorizeResponse,
@@ -20,6 +19,4 @@ __all__ = [
     "TokenResponse",
     "AuthorizeRequest",
     "AuthorizeResponse",
-    "NINBVNVerificationRequest",
-    "NINBVNVerificationResponse",
 ]
