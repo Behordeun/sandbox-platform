@@ -37,6 +37,14 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
+    # Email settings
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_username: Optional[str] = None
+    smtp_password: Optional[str] = None
+    smtp_from_email: str = "noreply@dpi-sandbox.ng"
+    smtp_from_name: str = "DPI Sandbox Platform"
+
     # Logging settings
     log_level: str = "info"
     log_format: str = "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
