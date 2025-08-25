@@ -2,38 +2,39 @@
 
 A modular, cloud-native platform designed for Nigerian startups to rapidly prototype and deploy applications. Built with FastAPI microservices, Docker containerization, and Kubernetes orchestration following the DIGIT-Core architecture pattern.
 
-## 🚀 Quick Start
+## 🚀 Quick Start for Nigerian DPI Developers
 
 ### Prerequisites
 
-- Docker Desktop with Kubernetes enabled
-- kubectl and Helm 3.8+
-- Python 3.11+ (for local development)
+- Docker Desktop (for infrastructure)
+- Python 3.11+ 
+- Git
 
-### Local Development
+### One-Command Setup
 
 ```bash
 # Clone the repository
 git clone https://github.com/Behordeun/sandbox-platform.git
-
 cd sandbox-platform
 
-# Start infrastructure services
-docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis mongo
+# Start everything with one command
+./sandbox-start.sh
 
-# Start platform services (in separate terminals)
-cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-cd config && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
-cd services/api-gateway && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8080
+# Verify DPI services are ready
+./check-services.sh
+```
 
-# Start sandbox services
-cd sandbox/ai && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8002
-cd sandbox/sms && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8003
-cd sandbox/nin && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8005
-cd sandbox/bvn && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8006
+### Test Your Setup
 
-# Verify setup
-curl http://localhost:8080/health
+```bash
+# Generate Nigerian test data
+python mock-data.py
+
+# Test DPI APIs
+./test-dpi-apis.sh
+
+# Access API documentation
+open http://localhost:8080/docs
 ```
 
 ### Production Deployment
@@ -114,25 +115,42 @@ sandbox-platform/
 └── .env.example
 ```
 
-## 🔧 Development
+## 🔧 Development for Nigerian DPI
 
-### Service Development
+### Nigerian Data Formats
 
-Each service is independently developed and deployed:
+- **Phone Numbers**: `+234XXXXXXXXXX` or `0XXXXXXXXXX`
+- **NIN**: 11-digit National Identity Number
+- **BVN**: 11-digit Bank Verification Number
+
+### Quick Development Commands
+
+```bash
+# Start all services
+./sandbox-start.sh
+
+# Check service health
+./check-services.sh
+
+# Test APIs with Nigerian examples
+./test-dpi-apis.sh
+
+# Generate mock Nigerian data
+python mock-data.py
+```
+
+### Individual Service Development
 
 ```bash
 # Platform Services
 cd services/auth-service && uvicorn app.main:app --reload --port 8000
 cd services/api-gateway && uvicorn app.main:app --reload --port 8080
-cd config && uvicorn app.main:app --reload --port 8001
 
-# Sandbox Services
-cd sandbox/ai && uvicorn app.main:app --reload --port 8002
-cd sandbox/sms && uvicorn app.main:app --reload --port 8003
-cd sandbox/ivr && uvicorn app.main:app --reload --port 8004
+# DPI Sandbox Services
 cd sandbox/nin && uvicorn app.main:app --reload --port 8005
 cd sandbox/bvn && uvicorn app.main:app --reload --port 8006
-cd sandbox/two-way-sms && uvicorn app.main:app --reload --port 8007
+cd sandbox/sms && uvicorn app.main:app --reload --port 8003
+cd sandbox/ai && uvicorn app.main:app --reload --port 8002
 ```
 
 ### Docker Development
@@ -188,9 +206,17 @@ helm install api-gateway ./services/api-gateway/helm/api-gateway
 
 ### Health Checks
 
-- Auth Service: `http://localhost:8000/health`
-- API Gateway: `http://localhost:8080/health`
-- Config Service: `http://localhost:8001/health`
+```bash
+# Check all DPI services at once
+./check-services.sh
+
+# Or check individual services
+curl http://localhost:8080/api/v1/dpi/health  # DPI services overview
+curl http://localhost:8000/health             # Auth service
+curl http://localhost:8005/health             # NIN service
+curl http://localhost:8006/health             # BVN service
+curl http://localhost:8003/health             # SMS service
+```
 
 ### Metrics
 
@@ -266,28 +292,30 @@ Structured JSON logging with correlation IDs:
 4. **Status Tracking**: Monitor verification status via respective service endpoints
 5. **Enhanced Access**: Verified users receive additional platform privileges
 
-### NIN/BVN Verification
+### Nigerian Identity Verification
 
 ```bash
-# Verify NIN (Full verification with Dojah API)
+# Get examples and test data
+curl http://localhost:8080/api/v1/examples/nin
+curl http://localhost:8080/api/v1/examples/sms
+
+# Verify NIN with authentication
 curl -X POST http://localhost:8080/api/v1/nin/verify \
+  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"nin": "12345678901"}'
 
-# Basic NIN lookup
-curl -X POST http://localhost:8080/api/v1/nin/lookup \
-  -H "Content-Type: application/json" \
-  -d '{"nin": "12345678901"}'
-
-# Verify BVN (Full verification with Dojah API)
+# Verify BVN with authentication
 curl -X POST http://localhost:8080/api/v1/bvn/verify \
+  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
 
-# Basic BVN lookup
-curl -X POST http://localhost:8080/api/v1/bvn/lookup \
+# Send SMS to Nigerian number
+curl -X POST http://localhost:8080/api/v1/sms/send \
+  -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"bvn": "12345678901"}'
+  -d '{"to": "+2348012345678", "message": "Your OTP is 123456"}'
 ```
 
 ### Configuration Encryption
@@ -482,17 +510,25 @@ GET /api/v1/services/health
 
 ## 📖 Documentation
 
+### Quick Reference for Nigerian Developers
+- [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
+- [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
+- [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
+- [Service Health Checker](check-services.sh) - Monitor all services
+
+### Detailed Documentation
 - [Deployment Guide](deployment/README.md) - Comprehensive deployment instructions
-- [Auth Service](services/auth-service/README.md) - OAuth2, JWT, and NIN/BVN verification
+- [Auth Service](services/auth-service/README.md) - OAuth2, JWT, and password management
 - [API Gateway](services/api-gateway/README.md) - Gateway configuration and usage
-- [Config Service](config/README.md) - Centralized configuration management
-- [Architecture Design](docs/architecture.md) - System architecture overview
+- [Services Overview](services/README.md) - Platform services management
 
 ### Service-Specific Documentation
-- **Auth Service**: OAuth2 flows, identity verification, JWT management
-- **API Gateway**: Request routing, rate limiting, circuit breaking
-- **Config Service**: Encrypted configuration, versioning, environment management
-- **Sandbox Services**: AI, SMS, IVR, NIN, BVN, Two-Way SMS capabilities
+- **Auth Service**: OAuth2 flows, Nigerian phone validation, JWT management
+- **API Gateway**: Request routing, rate limiting, DPI health monitoring
+- **NIN Service**: Nigerian Identity Number verification via Doja API
+- **BVN Service**: Bank Verification Number validation
+- **SMS Service**: Nigerian SMS messaging and notifications
+- **AI Service**: Content generation and data analysis
 
 ## 🐛 Troubleshooting
 

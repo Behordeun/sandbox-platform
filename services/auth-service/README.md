@@ -4,16 +4,19 @@ A FastAPI-based authentication and authorization service for the Sandbox Platfor
 
 ## Features
 
+- **Nigerian Phone Validation**: Automatic validation and formatting of +234 numbers
 - **Dynamic JWT Tokens**: Cryptographically secure tokens with unique identifiers (JTI)
 - **Token Blacklist System**: Token revocation and logout capabilities
+- **Password Reset**: Secure token-based password reset functionality
 - **Enhanced Security**: Audience/issuer validation, comprehensive claim checking
 - **Flexible Authentication**: Login with email or username
 - **OAuth2 Support**: Full OAuth2 authorization code flow implementation
 - **User Management**: Registration, authentication, and profile management
+- **Audit Logging**: Security event logging for compliance
+- **Standardized Responses**: Consistent API responses with helpful error messages
 - **SQLite Development**: Easy local development with SQLite database
 - **Docker Support**: Containerized deployment ready
 - **Kubernetes Ready**: Helm charts for production deployment
-- **Health Checks**: Built-in monitoring endpoints
 
 ## Quick Start
 
@@ -78,13 +81,15 @@ helm install auth-service . \
 
 ### Authentication
 
-- `POST /api/v1/auth/register` - User registration
+- `POST /api/v1/auth/register` - User registration with Nigerian phone validation
 - `POST /api/v1/auth/login` - OAuth2 compatible login (email/username)
 - `POST /api/v1/auth/login/json` - JSON login (email/username)
 - `GET /api/v1/auth/userinfo` - Get user information
 - `GET /api/v1/auth/me` - Get current user
 - `POST /api/v1/auth/logout` - Logout and blacklist token
 - `POST /api/v1/auth/revoke-token` - Revoke specific token
+- `POST /api/v1/auth/password-reset/request` - Request password reset
+- `POST /api/v1/auth/password-reset/confirm` - Confirm password reset
 
 ### OAuth2
 
