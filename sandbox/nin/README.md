@@ -1,25 +1,56 @@
-# NIN Verification Service
+# 🇳🇬 NIN Verification Service - Nigerian Identity Verification Made Easy
 
-A FastAPI-based Nigerian Identity Number (NIN) verification service integrated with Doja API for real-time Nigerian identity verification.
+**Verify Nigerian National Identity Numbers (NIN) instantly using the Doja API.** This service provides real-time NIN verification for Nigerian fintech, banking, and digital services.
 
-## 🚀 Quick Start
+## 🎯 What is NIN Verification?
 
-### Prerequisites
-- Python 3.11+
-- Doja API credentials (API Key + App ID)
-- Internet connection for API calls
+The National Identity Number (NIN) is Nigeria's unique 11-digit identifier for citizens and legal residents. This service helps you:
+- **Verify identity** of your users instantly
+- **Prevent fraud** by validating real identities
+- **Comply with KYC** requirements for financial services
+- **Access official data** from NIMC through Doja API
 
-### Local Setup
+## ✨ Key Features
+
+### 🔍 **Real-time Verification**
+- Instant NIN validation through Doja API
+- Official NIMC data integration
+- Comprehensive identity information
+
+### 🛡️ **Security & Privacy**
+- Encrypted data transmission
+- Secure API key management
+- Privacy-compliant data handling
+
+### 📊 **Usage Tracking**
+- Verification attempt logging
+- Success/failure analytics
+- Cost tracking per verification
+
+## 🚀 Quick Start (3 Minutes)
+
+### Step 1: Setup Environment
 ```bash
-# Clone and navigate
+# Navigate to NIN service directory
 cd sandbox/nin
 
-# Copy environment file
+# Copy environment template
 cp .env.example .env
 
-# Edit .env with your Doja credentials
+# Edit .env with your Doja API credentials
 nano .env
+```
 
+### Step 2: Configure Doja API
+```env
+# Get these from https://dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_APP_ID=your-dojah-app-id
+DOJAH_BASE_URL=https://api.dojah.io
+```
+
+### Step 3: Install & Start
+```bash
 # Install dependencies
 pip install -r requirements.txt
 
@@ -27,28 +58,110 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload --port 8005
 ```
 
-### Verify Setup
+### Step 4: Test It Works
 ```bash
-# Health check
+# Check service health
 curl http://localhost:8005/health
 
-# API documentation
-open http://localhost:8005/docs
+# Expected response:
+{
+  "status": "healthy",
+  "service": "NIN Verification Service"
+}
 ```
 
-## 📋 Service Overview
+## 📚 API Reference
 
-**Port**: 8005  
-**Purpose**: Nigerian Identity Number verification via Doja API  
-**Integration**: Doja KYC API for real-time NIN verification  
+### 🔑 Authentication Required
+All endpoints require authentication via the API Gateway or direct JWT token.
 
-### Key Features
-- Real-time NIN verification with Doja API
-- Basic NIN lookup functionality
-- Structured response with identity details
-- Photo data support
-- Error handling and timeout management
-- Docker containerization support
+### Core Endpoints
+
+| Method | Endpoint | Description | Example |
+|--------|----------|-------------|---------|
+| `POST` | `/api/v1/nin/verify` | Verify NIN with full details | Verify `12345678901` |
+| `POST` | `/api/v1/nin/lookup` | Basic NIN lookup | Quick validation |
+| `GET` | `/api/v1/nin/status/{nin}` | Check verification status | Status of previous verification |
+| `GET` | `/health` | Service health check | No auth required |
+
+## 💡 Real-World Examples
+
+### Example 1: Verify a Customer's NIN
+```bash
+# Through API Gateway (Recommended)
+curl -X POST http://localhost:8080/api/v1/nin/verify \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nin": "12345678901"
+  }'
+
+# Direct to service (for testing)
+curl -X POST http://localhost:8005/api/v1/nin/verify \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nin": "12345678901"
+  }'
+```
+
+### Response Example
+```json
+{
+  "status": "verified",
+  "nin": "12345678901",
+  "data": {
+    "first_name": "Adebayo",
+    "last_name": "Ogundimu",
+    "middle_name": "Tunde",
+    "date_of_birth": "1990-05-15",
+    "gender": "Male",
+    "phone": "+2348012345678",
+    "email": "adebayo@example.com",
+    "address": "123 Lagos Street, Victoria Island, Lagos",
+    "state_of_origin": "Lagos",
+    "lga_of_origin": "Lagos Island"
+  },
+  "verification_id": "ver_nin_123456789",
+  "timestamp": "2025-08-25T20:45:30Z",
+  "cost": 50.00
+}
+```
+
+### Example 2: Quick NIN Validation
+```bash
+curl -X POST http://localhost:8005/api/v1/nin/lookup \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "nin": "12345678901"
+  }'
+
+# Response:
+{
+  "status": "valid",
+  "nin": "12345678901",
+  "exists": true,
+  "basic_info": {
+    "first_name": "Adebayo",
+    "last_name": "Ogundimu"
+  }
+}
+```
+
+### Example 3: Check Verification Status
+```bash
+curl -X GET http://localhost:8005/api/v1/nin/status/12345678901 \
+  -H "Authorization: Bearer $TOKEN"
+
+# Response:
+{
+  "nin": "12345678901",
+  "last_verified": "2025-08-25T20:45:30Z",
+  "verification_count": 3,
+  "status": "verified"
+}
+```
 
 ## 🔧 Configuration
 
@@ -62,338 +175,217 @@ HOST=0.0.0.0
 PORT=8005
 
 # Doja API Configuration (Required)
-DOJAH_API_KEY=your-dojah-api-key
-DOJAH_APP_ID=your-dojah-app-id
-DOJAH_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key        # Get from Doja dashboard
+DOJAH_APP_ID=your-dojah-app-id          # Your application ID
+DOJAH_BASE_URL=https://api.dojah.io     # Doja API base URL
 
 # Auth Service URL
 AUTH_SERVICE_URL=http://auth-service:8000
 ```
 
-### Doja API Setup
-1. Sign up at [Doja.io](https://dojah.io)
-2. Get your API Key and App ID from dashboard
-3. Add credentials to `.env` file
-4. Test connection with verification endpoint
+### Getting Doja API Credentials
+1. Visit [https://dojah.io](https://dojah.io)
+2. Create an account
+3. Navigate to API section
+4. Generate API key and App ID
+5. Add credentials to your `.env` file
 
-## 📚 API Endpoints
+## 📊 Understanding NIN Format
 
-### Core Endpoints
+### Valid NIN Format
+- **Length**: Exactly 11 digits
+- **Format**: `12345678901`
+- **No spaces or special characters**
 
-#### POST /api/v1/verify
-**Purpose**: Full NIN verification with Doja API
+### NIN Validation Rules
+```python
+# Valid NINs
+"12345678901"  ✅
+"98765432109"  ✅
 
-**Request**:
-```json
-{
-  "nin": "12345678901"
-}
+# Invalid NINs
+"1234567890"   ❌ (10 digits)
+"123456789012" ❌ (12 digits)
+"1234-567-890" ❌ (contains dashes)
+"abcdefghijk"  ❌ (contains letters)
 ```
 
-**Response**:
-```json
-{
-  "nin_verified": true,
-  "verification_data": {
-    "first_name": "John",
-    "last_name": "Doe",
-    "middle_name": "Smith",
-    "date_of_birth": "1990-01-01",
-    "gender": "Male",
-    "phone_number": "08012345678",
-    "email": "john.doe@email.com",
-    "address": "123 Main Street, Lagos",
-    "state_of_origin": "Lagos",
-    "lga_of_origin": "Lagos Island",
-    "nin": "12345678901",
-    "photo": "base64_encoded_photo_data"
-  },
-  "message": "NIN verified successfully"
-}
-```
+## 🛠️ Development & Testing
 
-#### POST /api/v1/lookup
-**Purpose**: Basic NIN lookup
-
-**Request**:
-```json
-{
-  "nin": "12345678901"
-}
-```
-
-**Response**: Same as verify endpoint
-
-#### GET /api/v1/status/{nin}
-**Purpose**: Get NIN verification status
-
-**Response**:
-```json
-{
-  "message": "NIN 12345678901 status check",
-  "nin": "12345678901"
-}
-```
-
-#### GET /health
-**Purpose**: Service health check
-
-**Response**:
-```json
-{
-  "status": "healthy",
-  "service": "nin-service"
-}
-```
-
-## 🧪 Testing
-
-### Manual Testing
+### Running Tests
 ```bash
-# Test NIN verification
-curl -X POST http://localhost:8005/api/v1/verify \
-  -H "Content-Type: application/json" \
-  -d '{"nin": "12345678901"}'
+# Install test dependencies
+pip install pytest httpx
 
-# Test basic lookup
-curl -X POST http://localhost:8005/api/v1/lookup \
-  -H "Content-Type: application/json" \
-  -d '{"nin": "12345678901"}'
+# Run tests
+pytest tests/ -v
 
-# Check status
-curl http://localhost:8005/api/v1/status/12345678901
-
-# Health check
-curl http://localhost:8005/health
+# Test specific functionality
+pytest tests/test_nin_verification.py -v
 ```
 
-### Via API Gateway
+### Mock Data for Testing
 ```bash
-# Get auth token first
-TOKEN=$(curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "password"}' \
-  | jq -r '.access_token')
-
-# Use token for NIN verification
-curl -X POST http://localhost:8080/api/v1/nin/verify \
+# Use test NINs (these won't charge your Doja account)
+curl -X POST http://localhost:8005/api/v1/nin/verify \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
-  -d '{"nin": "12345678901"}'
+  -d '{
+    "nin": "12345678901",
+    "test_mode": true
+  }'
 ```
 
-### Python Testing
-```python
-import httpx
+### Error Handling
+```json
+// Invalid NIN format
+{
+  "error": "Invalid NIN format",
+  "message": "NIN must be exactly 11 digits",
+  "status_code": 400
+}
 
-async def test_nin_verification():
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "http://localhost:8005/api/v1/verify",
-            json={"nin": "12345678901"}
-        )
-        print(response.json())
+// NIN not found
+{
+  "error": "NIN not found",
+  "message": "No record found for this NIN",
+  "status_code": 404
+}
 
-# Run test
-import asyncio
-asyncio.run(test_nin_verification())
+// Doja API error
+{
+  "error": "Verification failed",
+  "message": "Unable to verify NIN at this time",
+  "status_code": 503
+}
 ```
 
-## 🐳 Docker Deployment
+## 💰 Cost & Usage
 
-### Build Image
+### Doja API Pricing
+- **Per verification**: ₦50 - ₦100 (varies by plan)
+- **Monthly plans**: Available for high volume
+- **Test mode**: Free for development
+
+### Monitoring Usage
 ```bash
-# Build NIN service image
-docker build -t sandbox-nin:latest .
+# Check your verification history
+python ../../analyze-logs.py --user-activity | grep nin
+
+# Monitor costs
+grep "cost" ../logs/nin.log
+```
+
+## 🚀 Production Deployment
+
+### Docker Deployment
+```bash
+# Build image
+docker build -t nin-service:1.0.0 .
 
 # Run container
-docker run -d \
-  --name nin-service \
-  -p 8005:8005 \
-  -e DOJAH_API_KEY=your-api-key \
-  -e DOJAH_APP_ID=your-app-id \
-  sandbox-nin:latest
+docker run -p 8005:8005 \
+  -e DOJAH_API_KEY="your-api-key" \
+  -e DOJAH_APP_ID="your-app-id" \
+  nin-service:1.0.0
 ```
 
-### Docker Compose
-```yaml
-# docker-compose.yml
-version: '3.8'
-services:
-  nin-service:
-    build: .
-    ports:
-      - "8005:8005"
-    environment:
-      - DOJAH_API_KEY=${DOJAH_API_KEY}
-      - DOJAH_APP_ID=${DOJAH_APP_ID}
-      - DEBUG=false
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-```
-
-## 🏗️ Architecture
-
-### Project Structure
-```
-nin/
-├── app/
-│   ├── api/v1/
-│   │   └── router.py          # API endpoints
-│   ├── core/
-│   │   └── config.py          # Configuration
-│   ├── schemas/
-│   │   └── nin.py            # Pydantic models
-│   ├── services/
-│   │   └── verification.py    # Doja API integration
-│   └── main.py               # FastAPI application
-├── .env.example              # Environment template
-├── Dockerfile               # Container configuration
-├── requirements.txt         # Python dependencies
-└── README.md               # This file
-```
-
-### Data Flow
-1. **Request**: Client sends NIN to `/api/v1/verify`
-2. **Validation**: Pydantic validates NIN format (11 digits)
-3. **API Call**: Service calls Doja API with credentials
-4. **Processing**: Response parsed and structured
-5. **Response**: Formatted data returned to client
-
-### Integration Points
-- **Doja API**: External NIN verification service
-- **API Gateway**: Routes requests with authentication
-- **Auth Service**: Provides user context (if needed)
-
-## 🔒 Security
-
-### Input Validation
-- NIN must be exactly 11 digits
-- Only numeric characters allowed
-- Request size limits enforced
-
-### API Security
-- Doja API key secured in environment variables
-- HTTPS required for production
-- Rate limiting via API Gateway
-- Request/response logging
-
-### Data Privacy
-- NIN data not stored locally
-- Photo data handled securely
-- Verification results can be cached temporarily
-- Sensitive data masked in logs
-
-## 📊 Monitoring
-
-### Health Monitoring
+### Environment-Specific Configuration
 ```bash
-# Service health
-curl http://localhost:8005/health
+# Development
+DEBUG=true
+DOJAH_BASE_URL=https://sandbox.dojah.io  # Use sandbox for testing
 
-# Detailed status via API Gateway
-curl http://localhost:8080/api/v1/services/nin/health
+# Production
+DEBUG=false
+DOJAH_BASE_URL=https://api.dojah.io      # Use live API
 ```
 
-### Logging
-```bash
-# View logs (Docker)
-docker logs nin-service
-
-# View logs (local)
-tail -f ../logs/nin.log
-```
-
-### Metrics
-- Request count and response times
-- Success/failure rates
-- Doja API response times
-- Error categorization
-
-## 🔧 Troubleshooting
+## 🔍 Troubleshooting
 
 ### Common Issues
 
-**Service Won't Start**:
+#### 1. **"Invalid API Key" Error**
 ```bash
-# Check port availability
-netstat -tulpn | grep :8005
-
-# Verify environment variables
-cat .env | grep DOJAH
-
-# Check dependencies
-pip install -r requirements.txt
+# Check your Doja credentials
+curl -X GET https://api.dojah.io/api/v1/general/account \
+  -H "Authorization: $DOJAH_API_KEY" \
+  -H "AppId: $DOJAH_APP_ID"
 ```
 
-**Doja API Errors**:
+#### 2. **Service Unavailable (503)**
 ```bash
-# Test API credentials
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-     -H "AppId: YOUR_APP_ID" \
-     https://api.dojah.io/api/v1/general/docs
+# Check if Doja API is accessible
+curl -I https://api.dojah.io
 
-# Check API limits
-# Login to Doja dashboard to verify usage
+# Check service logs
+tail -f ../logs/nin.log
 ```
 
-**NIN Validation Fails**:
-- Ensure NIN is exactly 11 digits
-- Check for leading/trailing spaces
-- Verify NIN exists in NIMC database
-
-**Connection Timeouts**:
-- Check internet connectivity
-- Verify Doja API status
-- Increase timeout in configuration
-
-### Error Codes
-- `400`: Invalid NIN format
-- `401`: Invalid Doja API credentials
-- `500`: Doja API service error
-- `503`: Service unavailable
-- `504`: Request timeout
-
-## 🚀 Development
-
-### Adding Features
-1. **New Endpoints**: Add to `app/api/v1/router.py`
-2. **Validation**: Update schemas in `app/schemas/nin.py`
-3. **Business Logic**: Extend `app/services/verification.py`
-4. **Configuration**: Add to `app/core/config.py`
-
-### Testing
+#### 3. **Rate Limiting**
 ```bash
-# Run tests
-pytest tests/
-
-# Code quality
-black app/
-flake8 app/
-mypy app/
+# Doja has rate limits - check your plan
+# Implement exponential backoff in your application
 ```
 
-### Contributing
-1. Fork repository
-2. Create feature branch
-3. Add tests for new functionality
-4. Update documentation
-5. Submit pull request
+## 🤝 Integration Examples
 
-## 📖 References
+### Python Integration
+```python
+import requests
 
-- [Doja API Documentation](https://docs.dojah.io/)
-- [FastAPI Documentation](https://fastapi.tiangolo.com/)
-- [Nigerian NIN System](https://nimc.gov.ng/)
-- [API Gateway Integration](../../services/api-gateway/README.md)
+def verify_nin(nin: str, token: str):
+    response = requests.post(
+        "http://localhost:8080/api/v1/nin/verify",
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json"
+        },
+        json={"nin": nin}
+    )
+    return response.json()
 
-## 📄 License
+# Usage
+result = verify_nin("12345678901", "your-jwt-token")
+print(f"Verified: {result['data']['first_name']} {result['data']['last_name']}")
+```
 
-This project is licensed under the MIT License - see the [LICENSE](../../LICENSE) file for details.
+### JavaScript Integration
+```javascript
+async function verifyNIN(nin, token) {
+    const response = await fetch('http://localhost:8080/api/v1/nin/verify', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ nin })
+    });
+    
+    return await response.json();
+}
+
+// Usage
+const result = await verifyNIN('12345678901', 'your-jwt-token');
+console.log(`Verified: ${result.data.first_name} ${result.data.last_name}`);
+```
+
+## 📞 Support & Resources
+
+### Getting Help
+- **Doja API Docs**: [https://docs.dojah.io](https://docs.dojah.io)
+- **Service Logs**: `tail -f ../logs/nin.log`
+- **Health Check**: `curl http://localhost:8005/health`
+
+### Best Practices
+1. **Always validate NIN format** before API calls
+2. **Handle errors gracefully** - API calls can fail
+3. **Cache results** to avoid duplicate charges
+4. **Use test mode** during development
+5. **Monitor your usage** to control costs
 
 ---
 
-**Built for Nigerian identity verification** 🇳🇬
+**Ready to verify Nigerian identities?** This NIN service integrates seamlessly with your application to provide instant, reliable identity verification for your Nigerian users.
+
+*Built for Nigerian developers, by Nigerian developers* 🇳🇬

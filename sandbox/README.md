@@ -1,358 +1,258 @@
-# Sandbox Services
+# 🇳🇬 Sandbox Services - Nigerian Digital Public Infrastructure
 
-The sandbox directory contains the core business offerings of the Sandbox Platform - specialized microservices designed for Nigerian startups to rapidly prototype and deploy applications.
+**The complete suite of Nigerian DPI services for developers and startups.** Everything you need to build world-class digital services for the Nigerian market.
 
-## 🚀 Quick Start
+## 🎯 What are Sandbox Services?
 
-### Prerequisites
-- Python 3.11+
-- Docker (optional)
-- Doja API credentials (for NIN/BVN services)
+These are production-ready microservices that provide essential digital infrastructure capabilities for Nigerian businesses:
 
-### Start All Services
+- **Identity Verification** - NIN and BVN verification
+- **Communication** - SMS and voice services  
+- **Intelligence** - AI-powered content and analysis
+- **Data Storage** - Reliable database solutions
+
+## 🏗️ Service Architecture
+
+```
+┌─────────────────────────────────────────────────────────────┐
+│                    API Gateway (Port 8080)                  │
+│                 Single Entry Point for All Services         │
+└─────────────────────┬───────────────────────────────────────┘
+                      │
+        ┌─────────────┼─────────────┐
+        │             │             │
+┌───────▼──────┐ ┌────▼────┐ ┌─────▼─────┐
+│   Identity   │ │  Comms  │ │    AI     │
+│   Services   │ │Services │ │ Services  │
+└──────────────┘ └─────────┘ └───────────┘
+│              │ │         │ │           │
+│ NIN (8005)   │ │SMS(8003)│ │ AI (8002) │
+│ BVN (8006)   │ │IVR(8004)│ │           │
+│              │ │2Way(8007)│ │           │
+└──────────────┘ └─────────┘ └───────────┘
+```
+
+## 🚀 Quick Start (All Services)
+
+### Option 1: Start Everything at Once
 ```bash
-# From sandbox directory
+# From sandbox-platform root directory
+./sandbox-start.sh
+
+# This starts all services automatically:
+# - AI Service (8002)
+# - SMS Service (8003) 
+# - IVR Service (8004)
+# - NIN Service (8005)
+# - BVN Service (8006)
+# - Two-Way SMS (8007)
+```
+
+### Option 2: Start Individual Services
+```bash
+# Navigate to sandbox directory
+cd sandbox
+
+# Start specific services
 ./start-all.sh
 
-# Or individually
-cd ai && uvicorn app.main:app --reload --port 8002
-cd sms && uvicorn app.main:app --reload --port 8003
-cd ivr && uvicorn app.main:app --reload --port 8004
-cd nin && uvicorn app.main:app --reload --port 8005
-cd bvn && uvicorn app.main:app --reload --port 8006
-cd two-way-sms && uvicorn app.main:app --reload --port 8007
+# Or start individually
+cd nin && uvicorn app.main:app --port 8005 &
+cd bvn && uvicorn app.main:app --port 8006 &
+cd sms && uvicorn app.main:app --port 8003 &
 ```
 
-## 📋 Services Overview
-
-| Service | Port | Description | Status |
-|---------|------|-------------|--------|
-| **AI Service** | 8002 | Content generation & data analysis | ✅ Active |
-| **SMS Service** | 8003 | SMS messaging & notifications | ✅ Active |
-| **IVR Service** | 8004 | Interactive Voice Response | 🚧 Development |
-| **NIN Service** | 8005 | Nigerian Identity Number verification | ✅ Active |
-| **BVN Service** | 8006 | Bank Verification Number validation | ✅ Active |
-| **Two-Way SMS** | 8007 | Bidirectional SMS communication | 🚧 Development |
-
-## 🔧 Service Details
-
-### AI Service (Port 8002)
-**Purpose**: AI-powered content generation and data analysis
-
-**Endpoints**:
-- `POST /api/v1/generate` - Generate AI content
-- `POST /api/v1/analyze` - Analyze data with AI
-- `GET /health` - Health check
-
-**Setup**:
+### Verify All Services
 ```bash
-cd ai
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8002
+# Check all services health
+./check-services.sh
+
+# Or check through API Gateway
+curl http://localhost:8080/api/v1/services/health
 ```
 
-### SMS Service (Port 8003)
-**Purpose**: SMS messaging and notification system
+## 📋 Service Overview
 
-**Features**:
-- Send SMS messages
-- Delivery status tracking
-- Bulk messaging support
+| Service | Port | Purpose | Key Features |
+|---------|------|---------|--------------|
+| **🆔 NIN Service** | 8005 | Nigerian Identity Verification | Real-time NIN validation, NIMC integration |
+| **🏦 BVN Service** | 8006 | Banking Identity Verification | BVN validation, CBN compliance |
+| **📱 SMS Service** | 8003 | SMS Messaging | Multi-network SMS, OTP delivery |
+| **📞 IVR Service** | 8004 | Voice Response Systems | Interactive voice menus, Nigerian languages |
+| **💬 Two-Way SMS** | 8007 | Interactive SMS | Bidirectional SMS, automated workflows |
+| **🤖 AI Service** | 8002 | Content & Analysis | Nigerian-context AI, business intelligence |
 
-**Setup**: See [SMS Service README](sms/README.md)
+## 🔧 Configuration
 
-### IVR Service (Port 8004)
-**Purpose**: Interactive Voice Response system
+### Environment Setup
+Each service has its own `.env.example` file. Copy and configure:
 
-**Endpoints**:
-- `POST /api/v1/call` - Initiate IVR call
-- `GET /api/v1/menu` - Get IVR menu configuration
-
-**Setup**:
 ```bash
-cd ivr
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8004
+# For each service
+cd service-directory
+cp .env.example .env
+# Edit .env with your API keys and configuration
 ```
 
-### NIN Service (Port 8005)
-**Purpose**: Nigerian Identity Number verification via Doja API
-
-**Endpoints**:
-- `POST /api/v1/verify` - Full NIN verification
-- `POST /api/v1/lookup` - Basic NIN lookup
-- `GET /api/v1/status/{nin}` - Get verification status
-
-**Configuration**:
+### Common Configuration
 ```env
+# Doja API (for NIN/BVN services)
 DOJAH_API_KEY=your-dojah-api-key
 DOJAH_APP_ID=your-dojah-app-id
-DOJAH_BASE_URL=https://api.dojah.io
+
+# SMS Provider (for SMS services)
+SMS_API_KEY=your-sms-api-key
+SMS_SENDER_ID=YourBrand
+
+# AI Provider (for AI service)
+AI_API_KEY=your-ai-api-key
+AI_MODEL=gpt-3.5-turbo
 ```
 
-**Setup**:
+## 💡 Usage Examples
+
+### Complete User Onboarding Flow
 ```bash
-cd nin
-cp .env.example .env
-# Edit .env with your Doja credentials
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8005
-```
-
-### BVN Service (Port 8006)
-**Purpose**: Bank Verification Number validation via Doja API
-
-**Endpoints**:
-- `POST /api/v1/verify` - Full BVN verification
-- `POST /api/v1/lookup` - Basic BVN lookup
-- `GET /api/v1/status/{bvn}` - Get verification status
-
-**Configuration**:
-```env
-DOJAH_API_KEY=your-dojah-api-key
-DOJAH_APP_ID=your-dojah-app-id
-DOJAH_BASE_URL=https://api.dojah.io
-```
-
-**Setup**:
-```bash
-cd bvn
-cp .env.example .env
-# Edit .env with your Doja credentials
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8006
-```
-
-### Two-Way SMS Service (Port 8007)
-**Purpose**: Bidirectional SMS communication
-
-**Endpoints**:
-- `POST /api/v1/send` - Send SMS
-- `POST /api/v1/receive` - Receive SMS webhook
-
-**Setup**:
-```bash
-cd two-way-sms
-pip install -r requirements.txt
-uvicorn app.main:app --reload --port 8007
-```
-
-## 🗄️ Data Stores
-
-### PostgreSQL
-**Purpose**: Primary relational database for structured data
-
-**Configuration**:
-```bash
-# Located in data-stores/postgres/
-docker run -d \
-  --name sandbox-postgres \
-  -e POSTGRES_DB=sandbox_db \
-  -e POSTGRES_USER=sandbox_user \
-  -e POSTGRES_PASSWORD=sandbox_password \
-  -p 5432:5432 \
-  -v ./data-stores/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql \
-  postgres:14
-```
-
-### MongoDB
-**Purpose**: Document database for flexible schemas
-
-**Configuration**:
-```bash
-# Located in data-stores/mongo/
-docker run -d \
-  --name sandbox-mongo \
-  -e MONGO_INITDB_ROOT_USERNAME=sandbox_user \
-  -e MONGO_INITDB_ROOT_PASSWORD=sandbox_password \
-  -e MONGO_INITDB_DATABASE=sandbox_db \
-  -p 27017:27017 \
-  -v ./data-stores/mongo/init.js:/docker-entrypoint-initdb.d/init.js \
-  mongo:6
-```
-
-## 🐳 Docker Deployment
-
-### Build All Services
-```bash
-# Build individual services
-docker build -t sandbox-ai:latest ./ai
-docker build -t sandbox-nin:latest ./nin
-docker build -t sandbox-bvn:latest ./bvn
-
-# Or use the build script
-../deployment/scripts/build-images.sh -s sandbox
-```
-
-### Run with Docker Compose
-```bash
-# From project root
-docker-compose -f deployment/docker-compose/docker-compose.dev.yml up sandbox-services
-```
-
-## 🔐 Security & Authentication
-
-### API Access
-All sandbox services are accessed through the API Gateway with authentication:
-
-```bash
-# Get auth token first
-curl -X POST http://localhost:8080/api/v1/auth/login \
+# 1. Register user
+curl -X POST http://localhost:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "password": "password"}'
+  -d '{"email": "user@example.com", "phone": "+2348012345678", ...}'
 
-# Use token to access sandbox services
+# 2. Send OTP for verification
+curl -X POST http://localhost:8080/api/v1/sms/send \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{"to": "+2348012345678", "message": "Your OTP: 123456"}'
+
+# 3. Verify NIN
 curl -X POST http://localhost:8080/api/v1/nin/verify \
-  -H "Authorization: Bearer YOUR_TOKEN" \
-  -H "Content-Type: application/json" \
-  -d '{"nin": "12345678901"}'
-```
-
-### Environment Variables
-Each service requires specific environment variables. Copy `.env.example` to `.env` in each service directory and configure:
-
-**Common Variables**:
-```env
-DEBUG=false
-HOST=0.0.0.0
-PORT=8xxx
-```
-
-**Identity Services (NIN/BVN)**:
-```env
-DOJAH_API_KEY=your-dojah-api-key
-DOJAH_APP_ID=your-dojah-app-id
-DOJAH_BASE_URL=https://api.dojah.io
-```
-
-## 🧪 Testing
-
-### Health Checks
-```bash
-# Check all services
-curl http://localhost:8002/health  # AI
-curl http://localhost:8003/health  # SMS
-curl http://localhost:8004/health  # IVR
-curl http://localhost:8005/health  # NIN
-curl http://localhost:8006/health  # BVN
-curl http://localhost:8007/health  # Two-Way SMS
-```
-
-### API Testing
-```bash
-# Test NIN verification
-curl -X POST http://localhost:8005/api/v1/verify \
-  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"nin": "12345678901"}'
 
-# Test BVN verification
-curl -X POST http://localhost:8006/api/v1/verify \
-  -H "Content-Type: application/json" \
+# 4. Verify BVN
+curl -X POST http://localhost:8080/api/v1/bvn/verify \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{"bvn": "12345678901"}'
 ```
 
-## 📊 Monitoring
-
-### Service Status
+### AI-Powered Customer Service
 ```bash
-# Via API Gateway
+# Generate customer response
+curl -X POST http://localhost:8080/api/v1/ai/generate \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "prompt": "Customer complaint about delayed transaction",
+    "type": "customer_service_response",
+    "context": "nigerian_banking"
+  }'
+```
+
+## 📊 Monitoring & Analytics
+
+### Service Health Monitoring
+```bash
+# Check all services
 curl http://localhost:8080/api/v1/services/health
 
-# Individual service metrics
-curl http://localhost:8005/metrics  # If metrics enabled
+# Individual service health
+curl http://localhost:8005/health  # NIN
+curl http://localhost:8006/health  # BVN
+curl http://localhost:8003/health  # SMS
 ```
 
-### Logs
+### Usage Analytics
 ```bash
-# Docker logs
-docker logs sandbox-nin
-docker logs sandbox-bvn
+# Analyze service usage
+python ../analyze-logs.py --all
 
-# Local development
-tail -f nin/logs/app.log
-tail -f bvn/logs/app.log
+# Service-specific analytics
+python ../analyze-logs.py --user-activity | grep nin
+python ../analyze-logs.py --user-activity | grep bvn
+python ../analyze-logs.py --user-activity | grep sms
 ```
 
-## 🚀 Development
+### Real-time Monitoring
+```bash
+# Monitor live activity
+tail -f logs/nin.log
+tail -f logs/bvn.log
+tail -f logs/sms.log
+tail -f logs/ai.log
+```
+
+## 🛠️ Development
+
+### Running Tests
+```bash
+# Test all services
+for service in nin bvn sms ai ivr two-way-sms; do
+  cd $service && pytest tests/ -v && cd ..
+done
+```
 
 ### Adding New Services
 1. Create service directory: `mkdir new-service`
-2. Copy template structure from existing service
-3. Update `app/main.py` with service-specific logic
-4. Add to API Gateway routing
-5. Update this README
+2. Follow the existing service structure
+3. Add to `start-all.sh` script
+4. Update API Gateway routing
+5. Add health check endpoint
 
-### Service Template Structure
-```
-new-service/
-├── app/
-│   ├── api/v1/
-│   │   └── router.py
-│   ├── core/
-│   │   └── config.py
-│   ├── schemas/
-│   ├── services/
-│   └── main.py
-├── .env.example
-├── Dockerfile
-├── requirements.txt
-└── README.md
-```
-
-## 🔧 Troubleshooting
-
-### Common Issues
-
-**Service Won't Start**:
+### Service Dependencies
 ```bash
-# Check port availability
-netstat -tulpn | grep :8005
+# Required for all services
+pip install fastapi uvicorn pydantic
 
-# Check environment variables
-cat .env
-
-# Check dependencies
-pip install -r requirements.txt
+# Service-specific dependencies
+# NIN/BVN: requests (for Doja API)
+# SMS: requests (for SMS providers)
+# AI: openai anthropic (for AI providers)
 ```
 
-**Doja API Issues**:
+## 🚀 Production Deployment
+
+### Docker Deployment
 ```bash
-# Verify credentials
-curl -H "Authorization: Bearer YOUR_API_KEY" \
-     -H "AppId: YOUR_APP_ID" \
-     https://api.dojah.io/api/v1/general/docs
+# Build all service images
+for service in nin bvn sms ai ivr two-way-sms; do
+  cd $service && docker build -t sandbox-$service:1.0.0 . && cd ..
+done
 
-# Check API limits and usage
+# Run with Docker Compose
+docker-compose -f ../deployment/docker-compose/docker-compose.prod.yml up
 ```
 
-**Database Connection**:
+### Kubernetes Deployment
 ```bash
-# Test PostgreSQL
-psql -h localhost -U sandbox_user -d sandbox_db
-
-# Test MongoDB
-mongo mongodb://sandbox_user:sandbox_password@localhost:27017/sandbox_db
+# Deploy all services
+cd ../deployment/helmfile
+helmfile -e prod apply
 ```
 
-## 📚 Documentation
+## 📞 Support & Resources
 
-- [API Gateway Integration](../services/api-gateway/README.md)
-- [Authentication Setup](../services/auth-service/README.md)
-- [Deployment Guide](../deployment/README.md)
-- [Doja API Documentation](https://docs.dojah.io/)
+### Service Documentation
+- **[NIN Service](nin/README.md)** - Nigerian Identity Number verification
+- **[BVN Service](bvn/README.md)** - Bank Verification Number validation
+- **[SMS Service](sms/README.md)** - SMS messaging and notifications
+- **[AI Service](ai/README.md)** - AI content generation and analysis
+- **[IVR Service](ivr/README.md)** - Interactive Voice Response systems
+- **[Two-Way SMS](two-way-sms/README.md)** - Bidirectional SMS communication
 
-## 🤝 Contributing
+### Getting Help
+- **Health Checks**: Each service has `/health` endpoint
+- **API Documentation**: Each service has `/docs` endpoint
+- **Logs**: Check `logs/` directory for service-specific logs
+- **Monitoring**: Use `../analyze-logs.py` for usage analytics
 
-1. Fork the repository
-2. Create feature branch: `git checkout -b feature/new-sandbox-service`
-3. Add your service following the template structure
-4. Update this README with service details
-5. Submit pull request
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
+### Best Practices
+1. **Always authenticate** through the API Gateway
+2. **Handle errors gracefully** - services can fail
+3. **Monitor usage and costs** - especially for external APIs
+4. **Use test modes** during development
+5. **Cache results** where appropriate to reduce costs
+6. **Follow Nigerian data protection** guidelines (NDPR)
 
 ---
 
-**Built with ❤️ for Nigerian startups**
+**Ready to build the next generation of Nigerian digital services?** These sandbox services provide everything you need to create world-class applications for the Nigerian market.
+
+*Powering Nigerian digital transformation* 🚀🇳🇬
