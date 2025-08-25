@@ -15,7 +15,6 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 ```bash
 # Clone the repository
 git clone https://github.com/Behordeun/sandbox-platform.git
-
 cd sandbox-platform
 
 # Setup configuration
@@ -28,10 +27,9 @@ export ENVIRONMENT=development
 # Start infrastructure services
 docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis mongo
 
-# Start platform services (in separate terminals)
-cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-cd config && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
-cd services/api-gateway && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8080
+# Verify DPI services are ready
+./check-services.sh
+```
 
 ### Test Your Setup
 
@@ -350,6 +348,7 @@ Comprehensive user activity tracking with structured JSON logging:
 - **Alembic Migrations**: Database version control and schema management
 
 ### Security Features
+
 - **Bcrypt Password Hashing**: Secure password storage
 - **JWT Signing**: Configurable secret keys and algorithms
 - **Identity Privacy**: NIN/BVN data hashing for privacy protection
