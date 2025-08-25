@@ -25,9 +25,9 @@ def create_access_token(
 ) -> str:
     """Create JWT access token with dynamic claims."""
     import secrets
-    import time
+    from datetime import datetime, timezone
     
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     if expires_delta:
         expire = now + expires_delta
     else:
@@ -57,8 +57,9 @@ def create_refresh_token(
 ) -> str:
     """Create JWT refresh token with dynamic claims."""
     import secrets
+    from datetime import datetime, timezone
     
-    now = datetime.now()
+    now = datetime.now(timezone.utc)
     if expires_delta:
         expire = now + expires_delta
     else:
@@ -100,12 +101,6 @@ def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
         required_claims = ["sub", "exp", "iat", "jti"]
         if not all(claim in payload for claim in required_claims):
             return None
-
-        # Check if token is not used before valid time
-        if "nbf" in payload:
-            import time
-            if time.time() < payload["nbf"]:
-                return None
 
         return payload
 
