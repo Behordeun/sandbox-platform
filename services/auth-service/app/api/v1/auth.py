@@ -5,6 +5,7 @@ from app.core.config import settings
 from app.core.security import create_access_token, create_refresh_token, get_password_hash
 from app.crud.user import user_crud
 from app.crud.password_reset import password_reset_crud
+from app.email_service import email_service
 from app.dependencies.auth import get_current_active_user, oauth2_scheme
 from app.dependencies.database import get_db
 from app.models.user import User
@@ -65,6 +66,13 @@ def register_user(
 
     # Create user
     user = user_crud.create(db, obj_in=user_in)
+    
+    # Send registration confirmation email
+    email_service.send_registration_confirmation(
+        to_email=user.email,
+        first_name=user.first_name or "Developer"
+    )
+    
     return user
 
 
@@ -239,9 +247,16 @@ def request_password_reset(
     # Create reset token
     token_obj = password_reset_crud.create_reset_token(db, email=reset_request.email)
     
-    # In production, send email with token
-    # For development, return token in response
-    return {"message": f"Reset token: {token_obj.token}"}
+    # Send password reset email with verification link
+    email_sent = email_service.send_password_reset_email(
+        to_email=reset_request.email,
+        reset_token=token_obj.token
+    )
+    
+    if email_sent:
+        return {"message": "Password reset link sent to your email"}
+    else:
+        return {"message": f"Reset token: {token_obj.token}"}  # Fallback for development
 
 
 @router.post("/password-reset/confirm", response_model=PasswordResetResponse)
@@ -277,3 +292,25 @@ def confirm_password_reset(
     db.commit()
     
     return {"message": "Password reset successfully"}
+
+
+@router.get("/password-reset/verify")
+def verify_reset_token(
+    token: str,
+    email: str,
+    db: Session = Depends(get_db),
+) -> Any:
+    """Verify password reset token from email link."""
+    # Validate token
+    token_obj = password_reset_crud.get_by_token(db, token=token)
+    if not token_obj or token_obj.email != email:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    return {
+        "message": "Token verified successfully",
+        "email": email,
+        "token": token
+    }
