@@ -2,6 +2,7 @@ from datetime import datetime
 from typing import Optional
 
 from pydantic import BaseModel, EmailStr, field_validator
+from app.validators import validate_nigerian_phone, format_nigerian_phone
 
 
 class UserBase(BaseModel):
@@ -20,6 +21,12 @@ class UserCreate(UserBase):
         if len(v) < 8:
             raise ValueError("Password must be at least 8 characters long")
         return v
+    
+    @field_validator("phone_number")
+    def validate_phone(cls, v):
+        if v and not validate_nigerian_phone(v):
+            raise ValueError("Invalid Nigerian phone number format. Use +234XXXXXXXXXX or 0XXXXXXXXXX")
+        return format_nigerian_phone(v) if v else v
 
 
 class UserUpdate(BaseModel):
@@ -32,7 +39,7 @@ class UserUpdate(BaseModel):
 
 
 class UserLogin(BaseModel):
-    email: EmailStr
+    identifier: str  # Can be email or username
     password: str
 
 
