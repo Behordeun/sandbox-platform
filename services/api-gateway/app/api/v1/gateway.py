@@ -60,6 +60,23 @@ async def get_services_health() -> Any:
     return await health_service.get_services_health()
 
 
+@router.get("/dpi/health")
+async def get_dpi_health() -> Any:
+    """Get DPI-specific service health for developers."""
+    dpi_services = ["nin", "bvn", "sms", "llm"]
+    health_status = await health_service.get_services_health()
+    
+    dpi_health = {
+        "status": "healthy" if health_status.get("overall_status") == "healthy" else "degraded",
+        "services": {k: v for k, v in health_status.get("services", {}).items() if k in dpi_services},
+        "ready_for_development": all(
+            health_status.get("services", {}).get(svc, {}).get("status") == "healthy" 
+            for svc in dpi_services
+        )
+    }
+    return dpi_health
+
+
 @router.get("/services/status")
 async def get_services_status() -> Any:
     """Get detailed status of all services."""
@@ -83,5 +100,57 @@ async def get_service_metrics(service_name: str) -> Any:
 
 @router.post("/auth/login")
 async def system_login(request: Request) -> Response:
-    """System-wide authentication endpoint."""
+    """System-wide authentication endpoint.
+    
+    Example for Nigerian developers:
+    {
+        "identifier": "developer@fintech.ng",
+        "password": "SecurePass123"
+    }
+    """
     return await proxy_service.proxy_request(request, "auth", "/api/v1/auth/login/json")
+
+
+@router.get("/examples/nin")
+async def nin_examples():
+    """NIN verification examples for Nigerian developers"""
+    return {
+        "success": True,
+        "message": "NIN verification examples",
+        "data": {
+            "test_nin": "12345678901",
+            "example_request": {
+                "nin": "12345678901"
+            },
+            "example_response": {
+                "success": True,
+                "message": "NIN verified successfully",
+                "data": {
+                    "nin": "12345678901",
+                    "first_name": "Adebayo",
+                    "last_name": "Ogundimu",
+                    "date_of_birth": "1990-01-15",
+                    "gender": "Male"
+                }
+            }
+        }
+    }
+
+
+@router.get("/examples/sms")
+async def sms_examples():
+    """SMS examples for Nigerian developers"""
+    return {
+        "success": True,
+        "message": "SMS examples",
+        "data": {
+            "example_request": {
+                "to": "+2348012345678",
+                "message": "Your OTP is 123456. Valid for 5 minutes."
+            },
+            "bulk_sms_request": {
+                "recipients": ["+2348012345678", "+2347012345678"],
+                "message": "Welcome to our DPI platform!"
+            }
+        }
+    }

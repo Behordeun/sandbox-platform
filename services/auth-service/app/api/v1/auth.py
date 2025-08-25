@@ -2,13 +2,16 @@ from datetime import timedelta
 from typing import Any
 
 from app.core.config import settings
-from app.core.security import create_access_token, create_refresh_token
+from app.core.security import create_access_token, create_refresh_token, get_password_hash
 from app.crud.user import user_crud
+from app.crud.password_reset import password_reset_crud
 from app.dependencies.auth import get_current_active_user, oauth2_scheme
 from app.dependencies.database import get_db
 from app.models.user import User
 from app.schemas.oauth import TokenResponse
 from app.schemas.user import UserCreate, UserLogin, UserProfile, UserResponse
+from app.schemas.password_reset import PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse
+from app.schemas.base import DPIResponse, DPIError
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
@@ -22,13 +25,33 @@ def register_user(
     db: Session = Depends(get_db),
     user_in: UserCreate,
 ) -> Any:
-    """Register a new user."""
+    """Register a new user.
+    
+    Example for Nigerian DPI developers:
+    {
+        "email": "adebayo@fintech.ng",
+        "username": "adebayo_dev",
+        "password": "SecurePass123",
+        "first_name": "Adebayo",
+        "last_name": "Ogundimu",
+        "phone_number": "+2348012345678"
+    }
+    """
     # Check if user already exists
     user = user_crud.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
             status_code=400,
-            detail="The user with this email already exists in the system.",
+            detail={
+                "success": False,
+                "message": "Email already registered",
+                "error_code": "EMAIL_EXISTS",
+                "details": {
+                    "suggestion": "Try logging in or use password reset if you forgot your password",
+                    "login_url": "/api/v1/auth/login",
+                    "reset_url": "/api/v1/auth/password-reset/request"
+                }
+            }
         )
 
     # Check username if provided
@@ -87,7 +110,14 @@ def login_user_json(
     db: Session = Depends(get_db),
     user_in: UserLogin,
 ) -> Any:
-    """Login with JSON payload using email or username."""
+    """Login with JSON payload using email or username.
+    
+    Example:
+    {
+        "identifier": "adebayo@fintech.ng",  // or "adebayo_dev"
+        "password": "SecurePass123"
+    }
+    """
     user = user_crud.authenticate(db, identifier=user_in.identifier, password=user_in.password)
     if not user:
         raise HTTPException(
@@ -192,3 +222,58 @@ def revoke_token(
     )
     
     return {"message": "Token revoked successfully"}
+
+
+@router.post("/password-reset/request", response_model=PasswordResetResponse)
+def request_password_reset(
+    *,
+    db: Session = Depends(get_db),
+    reset_request: PasswordResetRequest,
+) -> Any:
+    """Request password reset token."""
+    user = user_crud.get_by_email(db, email=reset_request.email)
+    if not user:
+        # Don't reveal if email exists for security
+        return {"message": "If the email exists, a reset link has been sent"}
+    
+    # Create reset token
+    token_obj = password_reset_crud.create_reset_token(db, email=reset_request.email)
+    
+    # In production, send email with token
+    # For development, return token in response
+    return {"message": f"Reset token: {token_obj.token}"}
+
+
+@router.post("/password-reset/confirm", response_model=PasswordResetResponse)
+def confirm_password_reset(
+    *,
+    db: Session = Depends(get_db),
+    reset_confirm: PasswordResetConfirm,
+) -> Any:
+    """Confirm password reset with token."""
+    # Validate token
+    token_obj = password_reset_crud.get_by_token(db, token=reset_confirm.token)
+    if not token_obj:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid or expired reset token"
+        )
+    
+    # Get user
+    user = user_crud.get_by_email(db, email=token_obj.email)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found"
+        )
+    
+    # Update password
+    user.hashed_password = get_password_hash(reset_confirm.new_password)
+    db.add(user)
+    
+    # Mark token as used
+    password_reset_crud.mark_as_used(db, token_obj=token_obj)
+    
+    db.commit()
+    
+    return {"message": "Password reset successfully"}
