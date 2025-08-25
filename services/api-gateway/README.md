@@ -11,6 +11,9 @@ A high-performance API Gateway built with FastAPI for the Sandbox Platform. This
 - **Load Balancing**: Multiple load balancing strategies (round-robin, least connections, random)
 - **Health Monitoring**: Continuous health checks for backend services
 - **Metrics Collection**: Prometheus metrics for monitoring and alerting
+- **Rich User Activity Logging**: Comprehensive tracking of user access patterns
+- **Security Monitoring**: Real-time detection of suspicious activities
+- **Usage Analytics**: Service popularity and user engagement metrics
 - **Request/Response Logging**: Structured logging for observability
 - **CORS Support**: Cross-origin resource sharing configuration
 - **Service Discovery**: Dynamic service registration and discovery
@@ -172,6 +175,22 @@ curl http://localhost:8080/api/v1/services/health
 
 # Specific service health
 curl http://localhost:8080/api/v1/services/auth/health
+```
+
+### User Activity Analytics
+
+```bash
+# Analyze user access patterns
+python ../../analyze-logs.py --user-activity
+
+# Security monitoring
+python ../../analyze-logs.py --security
+
+# Real-time access monitoring
+tail -f ../logs/api_access.log
+
+# View structured logs
+cat ../logs/api_access.log | jq '.'
 ```
 
 ## Security
