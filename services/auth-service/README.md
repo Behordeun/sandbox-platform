@@ -12,6 +12,9 @@ A FastAPI-based authentication and authorization service for the Sandbox Platfor
 - **Flexible Authentication**: Login with email or username
 - **OAuth2 Support**: Full OAuth2 authorization code flow implementation
 - **User Management**: Registration, authentication, and profile management
+- **Rich User Activity Logging**: Comprehensive tracking of user interactions
+- **Security Event Monitoring**: Real-time detection of authentication anomalies
+- **Usage Analytics**: User engagement patterns and service usage metrics
 - **Audit Logging**: Security event logging for compliance
 - **Standardized Responses**: Consistent API responses with helpful error messages
 - **SQLite Development**: Easy local development with SQLite database
@@ -197,6 +200,39 @@ The service includes comprehensive Helm charts for Kubernetes deployment:
 - **Monitoring**: Prometheus ServiceMonitor support
 
 See `helm/auth-service/README.md` for detailed deployment instructions.
+
+## Monitoring & Analytics
+
+### User Activity Tracking
+
+```bash
+# Analyze user authentication patterns
+python ../../analyze-logs.py --user-activity
+
+# Monitor security events
+python ../../analyze-logs.py --security
+
+# Real-time activity monitoring
+tail -f ../logs/user_activity.log
+
+# View security events
+tail -f ../logs/security_events.log
+```
+
+### Log Categories
+
+- **User Activities**: Registration, login, profile access, password resets
+- **Security Events**: Failed logins, suspicious activities, token violations
+- **OAuth2 Flows**: Authorization codes, token exchanges, client interactions
+- **Identity Verification**: NIN/BVN verification attempts and results
+
+### Analytics Capabilities
+
+- **User Engagement**: Track individual user activity patterns
+- **Authentication Success Rates**: Monitor login success/failure ratios
+- **Security Monitoring**: Detect brute force attacks and suspicious IPs
+- **Service Usage**: Popular endpoints and peak usage times
+- **Performance Metrics**: Response times and error rates
 
 ## Integration
 
