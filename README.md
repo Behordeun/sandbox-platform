@@ -393,8 +393,8 @@ OAUTH2_ISSUER_URL=http://localhost:8000
 OAUTH2_JWKS_URI=http://localhost:8000/.well-known/jwks.json
 
 # Identity Verification
-DOJA_API_KEY=your-doja-api-key
-DOJA_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_BASE_URL=https://api.dojah.io
 
 # CORS Configuration
 CORS_ORIGINS=["*"]
