@@ -2,21 +2,17 @@
 
 The services directory contains platform maintenance services that support the core sandbox offerings - authentication, API gateway, monitoring, and other infrastructure components.
 
-## 🚀 Quick Start
+## 🚀 Quick Start for DPI Development
 
-### Complete Development Setup
+### One-Command Setup
 ```bash
-# Setup everything (infrastructure + services)
-./dev-setup.sh
-
-# Or step by step
-./start-infrastructure.sh  # Start databases & Redis
-./start-all.sh            # Start platform services
+# From project root - starts everything
+./sandbox-start.sh
 ```
 
 ### Individual Commands
 ```bash
-# Infrastructure only
+# Infrastructure only (databases & Redis)
 ./start-infrastructure.sh
 ./stop-infrastructure.sh
 
@@ -24,7 +20,10 @@ The services directory contains platform maintenance services that support the c
 ./start-all.sh
 ./stop-all.sh
 
-# Clean shutdown with logs
+# Health monitoring
+./check-services.sh
+
+# Clean shutdown
 ./stop-all.sh --clean-logs
 ./stop-infrastructure.sh --clean-volumes
 ```
@@ -89,13 +88,18 @@ Stop infrastructure services
 
 ### Service Health
 ```bash
-# Check all services
+# Check all DPI services at once
+./check-services.sh
+
+# Check DPI-specific services
+curl http://localhost:8080/api/v1/dpi/health
+
+# Individual service checks
 curl http://localhost:8000/health  # Auth
 curl http://localhost:8080/health  # Gateway
-curl http://localhost:8009/health  # Health Service
-
-# Via API Gateway
-curl http://localhost:8080/api/v1/services/health
+curl http://localhost:8005/health  # NIN
+curl http://localhost:8006/health  # BVN
+curl http://localhost:8003/health  # SMS
 ```
 
 ### Logs
