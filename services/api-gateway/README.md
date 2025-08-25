@@ -14,38 +14,31 @@ Think of the API Gateway as the **front door** to all DPI services. Instead of c
 
 ## ✨ Key Features for Nigerian Developers
 
-1. **Setup environment**:
+### 🇳🇬 **Nigerian DPI Services**
 
-   ```bash
-   cd api-gateway
-   cp .env.example .env
-   # Edit .env with your configuration
-   ```
+- **NIN Verification**: Verify National Identity Numbers
+- **BVN Verification**: Validate Bank Verification Numbers
+- **SMS Services**: Send messages to Nigerian phone numbers
+- **AI Services**: Content generation and data analysis
+- **IVR Services**: Interactive Voice Response systems
 
-2. **Install dependencies**:
+### 📊 **Built-in Analytics**
 
-   ```bash
-   pip install -r requirements.txt
-   ```
+- Track your API usage patterns
+- Monitor service performance
+- Security event detection
+- User engagement metrics
 
-3. **Start Redis** (for rate limiting):
+### 🛡️ **Enterprise Security**
 
-   ```bash
-   docker run -d -p 6379:6379 redis:7-alpine
-   ```
+- Rate limiting (100 requests/minute by default)
+- Request logging and audit trails
+- Circuit breaker for service reliability
+- CORS protection for web applications
 
-4. **Run the gateway**:
+## 🚀 Quick Start Guide (5 Minutes)
 
-   ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
-   ```
-
-5. **Access the gateway**:
-   - API Documentation: [http://localhost:8080/docs](http://localhost:8080/docs)
-   - Health Check: [http://localhost:8080/health](http://localhost:8080/health)
-   - Metrics: [http://localhost:8080/metrics](http://localhost:8080/metrics)
-
-### Docker Deployment
+### Step 1: Start the Gateway
 
 ```bash
 # Build the gateway image
@@ -58,108 +51,27 @@ docker run -p 8080:8080 \
   sandbox-api-gateway:1.0.0
 ```
 
-## API Endpoints
+### Step 2: Verify It's Running
 
-### Gateway Routes
+```bash
+# Check gateway health
+curl http://localhost:8080/health
 
-- `GET|POST|PUT|DELETE /api/v1/auth/*` - Route to auth service
-- `GET|POST|PUT|DELETE /api/v1/sms/*` - Route to SMS service
-- `GET|POST|PUT|DELETE /api/v1/llm/*` - Route to LLM service
-
-### Management
-
-- `GET /api/v1/services/health` - Get health of all services
-- `GET /api/v1/services/status` - Get detailed service status
-- `GET /api/v1/services/{service}/health` - Get specific service health
-- `GET /api/v1/services/{service}/metrics` - Get service metrics
-
-### System
-
-- `GET /health` - Gateway health check
-- `GET /metrics` - Prometheus metrics
-- `GET /docs` - API documentation
-
-## Configuration
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `HOST` | Server host | `0.0.0.0` |
-| `PORT` | Server port | `8080` |
-| `REDIS_URL` | Redis connection URL | `redis://localhost:6379/0` |
-| `JWT_SECRET_KEY` | JWT secret for token validation | Required |
-| `RATE_LIMIT_REQUESTS` | Requests per window | `100` |
-| `RATE_LIMIT_WINDOW` | Rate limit window (seconds) | `60` |
-| `CIRCUIT_BREAKER_FAILURE_THRESHOLD` | Failures before opening circuit | `5` |
-| `METRICS_ENABLED` | Enable Prometheus metrics | `true` |
-
-### Service Configuration
-
-Services are configured in `app/core/config.py`:
-
-```python
-services = {
-    "auth": ServiceConfig(
-        name="auth-service",
-        url="http://auth-service:8000",
-        health_path="/health"
-    ),
-    "sms": ServiceConfig(
-        name="sms-service", 
-        url="http://sms-service:8000",
-        health_path="/health"
-    )
+# Expected response:
+{
+  "status": "healthy",
+  "service": "Sandbox API Gateway",
+  "version": "1.0.0"
 }
 ```
 
-## Architecture
+### Step 3: Explore the API Documentation
 
-### Middleware Stack
+Open your browser and go to: [http://localhost:8080/docs](http://localhost:8080/docs)
 
-1. **CORS Middleware**: Handle cross-origin requests
-2. **Metrics Middleware**: Collect Prometheus metrics
-3. **Logging Middleware**: Request/response logging
-4. **Rate Limit Middleware**: Redis-based rate limiting
-5. **Auth Middleware**: JWT/API key authentication
+This interactive documentation shows all available endpoints and lets you test them directly!
 
-### Circuit Breaker
-
-The gateway implements circuit breaker pattern for each backend service:
-
-- **Closed**: Normal operation, requests pass through
-- **Open**: Service is failing, requests are blocked
-- **Half-Open**: Testing if service has recovered
-
-### Load Balancing
-
-Supports multiple load balancing strategies:
-
-- **Round Robin**: Distribute requests evenly
-- **Least Connections**: Route to least busy instance
-- **Random**: Random selection
-
-### Health Monitoring
-
-- Continuous health checks every 30 seconds
-- Circuit breaker state tracking
-- Service response time monitoring
-- Automatic service discovery updates
-
-## Monitoring
-
-### Prometheus Metrics
-
-The gateway exposes the following metrics:
-
-- `api_gateway_requests_total` - Total requests by method/endpoint/status
-- `api_gateway_request_duration_seconds` - Request duration histogram
-- `api_gateway_active_requests` - Current active requests
-- `api_gateway_service_requests_total` - Backend service requests
-- `api_gateway_circuit_breaker_state` - Circuit breaker states
-- `api_gateway_rate_limit_hits_total` - Rate limit violations
-
-### Health Checks
+### Step 4: Get Your First Token
 
 ```bash
 # Deploy with Helm
@@ -237,70 +149,137 @@ app/
 ### Testing
 
 ```bash
-# Run tests
-pytest tests/
+# Check your current rate limit status
+curl -I http://localhost:8080/api/v1/auth/me \
+  -H "Authorization: Bearer $TOKEN"
 
-# Load testing
-hey -n 1000 -c 10 http://localhost:8080/health
+# Look for these headers:
+# X-RateLimit-Limit: 100
+# X-RateLimit-Remaining: 95
+# X-RateLimit-Reset: 1640995200
 ```
 
-## Deployment
+## 🛠️ Development & Testing
 
-### Kubernetes
-
-The gateway is designed for Kubernetes deployment with:
-
-- Health checks for liveness/readiness probes
-- Graceful shutdown handling
-- Resource limits and requests
-- Service discovery integration
-
-### Scaling
-
-- Horizontal scaling with multiple replicas
-- Stateless design (state in Redis)
-- Load balancer friendly
-- Circuit breaker per instance
-
-## Troubleshooting
-
-### Common Issues
-
-1. **Service Unavailable (503)**:
-   - Check backend service health
-   - Verify circuit breaker state
-   - Check service configuration
-
-2. **Rate Limited (429)**:
-   - Check Redis connectivity
-   - Verify rate limit configuration
-   - Monitor client request patterns
-
-3. **Authentication Failed (401)**:
-   - Verify JWT secret key
-   - Check token expiration
-   - Validate API key format
-
-### Debugging
+### Running Tests
 
 ```bash
-# Check service health
-curl http://localhost:8080/api/v1/services/health
+# Install test dependencies
+pip install pytest httpx
 
-# View metrics
-curl http://localhost:8080/metrics
+# Run the test suite
+pytest tests/
 
-# Check logs
-docker logs <container-id>
+# Run specific test categories
+pytest tests/test_auth.py -v
+pytest tests/test_routing.py -v
 ```
 
-## Contributing
+### Load Testing
 
-1. Fork the repository
-2. Create a feature branch
-3. Add tests for new functionality
-4. Submit a pull request
+```bash
+# Install hey (HTTP load testing tool)
+brew install hey  # macOS
+# or
+sudo apt install hey  # Ubuntu
 
-## License
+# Test gateway performance
+hey -n 1000 -c 10 -H "Authorization: Bearer $TOKEN" \
+  http://localhost:8080/api/v1/auth/me
+```
 
-This project is licensed under the MIT License.
+### Debugging Common Issues
+
+#### 1. **Gateway Returns 503 (Service Unavailable)**
+
+```bash
+# Check if backend services are running
+curl http://localhost:8000/health  # Auth service
+curl http://localhost:8005/health  # NIN service
+
+# Check service health through gateway
+curl http://localhost:8080/api/v1/services/health
+```
+
+#### 2. **Authentication Fails (401 Unauthorized)**
+
+```bash
+# Verify your token is valid
+curl -X GET http://localhost:8080/api/v1/auth/me \
+  -H "Authorization: Bearer $TOKEN" -v
+
+# Check token expiration
+# Tokens expire after 30 minutes by default
+```
+
+#### 3. **Rate Limited (429 Too Many Requests)**
+
+```bash
+# Wait for rate limit window to reset (60 seconds by default)
+# Or contact admin to increase your rate limit
+
+# Check when your rate limit resets
+curl -I http://localhost:8080/api/v1/auth/me \
+  -H "Authorization: Bearer $TOKEN"
+```
+
+## 🚀 Production Deployment
+
+### Docker Deployment
+
+```bash
+# Build the gateway image
+docker build -t sandbox-api-gateway:1.0.0 .
+
+# Run with Docker
+docker run -p 8080:8080 \
+  -e JWT_SECRET_KEY="your-production-secret" \
+  -e REDIS_URL="redis://redis:6379/0" \
+  sandbox-api-gateway:1.0.0
+```
+
+### Kubernetes Deployment
+
+```bash
+# Deploy with Helm
+cd helm/api-gateway
+helm install api-gateway . \
+  --set secrets.jwtSecretKey="your-production-secret" \
+  --set ingress.enabled=true \
+  --set ingress.hosts[0].host=api.yourdomain.com
+```
+
+## 🤝 Getting Help
+
+### Resources
+
+- **Interactive API Docs**: [http://localhost:8080/docs](http://localhost:8080/docs)
+- **Health Dashboard**: [http://localhost:8080/api/v1/services/health](http://localhost:8080/api/v1/services/health)
+- **Metrics**: [http://localhost:8080/metrics](http://localhost:8080/metrics)
+
+### Common Questions
+
+**Q: Can I use the gateway without authentication?**
+A: Some endpoints like `/health` and `/docs` are public, but all DPI services require authentication.
+
+**Q: How do I increase my rate limit?**
+A: Contact your platform administrator or modify the `RATE_LIMIT_REQUESTS` environment variable.
+
+**Q: Can I use API keys instead of JWT tokens?**
+A: Yes! Pass your API key in the `X-API-Key` header instead of the Authorization header.
+
+**Q: How do I monitor my API usage?**
+A: Use the built-in analytics: `python ../../analyze-logs.py --user-activity`
+
+### Support
+
+- 📧 **Email**: [support@sandbox-platform.ng](mail-to:support@sandbox-platform.ng)
+- 💬 **Slack**: #api-gateway-support
+- 🐛 **Issues**: Create an issue in the repository
+- 📖 **Documentation**: Check `/docs` endpoint for latest API reference
+
+---
+
+**Ready to build the next big Nigerian fintech or digital service? The API Gateway is your starting point!**
+
+## Built with ❤️ for Nigerian developers and startups

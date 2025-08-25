@@ -94,7 +94,7 @@ curl -X POST http://localhost:8080/api/v1/ivr/create-flow \
         "message": "Welcome to First Bank. Press 1 for account balance, 2 for transaction history, 3 for customer service",
         "options": {
           "1": "check_balance",
-          "2": "transaction_history", 
+          "2": "transaction_history",
           "3": "customer_service"
         }
       },
@@ -202,4 +202,4 @@ print(f"IVR Flow created: {result['flow_id']}")
 
 **Ready to build voice experiences for Nigerian customers?** This IVR service provides the foundation for intelligent voice applications.
 
-*Connecting Nigeria through voice* 📞🇳🇬
+## Connecting Nigeria through voice 📞🇳🇬

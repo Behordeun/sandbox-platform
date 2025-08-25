@@ -84,7 +84,11 @@ curl http://localhost:8005/health
 
 All endpoints require authentication via the API Gateway or direct JWT token.
 
-### Core Endpoints
+### Valid NIN Format
+
+- **Length**: Exactly 11 digits
+- **Format**: `12345678901`
+- **No spaces or special characters**
 
 | Method | Endpoint | Description | Example |
 |--------|----------|-------------|---------|
