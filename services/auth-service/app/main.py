@@ -5,6 +5,7 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import Base, engine
 from app.models import oauth_client, oauth_token, user, token_blacklist, password_reset  # Import to register models
+from app.middleware.logging import UserActivityLoggingMiddleware
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -51,6 +52,9 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+# Add user activity logging middleware
+app.add_middleware(UserActivityLoggingMiddleware)
 
 
 # Health check endpoint
