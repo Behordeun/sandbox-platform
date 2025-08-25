@@ -13,6 +13,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, excluded_paths: Optional[List[str]] = None):
         super().__init__(app)
         self.excluded_paths = excluded_paths or [
+            "/",
             "/health",
             "/metrics",
             "/docs",
