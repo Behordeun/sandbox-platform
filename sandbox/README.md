@@ -7,7 +7,7 @@
 These are production-ready microservices that provide essential digital infrastructure capabilities for Nigerian businesses:
 
 - **Identity Verification** - NIN and BVN verification
-- **Communication** - SMS and voice services  
+- **Communication** - SMS and voice services
 - **Intelligence** - AI-powered content and analysis
 - **Data Storage** - Reliable database solutions
 
@@ -42,7 +42,7 @@ These are production-ready microservices that provide essential digital infrastr
 
 # This starts all services automatically:
 # - AI Service (8002)
-# - SMS Service (8003) 
+# - SMS Service (8003)
 # - IVR Service (8004)
 # - NIN Service (8005)
 # - BVN Service (8006)
@@ -119,10 +119,7 @@ AI_MODEL=gpt-3.5-turbo
 ### Complete User Onboarding Flow
 
 ```bash
-# 1. Register user
 curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email": "user@example.com", "phone": "+2348012345678", ...}'
 
 # 2. Send OTP for verification
 curl -X POST http://localhost:8080/api/v1/sms/send \

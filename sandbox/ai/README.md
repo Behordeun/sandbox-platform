@@ -258,4 +258,4 @@ print(result['generated_text'])
 
 **Ready to build intelligent Nigerian applications?** This AI service provides the foundation for smart, context-aware applications.
 
-*Built for Nigerian innovation* 🤖🇳🇬
+## Built for Nigerian innovation 🇳🇬

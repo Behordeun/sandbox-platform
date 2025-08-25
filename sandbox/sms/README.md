@@ -399,7 +399,7 @@ docker run -p 8003:8003 \
 DEBUG=true
 SMS_RATE_LIMIT=10        # Lower limits for testing
 
-# Production  
+# Production
 DEBUG=false
 SMS_RATE_LIMIT=1000      # Higher limits for production
 SMS_DAILY_LIMIT=100000   # Production daily limits
@@ -530,4 +530,4 @@ if (result.success) {
 
 **Ready to connect with your Nigerian customers?** This SMS service provides reliable, cost-effective messaging across all Nigerian networks.
 
-*Trusted by Nigerian businesses for customer communication* 📱🇳🇬
+## Trusted by Nigerian businesses for customer communication 📱🇳🇬
