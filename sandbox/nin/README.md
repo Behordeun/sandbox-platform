@@ -62,9 +62,9 @@ HOST=0.0.0.0
 PORT=8005
 
 # Doja API Configuration (Required)
-DOJA_API_KEY=your-doja-api-key
-DOJA_APP_ID=your-doja-app-id
-DOJA_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_APP_ID=your-dojah-app-id
+DOJAH_BASE_URL=https://api.dojah.io
 
 # Auth Service URL
 AUTH_SERVICE_URL=http://auth-service:8000
@@ -210,8 +210,8 @@ docker build -t sandbox-nin:latest .
 docker run -d \
   --name nin-service \
   -p 8005:8005 \
-  -e DOJA_API_KEY=your-api-key \
-  -e DOJA_APP_ID=your-app-id \
+  -e DOJAH_API_KEY=your-api-key \
+  -e DOJAH_APP_ID=your-app-id \
   sandbox-nin:latest
 ```
 
@@ -225,8 +225,8 @@ services:
     ports:
       - "8005:8005"
     environment:
-      - DOJA_API_KEY=${DOJA_API_KEY}
-      - DOJA_APP_ID=${DOJA_APP_ID}
+      - DOJAH_API_KEY=${DOJAH_API_KEY}
+      - DOJAH_APP_ID=${DOJAH_APP_ID}
       - DEBUG=false
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8005/health"]
@@ -323,7 +323,7 @@ tail -f ../logs/nin.log
 netstat -tulpn | grep :8005
 
 # Verify environment variables
-cat .env | grep DOJA
+cat .env | grep DOJAH
 
 # Check dependencies
 pip install -r requirements.txt
