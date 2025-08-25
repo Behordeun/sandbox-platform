@@ -1,18 +1,19 @@
 # Sandbox Auth Service
 
-A FastAPI-based authentication and authorization service designed for the Sandbox Platform. This service provides OAuth2 authentication, JWT token management, and Nigerian identity verification (NIN/BVN) capabilities.
+A FastAPI-based authentication and authorization service for the Sandbox Platform. This service provides secure JWT token management, OAuth2 authentication, and user management with advanced security features.
 
 ## Features
 
-- **OAuth2 Authentication**: Full OAuth2 authorization code flow implementation
-- **JWT Token Management**: Access and refresh token generation and validation
-- **Nigerian Identity Verification**: NIN and BVN verification via Doja API
-- **User Management**: User registration, authentication, and profile management
-- **Modular Architecture**: Clean separation of concerns with CRUD operations
-- **Docker Support**: Containerized deployment with Docker Hub integration
-- **Kubernetes Ready**: Helm charts for easy Kubernetes deployment
-- **Health Checks**: Built-in health monitoring endpoints
-- **CORS Support**: Cross-origin resource sharing for web applications
+- **Dynamic JWT Tokens**: Cryptographically secure tokens with unique identifiers (JTI)
+- **Token Blacklist System**: Token revocation and logout capabilities
+- **Enhanced Security**: Audience/issuer validation, comprehensive claim checking
+- **Flexible Authentication**: Login with email or username
+- **OAuth2 Support**: Full OAuth2 authorization code flow implementation
+- **User Management**: Registration, authentication, and profile management
+- **SQLite Development**: Easy local development with SQLite database
+- **Docker Support**: Containerized deployment ready
+- **Kubernetes Ready**: Helm charts for production deployment
+- **Health Checks**: Built-in monitoring endpoints
 
 ## Quick Start
 
@@ -78,10 +79,12 @@ helm install auth-service . \
 ### Authentication
 
 - `POST /api/v1/auth/register` - User registration
-- `POST /api/v1/auth/login` - User login (OAuth2 compatible)
-- `POST /api/v1/auth/login/json` - User login (JSON payload)
+- `POST /api/v1/auth/login` - OAuth2 compatible login (email/username)
+- `POST /api/v1/auth/login/json` - JSON login (email/username)
 - `GET /api/v1/auth/userinfo` - Get user information
 - `GET /api/v1/auth/me` - Get current user
+- `POST /api/v1/auth/logout` - Logout and blacklist token
+- `POST /api/v1/auth/revoke-token` - Revoke specific token
 
 ### OAuth2
 
@@ -89,11 +92,6 @@ helm install auth-service . \
 - `POST /api/v1/oauth2/token` - OAuth2 token endpoint
 - `POST /api/v1/oauth2/clients` - Create OAuth2 client
 - `GET /api/v1/oauth2/clients/{client_id}` - Get OAuth2 client
-
-### Identity Verification
-
-- `POST /api/v1/identity/verify-nin-bvn` - Verify NIN/BVN
-- `GET /api/v1/identity/verification-status` - Get verification status
 
 ### System
 
@@ -109,27 +107,32 @@ The service uses environment variables for configuration. See `.env.example` for
 
 | Variable | Description | Default |
 |----------|-------------|---------|
-| `DATABASE_URL` | PostgreSQL connection string | Required |
+| `DATABASE_URL` | Database connection string | `sqlite:///./sandbox_auth.db` |
 | `JWT_SECRET_KEY` | Secret key for JWT signing | Required |
-| `DOJA_API_KEY` | Doja API key for NIN/BVN verification | Optional |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiry | `30` |
+| `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | Refresh token expiry | `7` |
+| `OAUTH2_ISSUER_URL` | OAuth2 issuer URL | `http://localhost:8000` |
 | `CORS_ORIGINS` | Allowed CORS origins | `["*"]` |
 | `DEBUG` | Enable debug mode | `false` |
 
 ## Database Schema
 
-The service uses PostgreSQL with the following main tables:
+The service uses SQLite for development (PostgreSQL for production) with the following main tables:
 
 - **users**: User accounts and profile information
 - **oauth_clients**: OAuth2 client applications
 - **oauth_tokens**: OAuth2 tokens and authorization codes
+- **token_blacklist**: Revoked/blacklisted tokens for security
 
-Database migrations are handled by Alembic (setup in `alembic/` directory).
+Database tables are automatically created on startup for development.
 
 ## Security Features
 
+- **Dynamic JWT Tokens**: Unique token identifiers (JTI) with cryptographic security
+- **Token Blacklist**: Revocation system for compromised or logged-out tokens
+- **Enhanced Validation**: Audience/issuer claims, comprehensive token verification
 - **Password Hashing**: Bcrypt for secure password storage
-- **JWT Tokens**: Signed tokens with configurable expiration
-- **Identity Verification**: NIN/BVN hashing for privacy
+- **Flexible Authentication**: Login with email or username
 - **CORS Protection**: Configurable cross-origin policies
 - **Input Validation**: Pydantic models for request validation
 
@@ -199,12 +202,13 @@ See `helm/auth-service/README.md` for detailed deployment instructions.
 3. **Token Exchange**: Exchange authorization code for tokens
 4. **API Access**: Use access token for authenticated requests
 
-### NIN/BVN Verification
+### Authentication Flow
 
-1. **User Registration**: Create user account
-2. **Identity Verification**: Submit NIN/BVN for verification
-3. **Verification Status**: Check verification status
-4. **Enhanced Access**: Verified users get additional privileges
+1. **User Registration**: Create account with email/username
+2. **Login**: Authenticate with email or username + password
+3. **Token Usage**: Use JWT access token for API requests
+4. **Token Refresh**: Use refresh token to get new access tokens
+5. **Logout**: Revoke tokens via blacklist system
 
 ## Contributing
 
