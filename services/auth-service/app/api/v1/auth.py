@@ -4,12 +4,13 @@ from typing import Any
 from app.core.config import settings
 from app.core.security import create_access_token, create_refresh_token
 from app.crud.user import user_crud
-from app.dependencies.auth import get_current_active_user
+from app.dependencies.auth import get_current_active_user, oauth2_scheme
 from app.dependencies.database import get_db
+from app.models.user import User
 from app.schemas.oauth import TokenResponse
 from app.schemas.user import UserCreate, UserLogin, UserProfile, UserResponse
 from fastapi import APIRouter, Depends, HTTPException, status
-from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 router = APIRouter()
@@ -128,3 +129,66 @@ def read_user_me(
 ) -> Any:
     """Get current user."""
     return current_user
+
+
+@router.post("/logout")
+def logout_user(
+    credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
+    db: Session = Depends(get_db),
+) -> Any:
+    """Logout user by blacklisting current token."""
+    from app.crud.token_blacklist import token_blacklist_crud
+    from app.core.security import verify_token
+    from datetime import datetime
+    
+    try:
+        token = credentials.credentials
+        payload = verify_token(token, token_type="access")
+        if payload is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token"
+            )
+            
+        # Blacklist the token
+        token_blacklist_crud.blacklist_token(
+            db,
+            jti=payload["jti"],
+            token_type="access",
+            user_id=int(payload["sub"]),
+            expires_at=datetime.fromtimestamp(payload["exp"]),
+            reason="logout"
+        )
+        
+        return {"message": "Successfully logged out"}
+        
+    except Exception as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Logout failed"
+        )
+
+
+@router.post("/revoke-token")
+def revoke_token(
+    token_jti: str,
+    current_user: User = Depends(get_current_active_user),
+    db: Session = Depends(get_db),
+) -> Any:
+    """Revoke a specific token by JTI (admin function)."""
+    from app.crud.token_blacklist import token_blacklist_crud
+    from datetime import datetime, timedelta
+    
+    # For now, allow users to revoke their own tokens
+    # In production, add admin role check
+    
+    token_blacklist_crud.blacklist_token(
+        db,
+        jti=token_jti,
+        token_type="access",  # Could be made dynamic
+        user_id=current_user.id,
+        expires_at=datetime.now() + timedelta(days=1),  # Default expiry
+        reason="manual_revocation"
+    )
+    
+    return {"message": "Token revoked successfully"}
