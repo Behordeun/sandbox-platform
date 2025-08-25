@@ -1,3 +1,4 @@
+import os
 from typing import Optional
 
 from pydantic_settings import BaseSettings
@@ -10,13 +11,10 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database settings
-    database_url: str = (
-        "postgresql://sandbox_user:"
-        "${SANDBOX_AUTH_DB_PASSWORD}@localhost:5432/sandbox_auth"
-    )
+    database_url: Optional[str] = os.getenv('DATABASE_URL')
 
     # JWT settings
-    jwt_secret_key: str = "your-secret-key-change-in-production"
+    jwt_secret_key: Optional[str] = os.getenv('JWT_SECRET_KEY')
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7

@@ -1,0 +1,47 @@
+from datetime import datetime
+from typing import Optional
+
+from app.crud.base import CRUDBase
+from app.models.token_blacklist import TokenBlacklist
+from sqlalchemy.orm import Session
+
+
+class CRUDTokenBlacklist(CRUDBase[TokenBlacklist, dict, dict]):
+    def is_token_blacklisted(self, db: Session, *, jti: str) -> bool:
+        """Check if token is blacklisted."""
+        token = db.query(TokenBlacklist).filter(TokenBlacklist.jti == jti).first()
+        return token is not None
+
+    def blacklist_token(
+        self,
+        db: Session,
+        *,
+        jti: str,
+        token_type: str,
+        user_id: int,
+        expires_at: datetime,
+        reason: Optional[str] = None
+    ) -> TokenBlacklist:
+        """Add token to blacklist."""
+        db_obj = TokenBlacklist(
+            jti=jti,
+            token_type=token_type,
+            user_id=user_id,
+            expires_at=expires_at,
+            reason=reason
+        )
+        db.add(db_obj)
+        db.commit()
+        db.refresh(db_obj)
+        return db_obj
+
+    def cleanup_expired_tokens(self, db: Session) -> int:
+        """Remove expired tokens from blacklist."""
+        count = db.query(TokenBlacklist).filter(
+            TokenBlacklist.expires_at < datetime.now()
+        ).delete()
+        db.commit()
+        return count
+
+
+token_blacklist_crud = CRUDTokenBlacklist(TokenBlacklist)
