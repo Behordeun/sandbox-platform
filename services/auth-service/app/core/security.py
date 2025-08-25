@@ -23,15 +23,28 @@ def get_password_hash(password: str) -> str:
 def create_access_token(
     subject: Union[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
-    """Create JWT access token."""
+    """Create JWT access token with dynamic claims."""
+    import secrets
+    import time
+    
+    now = datetime.now()
     if expires_delta:
-        expire = datetime.now() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.now() + timedelta(
+        expire = now + timedelta(
             minutes=settings.jwt_access_token_expire_minutes
         )
 
-    to_encode = {"exp": expire, "sub": str(subject), "type": "access"}
+    to_encode = {
+        "exp": expire,
+        "iat": now,
+        "nbf": now,
+        "sub": str(subject),
+        "type": "access",
+        "jti": secrets.token_urlsafe(32),  # Unique token ID
+        "iss": settings.oauth2_issuer_url,
+        "aud": "sandbox-platform"
+    }
 
     encoded_jwt = jwt.encode(
         to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
@@ -42,13 +55,25 @@ def create_access_token(
 def create_refresh_token(
     subject: Union[str, Any], expires_delta: Optional[timedelta] = None
 ) -> str:
-    """Create JWT refresh token."""
+    """Create JWT refresh token with dynamic claims."""
+    import secrets
+    
+    now = datetime.now()
     if expires_delta:
-        expire = datetime.now() + expires_delta
+        expire = now + expires_delta
     else:
-        expire = datetime.now() + timedelta(days=settings.jwt_refresh_token_expire_days)
+        expire = now + timedelta(days=settings.jwt_refresh_token_expire_days)
 
-    to_encode = {"exp": expire, "sub": str(subject), "type": "refresh"}
+    to_encode = {
+        "exp": expire,
+        "iat": now,
+        "nbf": now,
+        "sub": str(subject),
+        "type": "refresh",
+        "jti": secrets.token_urlsafe(32),  # Unique token ID
+        "iss": settings.oauth2_issuer_url,
+        "aud": "sandbox-platform"
+    }
 
     encoded_jwt = jwt.encode(
         to_encode, settings.jwt_secret_key, algorithm=settings.jwt_algorithm
@@ -56,22 +81,33 @@ def create_refresh_token(
     return encoded_jwt
 
 
-def verify_token(token: str, token_type: str = "access") -> Optional[str]:
-    """Verify JWT token and return subject."""
+def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
+    """Verify JWT token and return payload with enhanced validation."""
     try:
         payload = jwt.decode(
-            token, settings.jwt_secret_key, algorithms=[settings.jwt_algorithm]
+            token, 
+            settings.jwt_secret_key, 
+            algorithms=[settings.jwt_algorithm],
+            audience="sandbox-platform",
+            issuer=settings.oauth2_issuer_url
         )
 
         # Check token type
         if payload.get("type") != token_type:
             return None
 
-        subject = payload.get("sub")
-        if subject is None:
+        # Validate required claims
+        required_claims = ["sub", "exp", "iat", "jti"]
+        if not all(claim in payload for claim in required_claims):
             return None
 
-        return str(subject)
+        # Check if token is not used before valid time
+        if "nbf" in payload:
+            import time
+            if time.time() < payload["nbf"]:
+                return None
+
+        return payload
 
     except JWTError:
         return None
