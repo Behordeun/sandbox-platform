@@ -73,13 +73,13 @@ spec:
               value: {{ include "auth-service.oauth2JwksUri" . | quote }}
             
             # NIN/BVN Integration settings
-            - name: DOJA_API_KEY
+            - name: DOJAH_API_KEY
               valueFrom:
                 secretKeyRef:
                   name: {{ include "auth-service.fullname" . }}-secrets
-                  key: doja-api-key
+                  key: dojah-api-key
                   optional: true
-            - name: DOJA_BASE_URL
+            - name: DOJAH_BASE_URL
               value: {{ .Values.config.dojaBaseUrl | quote }}
             
             # CORS settings

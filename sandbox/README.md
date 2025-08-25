@@ -85,9 +85,9 @@ uvicorn app.main:app --reload --port 8004
 
 **Configuration**:
 ```env
-DOJA_API_KEY=your-doja-api-key
-DOJA_APP_ID=your-doja-app-id
-DOJA_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_APP_ID=your-dojah-app-id
+DOJAH_BASE_URL=https://api.dojah.io
 ```
 
 **Setup**:
@@ -109,9 +109,9 @@ uvicorn app.main:app --reload --port 8005
 
 **Configuration**:
 ```env
-DOJA_API_KEY=your-doja-api-key
-DOJA_APP_ID=your-doja-app-id
-DOJA_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_APP_ID=your-dojah-app-id
+DOJAH_BASE_URL=https://api.dojah.io
 ```
 
 **Setup**:
@@ -220,9 +220,9 @@ PORT=8xxx
 
 **Identity Services (NIN/BVN)**:
 ```env
-DOJA_API_KEY=your-doja-api-key
-DOJA_APP_ID=your-doja-app-id
-DOJA_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_APP_ID=your-dojah-app-id
+DOJAH_BASE_URL=https://api.dojah.io
 ```
 
 ## 🧪 Testing

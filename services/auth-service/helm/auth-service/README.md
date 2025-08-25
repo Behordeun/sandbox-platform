@@ -143,7 +143,7 @@ helm install auth-service ./auth-service \
   --set postgresql.enabled=false \
   --set secrets.databaseUrl="postgresql://user:pass@db.example.com:5432/authdb" \
   --set secrets.jwtSecretKey="your-secure-jwt-secret" \
-  --set secrets.dojaApiKey="your-doja-api-key" \
+  --set secrets.dojaApiKey="your-dojah-api-key" \
   --set ingress.enabled=true \
   --set ingress.hosts[0].host=auth.yourdomain.com \
   --set ingress.tls[0].secretName=auth-tls \

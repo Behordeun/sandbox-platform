@@ -52,7 +52,7 @@ services:
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - DEBUG=${DEBUG}
-      - DOJA_API_KEY=${DOJA_API_KEY}
+      - DOJAH_API_KEY=${DOJAH_API_KEY}
     ports:
       - "8000:8000"
     depends_on:
