@@ -5,6 +5,7 @@
 ## 🎯 What is the API Gateway?
 
 Think of the API Gateway as the **front door** to all DPI services. Instead of connecting to multiple services individually, you connect to one gateway that:
+
 - **Routes your requests** to the right service (NIN, BVN, SMS, AI, etc.)
 - **Handles authentication** so you don't need to manage tokens for each service
 - **Monitors usage** and provides analytics on your API consumption
@@ -14,11 +15,13 @@ Think of the API Gateway as the **front door** to all DPI services. Instead of c
 ## ✨ Key Features for Nigerian Developers
 
 ### 🔐 **Unified Authentication**
+
 - Single JWT token works across all services
 - Nigerian phone number validation (+234 format)
 - OAuth2 support for enterprise applications
 
 ### 🇳🇬 **Nigerian DPI Services**
+
 - **NIN Verification**: Verify National Identity Numbers
 - **BVN Verification**: Validate Bank Verification Numbers  
 - **SMS Services**: Send messages to Nigerian phone numbers
@@ -26,12 +29,14 @@ Think of the API Gateway as the **front door** to all DPI services. Instead of c
 - **IVR Services**: Interactive Voice Response systems
 
 ### 📊 **Built-in Analytics**
+
 - Track your API usage patterns
 - Monitor service performance
 - Security event detection
 - User engagement metrics
 
 ### 🛡️ **Enterprise Security**
+
 - Rate limiting (100 requests/minute by default)
 - Request logging and audit trails
 - Circuit breaker for service reliability
@@ -40,6 +45,7 @@ Think of the API Gateway as the **front door** to all DPI services. Instead of c
 ## 🚀 Quick Start Guide (5 Minutes)
 
 ### Step 1: Start the Gateway
+
 ```bash
 # From the sandbox-platform root directory
 cd services/api-gateway
@@ -52,6 +58,7 @@ uvicorn app.main:app --reload --host 0.0.0.0 --port 8080
 ```
 
 ### Step 2: Verify It's Running
+
 ```bash
 # Check gateway health
 curl http://localhost:8080/health
@@ -65,11 +72,13 @@ curl http://localhost:8080/health
 ```
 
 ### Step 3: Explore the API Documentation
+
 Open your browser and go to: **http://localhost:8080/docs**
 
 This interactive documentation shows all available endpoints and lets you test them directly!
 
 ### Step 4: Get Your First Token
+
 ```bash
 # Register a new user
 curl -X POST http://localhost:8080/api/v1/auth/register \
@@ -93,6 +102,7 @@ curl -X POST http://localhost:8080/api/v1/auth/login/json \
 ```
 
 ### Step 5: Make Your First API Call
+
 ```bash
 # Use the access_token from the login response
 export TOKEN="your-access-token-here"
@@ -119,8 +129,8 @@ curl -X GET http://localhost:8080/api/v1/auth/me \
 
 | Method | Endpoint | Description | Authentication |
 |--------|----------|-------------|----------------|
-| `POST` | `/api/v1/nin/verify` | Verify NIN with Doja API | Bearer Token |
-| `POST` | `/api/v1/bvn/verify` | Verify BVN with Doja API | Bearer Token |
+| `POST` | `/api/v1/nin/verify` | Verify NIN with Dojah API | Bearer Token |
+| `POST` | `/api/v1/bvn/verify` | Verify BVN with Dojah API | Bearer Token |
 | `GET` | `/api/v1/nin/status/{nin}` | Check NIN verification status | Bearer Token |
 | `GET` | `/api/v1/bvn/status/{bvn}` | Check BVN verification status | Bearer Token |
 
@@ -149,6 +159,7 @@ curl -X GET http://localhost:8080/api/v1/auth/me \
 ## 💡 Real-World Examples
 
 ### Example 1: Verify a Nigerian NIN
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/nin/verify \
   -H "Authorization: Bearer $TOKEN" \
@@ -169,6 +180,7 @@ curl -X POST http://localhost:8080/api/v1/nin/verify \
 ```
 
 ### Example 2: Send SMS to Nigerian Number
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/sms/send \
   -H "Authorization: Bearer $TOKEN" \
@@ -188,6 +200,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
 ```
 
 ### Example 3: Generate Content with AI
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/ai/generate \
   -H "Authorization: Bearer $TOKEN" \
@@ -242,6 +255,7 @@ CORS_ALLOW_CREDENTIALS=true
 ### Required Dependencies
 
 The gateway requires these services to be running:
+
 - **Auth Service** (port 8000) - For user authentication
 - **Redis** (port 6379) - For rate limiting and caching
 - **Backend Services** - NIN (8005), BVN (8006), SMS (8003), AI (8002)
@@ -249,6 +263,7 @@ The gateway requires these services to be running:
 ## 📊 Monitoring Your Usage
 
 ### View Your API Activity
+
 ```bash
 # Analyze your usage patterns
 python ../../analyze-logs.py --user-activity
@@ -261,6 +276,7 @@ python ../../analyze-logs.py --security
 ```
 
 ### Understanding Rate Limits
+
 - **Default Limit**: 100 requests per minute per user
 - **Rate Limit Headers**: Check `X-RateLimit-Remaining` in responses
 - **429 Status Code**: Indicates you've hit the rate limit
@@ -279,6 +295,7 @@ curl -I http://localhost:8080/api/v1/auth/me \
 ## 🛠️ Development & Testing
 
 ### Running Tests
+
 ```bash
 # Install test dependencies
 pip install pytest httpx
@@ -292,6 +309,7 @@ pytest tests/test_routing.py -v
 ```
 
 ### Load Testing
+
 ```bash
 # Install hey (HTTP load testing tool)
 brew install hey  # macOS
@@ -306,6 +324,7 @@ hey -n 1000 -c 10 -H "Authorization: Bearer $TOKEN" \
 ### Debugging Common Issues
 
 #### 1. **Gateway Returns 503 (Service Unavailable)**
+
 ```bash
 # Check if backend services are running
 curl http://localhost:8000/health  # Auth service
@@ -316,6 +335,7 @@ curl http://localhost:8080/api/v1/services/health
 ```
 
 #### 2. **Authentication Fails (401 Unauthorized)**
+
 ```bash
 # Verify your token is valid
 curl -X GET http://localhost:8080/api/v1/auth/me \
@@ -326,6 +346,7 @@ curl -X GET http://localhost:8080/api/v1/auth/me \
 ```
 
 #### 3. **Rate Limited (429 Too Many Requests)**
+
 ```bash
 # Wait for rate limit window to reset (60 seconds by default)
 # Or contact admin to increase your rate limit
@@ -338,6 +359,7 @@ curl -I http://localhost:8080/api/v1/auth/me \
 ## 🚀 Production Deployment
 
 ### Docker Deployment
+
 ```bash
 # Build the gateway image
 docker build -t sandbox-api-gateway:1.0.0 .
@@ -350,6 +372,7 @@ docker run -p 8080:8080 \
 ```
 
 ### Kubernetes Deployment
+
 ```bash
 # Deploy with Helm
 cd helm/api-gateway
@@ -362,6 +385,7 @@ helm install api-gateway . \
 ## 🤝 Getting Help
 
 ### Resources
+
 - **Interactive API Docs**: http://localhost:8080/docs
 - **Health Dashboard**: http://localhost:8080/api/v1/services/health
 - **Metrics**: http://localhost:8080/metrics
@@ -381,13 +405,14 @@ A: Yes! Pass your API key in the `X-API-Key` header instead of the Authorization
 A: Use the built-in analytics: `python ../../analyze-logs.py --user-activity`
 
 ### Support
-- 📧 **Email**: support@sandbox-platform.ng
+
+- 📧 **Email**: [support@sandbox-platform.ng](mail-to:support@sandbox-platform.ng)
 - 💬 **Slack**: #api-gateway-support
 - 🐛 **Issues**: Create an issue in the repository
 - 📖 **Documentation**: Check `/docs` endpoint for latest API reference
 
 ---
 
-**Built with ❤️ for Nigerian developers and startups**
+## Built with ❤️ for Nigerian developers and startups
 
-*Ready to build the next big Nigerian fintech or digital service? The API Gateway is your starting point!*
+*Ready to build the next big digital service? The API Gateway is your starting point!*

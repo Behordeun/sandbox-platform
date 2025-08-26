@@ -5,6 +5,7 @@
 ## 🎯 What is IVR?
 
 Interactive Voice Response (IVR) allows customers to interact with your system through voice and keypad inputs. Perfect for:
+
 - **Customer Support**: Automated help systems
 - **Banking Services**: Account balance, transaction history
 - **Surveys & Feedback**: Voice-based data collection
@@ -13,18 +14,21 @@ Interactive Voice Response (IVR) allows customers to interact with your system t
 ## ✨ Key Features
 
 ### 🇳🇬 **Nigerian Language Support**
+
 - English (Nigerian accent)
 - Hausa, Yoruba, Igbo support
 - Local context awareness
 - Cultural appropriate responses
 
 ### 📞 **Voice Capabilities**
+
 - Text-to-speech in Nigerian languages
 - Speech recognition
 - DTMF (keypad) input handling
 - Call routing and forwarding
 
 ### 🔧 **Easy Integration**
+
 - RESTful API interface
 - Webhook support for call events
 - Real-time call monitoring
@@ -33,6 +37,7 @@ Interactive Voice Response (IVR) allows customers to interact with your system t
 ## 🚀 Quick Start (3 Minutes)
 
 ### Step 1: Setup Environment
+
 ```bash
 # Navigate to IVR service directory
 cd sandbox/ivr
@@ -42,12 +47,14 @@ pip install -r requirements.txt
 ```
 
 ### Step 2: Start Service
+
 ```bash
 # Start the IVR service
 uvicorn app.main:app --reload --port 8004
 ```
 
 ### Step 3: Test It Works
+
 ```bash
 # Check service health
 curl http://localhost:8004/health
@@ -74,6 +81,7 @@ curl http://localhost:8004/health
 ## 💡 Real-World Examples
 
 ### Example 1: Create Banking IVR Flow
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/ivr/create-flow \
   -H "Authorization: Bearer $TOKEN" \
@@ -100,6 +108,7 @@ curl -X POST http://localhost:8080/api/v1/ivr/create-flow \
 ```
 
 ### Example 2: Handle Incoming Call
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/ivr/handle-call \
   -H "Authorization: Bearer $TOKEN" \
@@ -113,6 +122,7 @@ curl -X POST http://localhost:8080/api/v1/ivr/handle-call \
 ```
 
 ### Response Example
+
 ```json
 {
   "call_id": "call_123456",
@@ -131,6 +141,7 @@ curl -X POST http://localhost:8080/api/v1/ivr/handle-call \
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```env
 # Service Configuration
 APP_NAME=IVR Service
@@ -156,6 +167,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ## 🤝 Integration Examples
 
 ### Python Integration
+
 ```python
 import requests
 

@@ -9,7 +9,7 @@ api_router = APIRouter()
 
 @api_router.post("/verify", response_model=NINVerificationResponse)
 async def verify_nin(verification_request: NINVerificationRequest) -> Any:
-    """Verify NIN using Doja API."""
+    """Verify NIN using Dojah API."""
     try:
         result = await verify_nin_with_doja(verification_request.nin)
 

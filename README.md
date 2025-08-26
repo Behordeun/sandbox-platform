@@ -330,7 +330,7 @@ Comprehensive user activity tracking with structured JSON logging:
 #### Identity Verification
 1. **NIN Verification**: Dedicated NIN service at `/api/v1/nin/verify`
 2. **BVN Verification**: Dedicated BVN service at `/api/v1/bvn/verify`
-3. **Doja API Integration**: Real-time verification through Doja API
+3. **Dojah API Integration**: Real-time verification through Dojah API
 4. **Status Tracking**: Monitor verification status via respective service endpoints
 5. **Enhanced Access**: Verified users receive additional platform privileges
 
@@ -567,7 +567,7 @@ GET /api/v1/services/health
 ### Service-Specific Documentation
 - **Auth Service**: OAuth2 flows, Nigerian phone validation, JWT management
 - **API Gateway**: Request routing, rate limiting, DPI health monitoring
-- **NIN Service**: Nigerian Identity Number verification via Doja API
+- **NIN Service**: Nigerian Identity Number verification via Dojah API
 - **BVN Service**: Bank Verification Number validation
 - **SMS Service**: Nigerian SMS messaging and notifications
 - **AI Service**: Content generation and data analysis

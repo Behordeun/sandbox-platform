@@ -9,7 +9,7 @@ api_router = APIRouter()
 
 @api_router.post("/verify", response_model=BVNVerificationResponse)
 async def verify_bvn(verification_request: BVNVerificationRequest) -> Any:
-    """Verify BVN using Doja API."""
+    """Verify BVN using Dojah API."""
     try:
         result = await verify_bvn_with_doja(verification_request.bvn)
 

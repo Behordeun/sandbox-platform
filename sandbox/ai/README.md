@@ -5,6 +5,7 @@
 ## 🎯 What is the AI Service?
 
 This service provides AI-powered capabilities specifically optimized for Nigerian businesses and contexts:
+
 - **Content Generation**: Blog posts, marketing copy, business plans
 - **Data Analysis**: Extract insights from Nigerian market data
 - **Language Processing**: Support for Nigerian English and local contexts
@@ -13,12 +14,14 @@ This service provides AI-powered capabilities specifically optimized for Nigeria
 ## ✨ Key Features
 
 ### 🇳🇬 **Nigerian Context Awareness**
+
 - Understanding of Nigerian business environment
 - Local market knowledge and trends
 - Cultural context in content generation
 - Nigerian English language patterns
 
 ### 🚀 **Multiple AI Capabilities**
+
 - Text generation and completion
 - Data analysis and insights
 - Sentiment analysis
@@ -26,6 +29,7 @@ This service provides AI-powered capabilities specifically optimized for Nigeria
 - Question answering
 
 ### 💡 **Business-Ready Applications**
+
 - Marketing content creation
 - Business plan generation
 - Customer service automation
@@ -34,6 +38,7 @@ This service provides AI-powered capabilities specifically optimized for Nigeria
 ## 🚀 Quick Start (3 Minutes)
 
 ### Step 1: Setup Environment
+
 ```bash
 # Navigate to AI service directory
 cd sandbox/ai
@@ -43,12 +48,14 @@ pip install -r requirements.txt
 ```
 
 ### Step 2: Start Service
+
 ```bash
 # Start the AI service
 uvicorn app.main:app --reload --port 8002
 ```
 
 ### Step 3: Test It Works
+
 ```bash
 # Check service health
 curl http://localhost:8002/health
@@ -75,6 +82,7 @@ curl http://localhost:8002/health
 ## 💡 Real-World Examples
 
 ### Example 1: Generate Nigerian Business Plan
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/ai/generate \
   -H "Authorization: Bearer $TOKEN" \
@@ -88,6 +96,7 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ```
 
 ### Response Example
+
 ```json
 {
   "generated_text": "# Nigerian Fintech Business Plan\n\n## Executive Summary\nOur fintech startup, PayNaija, aims to revolutionize mobile payments across Nigeria by providing seamless, secure, and affordable digital payment solutions...",
@@ -99,6 +108,7 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ```
 
 ### Example 2: Analyze Nigerian Market Data
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/ai/analyze \
   -H "Authorization: Bearer $TOKEN" \
@@ -111,6 +121,7 @@ curl -X POST http://localhost:8080/api/v1/ai/analyze \
 ```
 
 ### Response Example
+
 ```json
 {
   "analysis": {
@@ -136,6 +147,7 @@ curl -X POST http://localhost:8080/api/v1/ai/analyze \
 ```
 
 ### Example 3: Generate Marketing Content
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/ai/generate \
   -H "Authorization: Bearer $TOKEN" \
@@ -149,6 +161,7 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ```
 
 ### Response Example
+
 ```json
 {
   "generated_text": "🚀 BREAKING: Same-day delivery is now LIVE in Lagos! 📦✨\n\nOrder before 2PM and get your items delivered the same day! From Victoria Island to Ikeja, we've got you covered. 🏃‍♂️💨\n\n#LagosDelivery #SameDayDelivery #NigerianEcommerce #FastDelivery",
@@ -161,6 +174,7 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```env
 # Service Configuration
 APP_NAME=AI Service
@@ -187,6 +201,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ## 🛠️ Development & Testing
 
 ### Running Tests
+
 ```bash
 # Install test dependencies
 pip install pytest httpx
@@ -196,6 +211,7 @@ pytest tests/ -v
 ```
 
 ### Mock Mode for Testing
+
 ```bash
 # Enable test mode (uses mock responses)
 curl -X POST http://localhost:8002/api/v1/ai/generate \
@@ -210,6 +226,7 @@ curl -X POST http://localhost:8002/api/v1/ai/generate \
 ## 🤝 Integration Examples
 
 ### Python Integration
+
 ```python
 import requests
 
