@@ -5,6 +5,7 @@
 ## 🎯 What is the SMS Service?
 
 This service enables you to send SMS messages to Nigerian mobile numbers across all networks (MTN, Airtel, Glo, 9mobile). Essential for:
+
 - **OTP Verification**: Secure user authentication
 - **Notifications**: Order updates, payment confirmations
 - **Marketing**: Promotional campaigns and announcements
@@ -13,21 +14,25 @@ This service enables you to send SMS messages to Nigerian mobile numbers across 
 ## ✨ Key Features
 
 ### 📲 **Multi-Network Support**
+
 - MTN, Airtel, Glo, 9mobile coverage
 - Automatic network detection
 - Optimized routing for best delivery
 
 ### 🚀 **High Delivery Rates**
+
 - Direct operator connections
 - Real-time delivery reports
 - Retry mechanisms for failed messages
 
 ### 💰 **Cost-Effective**
+
 - Competitive Nigerian SMS rates
 - Bulk messaging discounts
 - Pay-per-message or monthly plans
 
 ### 🔒 **Secure & Reliable**
+
 - Encrypted message transmission
 - Delivery confirmation
 - Message queuing for high volume
@@ -35,6 +40,7 @@ This service enables you to send SMS messages to Nigerian mobile numbers across 
 ## 🚀 Quick Start (3 Minutes)
 
 ### Step 1: Setup Environment
+
 ```bash
 # Navigate to SMS service directory
 cd sandbox/sms
@@ -47,6 +53,7 @@ nano .env
 ```
 
 ### Step 2: Configure SMS Provider
+
 ```env
 # SMS Provider Configuration (choose one)
 SMS_PROVIDER=termii  # or twilio, infobip, etc.
@@ -55,6 +62,7 @@ SMS_SENDER_ID=YourBrand  # Your brand name (max 11 chars)
 ```
 
 ### Step 3: Install & Start
+
 ```bash
 # Install dependencies
 pip install -r requirements.txt
@@ -64,6 +72,7 @@ uvicorn app.main:app --reload --port 8003
 ```
 
 ### Step 4: Test It Works
+
 ```bash
 # Check service health
 curl http://localhost:8003/health
@@ -78,6 +87,7 @@ curl http://localhost:8003/health
 ## 📚 API Reference
 
 ### 🔑 Authentication Required
+
 All endpoints require authentication via the API Gateway or direct JWT token.
 
 ### Core Endpoints
@@ -93,6 +103,7 @@ All endpoints require authentication via the API Gateway or direct JWT token.
 ## 💡 Real-World Examples
 
 ### Example 1: Send OTP for User Verification
+
 ```bash
 # Through API Gateway (Recommended)
 curl -X POST http://localhost:8080/api/v1/sms/send \
@@ -116,6 +127,7 @@ curl -X POST http://localhost:8003/api/v1/sms/send \
 ```
 
 ### Response Example
+
 ```json
 {
   "status": "sent",
@@ -131,6 +143,7 @@ curl -X POST http://localhost:8003/api/v1/sms/send \
 ```
 
 ### Example 2: Send Payment Confirmation
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/sms/send \
   -H "Authorization: Bearer $TOKEN" \
@@ -153,6 +166,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
 ```
 
 ### Example 3: Send Bulk Marketing SMS
+
 ```bash
 curl -X POST http://localhost:8080/api/v1/sms/send-bulk \
   -H "Authorization: Bearer $TOKEN" \
@@ -196,6 +210,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send-bulk \
 ```
 
 ### Example 4: Check Message Delivery Status
+
 ```bash
 curl -X GET http://localhost:8080/api/v1/sms/status/msg_sms_789012345 \
   -H "Authorization: Bearer $TOKEN"
@@ -215,6 +230,7 @@ curl -X GET http://localhost:8080/api/v1/sms/status/msg_sms_789012345 \
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```env
 # Service Configuration
 APP_NAME=SMS Service
@@ -240,6 +256,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ### SMS Provider Setup
 
 #### Option 1: Termii (Recommended for Nigeria)
+
 1. Visit [https://termii.com](https://termii.com)
 2. Create account and complete verification
 3. Get API key from dashboard
@@ -247,6 +264,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 5. Configure sender ID
 
 #### Option 2: Twilio
+
 1. Visit [https://twilio.com](https://twilio.com)
 2. Create account and get Account SID & Auth Token
 3. Purchase Nigerian phone number
@@ -255,6 +273,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ## 📱 Nigerian Phone Number Format
 
 ### Supported Formats
+
 ```python
 # International format (Recommended)
 "+2348012345678"  ✅
@@ -271,6 +290,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ```
 
 ### Network Detection
+
 ```json
 {
   "+2348012345678": "MTN",
@@ -283,11 +303,13 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ## 💰 SMS Pricing & Costs
 
 ### Typical Nigerian SMS Rates
+
 - **Local SMS**: ₦3.50 - ₦5.00 per message
 - **Bulk SMS**: ₦2.50 - ₦4.00 per message (volume discounts)
 - **OTP SMS**: ₦4.00 - ₦6.00 per message (higher priority)
 
 ### Cost Optimization Tips
+
 1. **Use bulk endpoints** for multiple recipients
 2. **Optimize message length** (160 chars = 1 unit)
 3. **Choose appropriate message type** (marketing vs transactional)
@@ -297,6 +319,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ## 🛠️ Development & Testing
 
 ### Running Tests
+
 ```bash
 # Install test dependencies
 pip install pytest httpx
@@ -309,6 +332,7 @@ pytest tests/test_sms_sending.py -v
 ```
 
 ### Mock Mode for Testing
+
 ```bash
 # Enable test mode (won't send real SMS)
 curl -X POST http://localhost:8003/api/v1/sms/send \
@@ -322,6 +346,7 @@ curl -X POST http://localhost:8003/api/v1/sms/send \
 ```
 
 ### Error Handling
+
 ```json
 // Invalid phone number
 {
@@ -355,6 +380,7 @@ curl -X POST http://localhost:8003/api/v1/sms/send \
 ## 🚀 Production Deployment
 
 ### Docker Deployment
+
 ```bash
 # Build image
 docker build -t sms-service:1.0.0 .
@@ -367,6 +393,7 @@ docker run -p 8003:8003 \
 ```
 
 ### Environment-Specific Configuration
+
 ```bash
 # Development
 DEBUG=true
@@ -383,6 +410,7 @@ SMS_DAILY_LIMIT=100000   # Production daily limits
 ### Common Issues
 
 #### 1. **Messages Not Delivering**
+
 ```bash
 # Check SMS provider balance
 curl -X GET http://localhost:8003/api/v1/sms/balance \
@@ -394,6 +422,7 @@ curl -X GET http://localhost:8003/api/v1/sms/status/msg_id \
 ```
 
 #### 2. **Invalid Sender ID**
+
 ```bash
 # Sender ID rules:
 # - Max 11 characters
@@ -403,6 +432,7 @@ curl -X GET http://localhost:8003/api/v1/sms/status/msg_id \
 ```
 
 #### 3. **High Costs**
+
 ```bash
 # Monitor message length (160 chars = 1 unit)
 # Use bulk endpoints for multiple recipients
@@ -412,6 +442,7 @@ curl -X GET http://localhost:8003/api/v1/sms/status/msg_id \
 ## 🤝 Integration Examples
 
 ### Python Integration
+
 ```python
 import requests
 
@@ -437,6 +468,7 @@ if result['status'] == 'sent':
 ```
 
 ### JavaScript Integration
+
 ```javascript
 async function sendSMS(to, message, token, type = 'notification') {
     try {
@@ -471,12 +503,14 @@ if (result.success) {
 ## 📞 Support & Resources
 
 ### Getting Help
+
 - **Provider Docs**: Check your SMS provider documentation
 - **Service Logs**: `tail -f ../logs/sms.log`
 - **Health Check**: `curl http://localhost:8003/health`
 - **Balance Check**: Use `/api/v1/sms/balance` endpoint
 
 ### Best Practices
+
 1. **Validate phone numbers** before sending
 2. **Use appropriate message types** (OTP, notification, marketing)
 3. **Monitor delivery rates** and costs
@@ -486,6 +520,7 @@ if (result.success) {
 7. **Use test mode** during development
 
 ### Compliance & Regulations
+
 - **NCC Guidelines**: Follow Nigerian Communications Commission rules
 - **Opt-out Mechanisms**: Include unsubscribe options for marketing
 - **Data Protection**: Follow NDPR for customer phone numbers
