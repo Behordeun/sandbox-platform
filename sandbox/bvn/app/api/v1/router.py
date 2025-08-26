@@ -1,4 +1,5 @@
 from typing import Any
+
 from app.schemas.bvn import BVNVerificationRequest, BVNVerificationResponse
 from app.services.verification import verify_bvn_with_doja
 from fastapi import APIRouter, HTTPException
@@ -15,7 +16,7 @@ async def verify_bvn(verification_request: BVNVerificationRequest) -> Any:
         return BVNVerificationResponse(
             bvn_verified=result["success"],
             verification_data=result["data"] if result["success"] else None,
-            message=result["message"]
+            message=result["message"],
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -37,7 +38,7 @@ async def lookup_bvn_basic(verification_request: BVNVerificationRequest) -> Any:
         return BVNVerificationResponse(
             bvn_verified=result["success"],
             verification_data=result["data"] if result["success"] else None,
-            message=f"BVN lookup: {result['message']}"
+            message=f"BVN lookup: {result['message']}",
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

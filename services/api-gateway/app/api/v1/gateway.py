@@ -10,8 +10,9 @@ router = APIRouter()
 
 
 @router.api_route(
-    "/auth/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_auth_service_{method}"
+    "/auth/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_auth_service_{method}",
 )
 async def proxy_auth_service(request: Request, path: str) -> Response:
     """Proxy requests to auth service."""
@@ -19,8 +20,9 @@ async def proxy_auth_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/sms/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_sms_service_{method}"
+    "/sms/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_sms_service_{method}",
 )
 async def proxy_sms_service(request: Request, path: str) -> Response:
     """Proxy requests to SMS service."""
@@ -28,8 +30,9 @@ async def proxy_sms_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/llm/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_llm_service_{method}"
+    "/llm/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_llm_service_{method}",
 )
 async def proxy_llm_service(request: Request, path: str) -> Response:
     """Proxy requests to LLM service."""
@@ -37,8 +40,9 @@ async def proxy_llm_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/nin/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_nin_service_{method}"
+    "/nin/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_nin_service_{method}",
 )
 async def proxy_nin_service(request: Request, path: str) -> Response:
     """Proxy requests to NIN service."""
@@ -46,8 +50,9 @@ async def proxy_nin_service(request: Request, path: str) -> Response:
 
 
 @router.api_route(
-    "/bvn/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_bvn_service_{method}"
+    "/bvn/{path:path}",
+    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    operation_id="proxy_bvn_service_{method}",
 )
 async def proxy_bvn_service(request: Request, path: str) -> Response:
     """Proxy requests to BVN service."""
@@ -65,14 +70,22 @@ async def get_dpi_health() -> Any:
     """Get DPI-specific service health for developers."""
     dpi_services = ["nin", "bvn", "sms", "llm"]
     health_status = await health_service.get_services_health()
-    
+
     dpi_health = {
-        "status": "healthy" if health_status.get("overall_status") == "healthy" else "degraded",
-        "services": {k: v for k, v in health_status.get("services", {}).items() if k in dpi_services},
+        "status": (
+            "healthy"
+            if health_status.get("overall_status") == "healthy"
+            else "degraded"
+        ),
+        "services": {
+            k: v
+            for k, v in health_status.get("services", {}).items()
+            if k in dpi_services
+        },
         "ready_for_development": all(
-            health_status.get("services", {}).get(svc, {}).get("status") == "healthy" 
+            health_status.get("services", {}).get(svc, {}).get("status") == "healthy"
             for svc in dpi_services
-        )
+        ),
     }
     return dpi_health
 
@@ -101,7 +114,7 @@ async def get_service_metrics(service_name: str) -> Any:
 @router.post("/auth/login")
 async def system_login(request: Request) -> Response:
     """System-wide authentication endpoint.
-    
+
     Example for Nigerian developers:
     {
         "identifier": "developer@fintech.ng",
@@ -119,9 +132,7 @@ async def nin_examples():
         "message": "NIN verification examples",
         "data": {
             "test_nin": "12345678901",
-            "example_request": {
-                "nin": "12345678901"
-            },
+            "example_request": {"nin": "12345678901"},
             "example_response": {
                 "success": True,
                 "message": "NIN verified successfully",
@@ -130,10 +141,10 @@ async def nin_examples():
                     "first_name": "Adebayo",
                     "last_name": "Ogundimu",
                     "date_of_birth": "1990-01-15",
-                    "gender": "Male"
-                }
-            }
-        }
+                    "gender": "Male",
+                },
+            },
+        },
     }
 
 
@@ -146,11 +157,11 @@ async def sms_examples():
         "data": {
             "example_request": {
                 "to": "+2348012345678",
-                "message": "Your OTP is 123456. Valid for 5 minutes."
+                "message": "Your OTP is 123456. Valid for 5 minutes.",
             },
             "bulk_sms_request": {
                 "recipients": ["+2348012345678", "+2347012345678"],
-                "message": "Welcome to our DPI platform!"
-            }
-        }
+                "message": "Welcome to our DPI platform!",
+            },
+        },
     }
