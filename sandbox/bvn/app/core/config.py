@@ -9,7 +9,7 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8006
 
-    # Doja API settings
+    # Dojah API settings
     doja_api_key: str = ""
     doja_app_id: str = ""
     doja_base_url: str = "https://api.dojah.io"

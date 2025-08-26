@@ -13,7 +13,7 @@ These are production-ready microservices that provide essential digital infrastr
 
 ## 🏗️ Service Architecture
 
-```
+```plain text
 ┌─────────────────────────────────────────────────────────────┐
 │                    API Gateway (Port 8080)                  │
 │                 Single Entry Point for All Services         │
@@ -35,6 +35,7 @@ These are production-ready microservices that provide essential digital infrastr
 ## 🚀 Quick Start (All Services)
 
 ### Option 1: Start Everything at Once
+
 ```bash
 # From sandbox-platform root directory
 ./sandbox-start.sh
@@ -49,6 +50,7 @@ These are production-ready microservices that provide essential digital infrastr
 ```
 
 ### Option 2: Start Individual Services
+
 ```bash
 # Navigate to sandbox directory
 cd sandbox
@@ -63,6 +65,7 @@ cd sms && uvicorn app.main:app --port 8003 &
 ```
 
 ### Verify All Services
+
 ```bash
 # Check all services health
 ./check-services.sh
@@ -85,6 +88,7 @@ curl http://localhost:8080/api/v1/services/health
 ## 🔧 Configuration
 
 ### Environment Setup
+
 Each service has its own `.env.example` file. Copy and configure:
 
 ```bash
@@ -95,8 +99,9 @@ cp .env.example .env
 ```
 
 ### Common Configuration
+
 ```env
-# Doja API (for NIN/BVN services)
+# Dojah API (for NIN/BVN services)
 DOJAH_API_KEY=your-dojah-api-key
 DOJAH_APP_ID=your-dojah-app-id
 
@@ -112,6 +117,7 @@ AI_MODEL=gpt-3.5-turbo
 ## 💡 Usage Examples
 
 ### Complete User Onboarding Flow
+
 ```bash
 # 1. Register user
 curl -X POST http://localhost:8080/api/v1/auth/register \
@@ -135,6 +141,7 @@ curl -X POST http://localhost:8080/api/v1/bvn/verify \
 ```
 
 ### AI-Powered Customer Service
+
 ```bash
 # Generate customer response
 curl -X POST http://localhost:8080/api/v1/ai/generate \
@@ -149,6 +156,7 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ## 📊 Monitoring & Analytics
 
 ### Service Health Monitoring
+
 ```bash
 # Check all services
 curl http://localhost:8080/api/v1/services/health
@@ -160,6 +168,7 @@ curl http://localhost:8003/health  # SMS
 ```
 
 ### Usage Analytics
+
 ```bash
 # Analyze service usage
 python ../analyze-logs.py --all
@@ -171,6 +180,7 @@ python ../analyze-logs.py --user-activity | grep sms
 ```
 
 ### Real-time Monitoring
+
 ```bash
 # Monitor live activity
 tail -f logs/nin.log
@@ -182,6 +192,7 @@ tail -f logs/ai.log
 ## 🛠️ Development
 
 ### Running Tests
+
 ```bash
 # Test all services
 for service in nin bvn sms ai ivr two-way-sms; do
@@ -190,6 +201,7 @@ done
 ```
 
 ### Adding New Services
+
 1. Create service directory: `mkdir new-service`
 2. Follow the existing service structure
 3. Add to `start-all.sh` script
@@ -197,12 +209,13 @@ done
 5. Add health check endpoint
 
 ### Service Dependencies
+
 ```bash
 # Required for all services
 pip install fastapi uvicorn pydantic
 
 # Service-specific dependencies
-# NIN/BVN: requests (for Doja API)
+# NIN/BVN: requests (for Dojah API)
 # SMS: requests (for SMS providers)
 # AI: openai anthropic (for AI providers)
 ```
@@ -210,6 +223,7 @@ pip install fastapi uvicorn pydantic
 ## 🚀 Production Deployment
 
 ### Docker Deployment
+
 ```bash
 # Build all service images
 for service in nin bvn sms ai ivr two-way-sms; do
@@ -221,6 +235,7 @@ docker-compose -f ../deployment/docker-compose/docker-compose.prod.yml up
 ```
 
 ### Kubernetes Deployment
+
 ```bash
 # Deploy all services
 cd ../deployment/helmfile
@@ -230,6 +245,7 @@ helmfile -e prod apply
 ## 📞 Support & Resources
 
 ### Service Documentation
+
 - **[NIN Service](nin/README.md)** - Nigerian Identity Number verification
 - **[BVN Service](bvn/README.md)** - Bank Verification Number validation
 - **[SMS Service](sms/README.md)** - SMS messaging and notifications
@@ -238,12 +254,14 @@ helmfile -e prod apply
 - **[Two-Way SMS](two-way-sms/README.md)** - Bidirectional SMS communication
 
 ### Getting Help
+
 - **Health Checks**: Each service has `/health` endpoint
 - **API Documentation**: Each service has `/docs` endpoint
 - **Logs**: Check `logs/` directory for service-specific logs
 - **Monitoring**: Use `../analyze-logs.py` for usage analytics
 
 ### Best Practices
+
 1. **Always authenticate** through the API Gateway
 2. **Handle errors gracefully** - services can fail
 3. **Monitor usage and costs** - especially for external APIs
