@@ -1,9 +1,11 @@
 from typing import Any, Optional
+
 from pydantic import BaseModel
 
 
 class DPIResponse(BaseModel):
     """Standard DPI API response format"""
+
     success: bool
     message: str
     data: Optional[Any] = None
@@ -12,6 +14,7 @@ class DPIResponse(BaseModel):
 
 class DPIError(BaseModel):
     """Standard DPI error response"""
+
     success: bool = False
     message: str
     error_code: str
