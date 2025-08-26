@@ -10,7 +10,7 @@ from app.core.security import (
 from app.crud.password_reset import password_reset_crud
 from app.crud.user import user_crud
 from app.crud.password_reset import password_reset_crud
-from app.email_service import email_service
+from app.crud.user import user_crud
 from app.dependencies.auth import get_current_active_user, oauth2_scheme
 from app.dependencies.database import get_db
 from app.email_service import email_service
@@ -22,8 +22,6 @@ from app.schemas.password_reset import (
     PasswordResetResponse,
 )
 from app.schemas.user import UserCreate, UserLogin, UserProfile, UserResponse
-from app.schemas.password_reset import PasswordResetRequest, PasswordResetConfirm, PasswordResetResponse
-from app.schemas.base import DPIResponse, DPIError
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session

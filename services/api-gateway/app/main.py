@@ -81,6 +81,7 @@ if settings.request_logging_enabled or settings.response_logging_enabled:
 if settings.rate_limit_enabled:
     try:
         import redis
+
         redis_client = redis.from_url(settings.redis_url)
         if redis_client is not None:
             redis_client.ping()

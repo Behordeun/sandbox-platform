@@ -10,9 +10,9 @@ class Settings(BaseSettings):
     port: int = 8005
 
     # Dojah API settings
-    doja_api_key: str = ""
-    doja_app_id: str = ""
-    doja_base_url: str = "https://api.dojah.io"
+    dojah_api_key: str = ""
+    dojah_app_id: str = ""
+    dojah_base_url: str = "https://api.dojah.io"
 
     # Auth service URL for user updates
     auth_service_url: str = "http://auth-service:8000"
