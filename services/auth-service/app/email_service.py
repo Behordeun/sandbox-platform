@@ -1,7 +1,6 @@
 import smtplib
-from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from typing import Optional
+from email.mime.text import MIMEText
 
 from app.core.config import settings
 
@@ -22,19 +21,19 @@ class EmailService:
             return True  # Mock success for development
 
         try:
-            msg = MIMEMultipart('alternative')
-            msg['Subject'] = subject
-            msg['From'] = f"{self.from_name} <{self.from_email}>"
-            msg['To'] = to_email
+            msg = MIMEMultipart("alternative")
+            msg["Subject"] = subject
+            msg["From"] = f"{self.from_name} <{self.from_email}>"
+            msg["To"] = to_email
 
-            html_part = MIMEText(html_content, 'html')
+            html_part = MIMEText(html_content, "html")
             msg.attach(html_part)
 
             with smtplib.SMTP(self.smtp_host, self.smtp_port) as server:
                 server.starttls()
                 server.login(self.smtp_username, self.smtp_password)
                 server.send_message(msg)
-            
+
             return True
         except Exception as e:
             print(f"Email sending failed: {e}")
@@ -43,7 +42,7 @@ class EmailService:
     def send_registration_confirmation(self, to_email: str, first_name: str) -> bool:
         """Send registration confirmation email"""
         subject = "Welcome to DPI Sandbox Platform! 🇳🇬"
-        
+
         html_content = f"""
         <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -76,15 +75,17 @@ class EmailService:
         </body>
         </html>
         """
-        
+
         return self.send_email(to_email, subject, html_content)
 
     def send_password_reset_email(self, to_email: str, reset_token: str) -> bool:
         """Send password reset email with verification link"""
         subject = "Reset Your DPI Sandbox Password"
-        
-        reset_link = f"http://localhost:3000/reset-password?token={reset_token}&email={to_email}"
-        
+
+        reset_link = (
+            f"http://localhost:3000/reset-password?token={reset_token}&email={to_email}"
+        )
+
         html_content = f"""
         <html>
         <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -120,7 +121,7 @@ class EmailService:
         </body>
         </html>
         """
-        
+
         return self.send_email(to_email, subject, html_content)
 
 

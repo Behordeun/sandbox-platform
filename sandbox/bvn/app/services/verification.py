@@ -52,7 +52,9 @@ async def verify_bvn_with_doja(bvn: str) -> dict:
                     "message": "BVN verified successfully",
                 }
             else:
-                error_msg = response_data.get("error", {}).get("message", "Verification failed")
+                error_msg = response_data.get("error", {}).get(
+                    "message", "Verification failed"
+                )
                 return {
                     "success": False,
                     "data": None,

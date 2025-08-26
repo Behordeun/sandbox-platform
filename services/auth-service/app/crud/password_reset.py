@@ -14,12 +14,8 @@ class CRUDPasswordReset(CRUDBase[PasswordResetToken, dict, dict]):
         """Create a password reset token."""
         token = secrets.token_urlsafe(32)
         expires_at = datetime.now() + timedelta(minutes=expires_in_minutes)
-        
-        db_obj = PasswordResetToken(
-            email=email,
-            token=token,
-            expires_at=expires_at
-        )
+
+        db_obj = PasswordResetToken(email=email, token=token, expires_at=expires_at)
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -27,13 +23,19 @@ class CRUDPasswordReset(CRUDBase[PasswordResetToken, dict, dict]):
 
     def get_by_token(self, db: Session, *, token: str) -> Optional[PasswordResetToken]:
         """Get reset token by token string."""
-        return db.query(PasswordResetToken).filter(
-            PasswordResetToken.token == token,
-            PasswordResetToken.expires_at > datetime.now(),
-            PasswordResetToken.is_used == False
-        ).first()
+        return (
+            db.query(PasswordResetToken)
+            .filter(
+                PasswordResetToken.token == token,
+                PasswordResetToken.expires_at > datetime.now(),
+                PasswordResetToken.is_used == False,
+            )
+            .first()
+        )
 
-    def mark_as_used(self, db: Session, *, token_obj: PasswordResetToken) -> PasswordResetToken:
+    def mark_as_used(
+        self, db: Session, *, token_obj: PasswordResetToken
+    ) -> PasswordResetToken:
         """Mark token as used."""
         token_obj.is_used = True
         db.add(token_obj)
@@ -43,9 +45,11 @@ class CRUDPasswordReset(CRUDBase[PasswordResetToken, dict, dict]):
 
     def cleanup_expired_tokens(self, db: Session) -> int:
         """Remove expired tokens."""
-        count = db.query(PasswordResetToken).filter(
-            PasswordResetToken.expires_at < datetime.now()
-        ).delete()
+        count = (
+            db.query(PasswordResetToken)
+            .filter(PasswordResetToken.expires_at < datetime.now())
+            .delete()
+        )
         db.commit()
         return count
 
