@@ -1,15 +1,17 @@
 # BVN Verification Service
 
-A FastAPI-based Bank Verification Number (BVN) verification service integrated with Doja API for real-time Nigerian banking identity verification.
+A FastAPI-based Bank Verification Number (BVN) verification service integrated with Dojah API for real-time Nigerian banking identity verification.
 
 ## 🚀 Quick Start
 
 ### Prerequisites
+
 - Python 3.11+
-- Doja API credentials (API Key + App ID)
+- Dojah API credentials (API Key + App ID)
 - Internet connection for API calls
 
 ### Local Setup
+
 ```bash
 # Clone and navigate
 cd sandbox/bvn
@@ -17,7 +19,7 @@ cd sandbox/bvn
 # Copy environment file
 cp .env.example .env
 
-# Edit .env with your Doja credentials
+# Edit .env with your Dojah credentials
 nano .env
 
 # Install dependencies
@@ -28,6 +30,7 @@ uvicorn app.main:app --reload --port 8006
 ```
 
 ### Verify Setup
+
 ```bash
 # Health check
 curl http://localhost:8006/health
@@ -39,11 +42,12 @@ open http://localhost:8006/docs
 ## 📋 Service Overview
 
 **Port**: 8006  
-**Purpose**: Bank Verification Number validation via Doja API  
-**Integration**: Doja KYC API for real-time BVN verification  
+**Purpose**: Bank Verification Number validation via Dojah API  
+**Integration**: Dojah KYC API for real-time BVN verification  
 
 ### Key Features
-- Real-time BVN verification with Doja API
+
+- Real-time BVN verification with Dojah API
 - Basic BVN lookup functionality
 - Structured response with banking details
 - Error handling and timeout management
@@ -52,6 +56,7 @@ open http://localhost:8006/docs
 ## 🔧 Configuration
 
 ### Environment Variables
+
 ```env
 # Service Configuration
 APP_NAME=BVN Verification Service
@@ -60,7 +65,7 @@ DEBUG=false
 HOST=0.0.0.0
 PORT=8006
 
-# Doja API Configuration (Required)
+# Dojah API Configuration (Required)
 DOJAH_API_KEY=your-dojah-api-key
 DOJAH_APP_ID=your-dojah-app-id
 DOJAH_BASE_URL=https://api.dojah.io
@@ -69,8 +74,9 @@ DOJAH_BASE_URL=https://api.dojah.io
 AUTH_SERVICE_URL=http://auth-service:8000
 ```
 
-### Doja API Setup
-1. Sign up at [Doja.io](https://dojah.io)
+### Dojah API Setup
+
+1. Sign up at [Dojah.io](https://dojah.io)
 2. Get your API Key and App ID from dashboard
 3. Add credentials to `.env` file
 4. Test connection with verification endpoint
@@ -80,9 +86,11 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ### Core Endpoints
 
 #### POST /api/v1/verify
-**Purpose**: Full BVN verification with Doja API
+
+**Purpose**: Full BVN verification with Dojah API
 
 **Request**:
+
 ```json
 {
   "bvn": "12345678901"
@@ -90,6 +98,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ```
 
 **Response**:
+
 ```json
 {
   "bvn_verified": true,
@@ -114,9 +123,11 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ```
 
 #### POST /api/v1/lookup
+
 **Purpose**: Basic BVN lookup
 
 **Request**:
+
 ```json
 {
   "bvn": "12345678901"
@@ -126,9 +137,11 @@ AUTH_SERVICE_URL=http://auth-service:8000
 **Response**: Same as verify endpoint
 
 #### GET /api/v1/status/{bvn}
+
 **Purpose**: Get BVN verification status
 
 **Response**:
+
 ```json
 {
   "message": "BVN 12345678901 status check",
@@ -137,9 +150,11 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ```
 
 #### GET /health
+
 **Purpose**: Service health check
 
 **Response**:
+
 ```json
 {
   "status": "healthy",
@@ -150,6 +165,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 ## 🧪 Testing
 
 ### Manual Testing
+
 ```bash
 # Test BVN verification
 curl -X POST http://localhost:8006/api/v1/verify \
@@ -169,6 +185,7 @@ curl http://localhost:8006/health
 ```
 
 ### Via API Gateway
+
 ```bash
 # Get auth token first
 TOKEN=$(curl -X POST http://localhost:8080/api/v1/auth/login \
@@ -184,6 +201,7 @@ curl -X POST http://localhost:8080/api/v1/bvn/verify \
 ```
 
 ### Python Testing
+
 ```python
 import httpx
 
@@ -203,6 +221,7 @@ asyncio.run(test_bvn_verification())
 ## 🐳 Docker Deployment
 
 ### Build Image
+
 ```bash
 # Build BVN service image
 docker build -t sandbox-bvn:latest .
@@ -217,6 +236,7 @@ docker run -d \
 ```
 
 ### Docker Compose
+
 ```yaml
 # docker-compose.yml
 version: '3.8'
@@ -239,7 +259,8 @@ services:
 ## 🏗️ Architecture
 
 ### Project Structure
-```
+
+```plain text
 bvn/
 ├── app/
 │   ├── api/v1/
@@ -249,7 +270,7 @@ bvn/
 │   ├── schemas/
 │   │   └── bvn.py            # Pydantic models
 │   ├── services/
-│   │   └── verification.py    # Doja API integration
+│   │   └── verification.py    # Dojah API integration
 │   └── main.py               # FastAPI application
 ├── .env.example              # Environment template
 ├── Dockerfile               # Container configuration
@@ -258,31 +279,36 @@ bvn/
 ```
 
 ### Data Flow
+
 1. **Request**: Client sends BVN to `/api/v1/verify`
 2. **Validation**: Pydantic validates BVN format (11 digits)
-3. **API Call**: Service calls Doja API with credentials
+3. **API Call**: Service calls Dojah API with credentials
 4. **Processing**: Response parsed and structured
 5. **Response**: Formatted data returned to client
 
 ### Integration Points
-- **Doja API**: External BVN verification service
+
+- **Dojah API**: External BVN verification service
 - **API Gateway**: Routes requests with authentication
 - **Auth Service**: Provides user context (if needed)
 
 ## 🔒 Security
 
 ### Input Validation
+
 - BVN must be exactly 11 digits
 - Only numeric characters allowed
 - Request size limits enforced
 
 ### API Security
-- Doja API key secured in environment variables
+
+- Dojah API key secured in environment variables
 - HTTPS required for production
 - Rate limiting via API Gateway
 - Request/response logging
 
 ### Data Privacy
+
 - BVN data not stored locally
 - Verification results can be cached temporarily
 - Sensitive data masked in logs
@@ -290,6 +316,7 @@ bvn/
 ## 📊 Monitoring
 
 ### Health Monitoring
+
 ```bash
 # Service health
 curl http://localhost:8006/health
@@ -299,6 +326,7 @@ curl http://localhost:8080/api/v1/services/bvn/health
 ```
 
 ### Logging
+
 ```bash
 # View logs (Docker)
 docker logs bvn-service
@@ -308,9 +336,10 @@ tail -f ../logs/bvn.log
 ```
 
 ### Metrics
+
 - Request count and response times
 - Success/failure rates
-- Doja API response times
+- Dojah API response times
 - Error categorization
 
 ## 🔧 Troubleshooting
@@ -318,6 +347,7 @@ tail -f ../logs/bvn.log
 ### Common Issues
 
 **Service Won't Start**:
+
 ```bash
 # Check port availability
 netstat -tulpn | grep :8006
@@ -329,7 +359,8 @@ cat .env | grep DOJAH
 pip install -r requirements.txt
 ```
 
-**Doja API Errors**:
+**Dojah API Errors**:
+
 ```bash
 # Test API credentials
 curl -H "Authorization: Bearer YOUR_API_KEY" \
@@ -337,35 +368,40 @@ curl -H "Authorization: Bearer YOUR_API_KEY" \
      https://api.dojah.io/api/v1/general/docs
 
 # Check API limits
-# Login to Doja dashboard to verify usage
+# Login to Dojah dashboard to verify usage
 ```
 
 **BVN Validation Fails**:
+
 - Ensure BVN is exactly 11 digits
 - Check for leading/trailing spaces
 - Verify BVN exists in Nigerian banking system
 
 **Connection Timeouts**:
+
 - Check internet connectivity
-- Verify Doja API status
+- Verify Dojah API status
 - Increase timeout in configuration
 
 ### Error Codes
+
 - `400`: Invalid BVN format
-- `401`: Invalid Doja API credentials
-- `500`: Doja API service error
+- `401`: Invalid Dojah API credentials
+- `500`: Dojah API service error
 - `503`: Service unavailable
 - `504`: Request timeout
 
 ## 🚀 Development
 
 ### Adding Features
+
 1. **New Endpoints**: Add to `app/api/v1/router.py`
 2. **Validation**: Update schemas in `app/schemas/bvn.py`
 3. **Business Logic**: Extend `app/services/verification.py`
 4. **Configuration**: Add to `app/core/config.py`
 
 ### Testing
+
 ```bash
 # Run tests
 pytest tests/
@@ -376,7 +412,10 @@ flake8 app/
 mypy app/
 ```
 
+***Note: Replace placeholder values in `.env` with actual Dojah API credentials before running the service.***
+
 ### Contributing
+
 1. Fork repository
 2. Create feature branch
 3. Add tests for new functionality
@@ -385,7 +424,7 @@ mypy app/
 
 ## 📖 References
 
-- [Doja API Documentation](https://docs.dojah.io/)
+- [Dojah API Documentation](https://docs.dojah.io/)
 - [FastAPI Documentation](https://fastapi.tiangolo.com/)
 - [Nigerian BVN System](https://www.nibss-plc.com.ng/bvn/)
 - [API Gateway Integration](../../services/api-gateway/README.md)

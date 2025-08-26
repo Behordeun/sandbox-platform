@@ -91,7 +91,7 @@ helm delete auth-service
 | Name                      | Description                                    | Value                                      |
 | ------------------------- | ---------------------------------------------- | ------------------------------------------ |
 | `secrets.jwtSecretKey`    | JWT secret key for token signing              | `"your-secret-key-change-in-production"`   |
-| `secrets.dojaApiKey`      | Doja API key for NIN/BVN verification         | `""`                                       |
+| `secrets.dojaApiKey`      | Dojah API key for NIN/BVN verification         | `""`                                       |
 
 ## Configuration and installation details
 
@@ -106,7 +106,7 @@ To use an external database instead of the included PostgreSQL:
 
 To enable NIN/BVN verification:
 
-1. Obtain an API key from Doja (https://dojah.io)
+1. Obtain an API key from Dojah (https://dojah.io)
 2. Set `secrets.dojaApiKey` to your API key
 
 ### Ingress
