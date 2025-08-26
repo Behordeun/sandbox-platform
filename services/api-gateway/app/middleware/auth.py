@@ -1,6 +1,6 @@
+import logging
 import re
 import time
-import logging
 from typing import List, Optional
 
 from app.core.security import validate_api_key, verify_token
@@ -10,8 +10,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 
 # Configure structured logging
 logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    level=logging.INFO, format="%(asctime)s - %(name)s - %(levelname)s - %(message)s"
 )
 logger = logging.getLogger("api_gateway.access")
 
@@ -43,11 +42,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
         start_time = time.time()
         client_ip = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("User-Agent", "unknown")
-        
+
         # Skip authentication for excluded paths
         if self._is_excluded_path(request.url.path):
             response = await call_next(request)
-            self._log_access(request, response, None, "public", start_time, client_ip, user_agent)
+            self._log_access(
+                request, response, None, "public", start_time, client_ip, user_agent
+            )
             return response
 
         # Extract authentication credentials
@@ -62,7 +63,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"error": "Authentication required"},
             )
-            self._log_access(request, response, None, "unauthenticated", start_time, client_ip, user_agent)
+            self._log_access(
+                request,
+                response,
+                None,
+                "unauthenticated",
+                start_time,
+                client_ip,
+                user_agent,
+            )
             return response
 
         # Validate JWT token
@@ -72,7 +81,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"error": "Invalid authorization header format"},
                 )
-                self._log_access(request, response, None, "invalid_token_format", start_time, client_ip, user_agent)
+                self._log_access(
+                    request,
+                    response,
+                    None,
+                    "invalid_token_format",
+                    start_time,
+                    client_ip,
+                    user_agent,
+                )
                 return response
 
             token = auth_header.split(" ")[1]
@@ -83,7 +100,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"error": "Invalid or expired token"},
                 )
-                self._log_access(request, response, None, "invalid_token", start_time, client_ip, user_agent)
+                self._log_access(
+                    request,
+                    response,
+                    None,
+                    "invalid_token",
+                    start_time,
+                    client_ip,
+                    user_agent,
+                )
                 return response
 
             # Add user info to request state
@@ -99,7 +124,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     content={"error": "Invalid API key"},
                 )
-                self._log_access(request, response, None, "invalid_api_key", start_time, client_ip, user_agent)
+                self._log_access(
+                    request,
+                    response,
+                    None,
+                    "invalid_api_key",
+                    start_time,
+                    client_ip,
+                    user_agent,
+                )
                 return response
 
             # Add API key info to request state
@@ -108,16 +141,27 @@ class AuthMiddleware(BaseHTTPMiddleware):
             user_id = f"api_key_{api_key[:8]}..."
 
         response = await call_next(request)
-        self._log_access(request, response, user_id, auth_method, start_time, client_ip, user_agent)
+        self._log_access(
+            request, response, user_id, auth_method, start_time, client_ip, user_agent
+        )
         return response
 
-    def _log_access(self, request: Request, response, user_id: str, auth_method: str, start_time: float, client_ip: str, user_agent: str):
+    def _log_access(
+        self,
+        request: Request,
+        response,
+        user_id: str,
+        auth_method: str,
+        start_time: float,
+        client_ip: str,
+        user_agent: str,
+    ):
         """Log detailed access information for monitoring and analytics."""
         duration = round((time.time() - start_time) * 1000, 2)  # milliseconds
-        
+
         # Determine service being accessed
         service_name = self._extract_service_name(request.url.path)
-        
+
         # Create structured log entry
         log_data = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
@@ -130,15 +174,15 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "duration_ms": duration,
             "client_ip": client_ip,
             "user_agent": user_agent,
-            "query_params": str(request.query_params) if request.query_params else None
+            "query_params": str(request.query_params) if request.query_params else None,
         }
-        
+
         # Log with appropriate level based on status code
         if response.status_code >= 400:
             logger.warning(f"ACCESS_DENIED: {log_data}")
         else:
             logger.info(f"ACCESS_GRANTED: {log_data}")
-    
+
     def _extract_service_name(self, path: str) -> str:
         """Extract service name from request path."""
         if path.startswith("/api/v1/auth"):

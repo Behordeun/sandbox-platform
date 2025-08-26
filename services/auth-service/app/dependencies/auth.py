@@ -16,7 +16,7 @@ def get_current_user(
 ) -> User:
     """Get current authenticated user from JWT token."""
     from app.crud.token_blacklist import token_blacklist_crud
-    
+
     credentials_exception = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Could not validate credentials",
@@ -28,7 +28,7 @@ def get_current_user(
         payload = verify_token(token, token_type="access")
         if payload is None:
             raise credentials_exception
-            
+
         # Check if token is blacklisted
         jti = payload.get("jti")
         if jti and token_blacklist_crud.is_token_blacklisted(db, jti=jti):
@@ -37,7 +37,7 @@ def get_current_user(
                 detail="Token has been revoked",
                 headers={"WWW-Authenticate": "Bearer"},
             )
-            
+
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception

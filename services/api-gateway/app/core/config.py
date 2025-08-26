@@ -1,10 +1,9 @@
-import os
 from typing import Dict, List
 
 from pydantic_settings import BaseSettings
 
-
 HEALTH_PATH = "/health"
+
 
 class ServiceConfig(BaseSettings):
     """Configuration for a backend service."""

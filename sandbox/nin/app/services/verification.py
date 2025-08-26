@@ -28,7 +28,7 @@ async def verify_nin_with_doja(nin: str) -> dict:
             )
 
             response_data = response.json()
-            
+
             if response.status_code == 200 and response_data.get("success"):
                 entity = response_data.get("entity", {})
                 return {
@@ -50,7 +50,9 @@ async def verify_nin_with_doja(nin: str) -> dict:
                     "message": "NIN verified successfully",
                 }
             else:
-                error_msg = response_data.get("error", {}).get("message", "Verification failed")
+                error_msg = response_data.get("error", {}).get(
+                    "message", "Verification failed"
+                )
                 return {
                     "success": False,
                     "data": None,

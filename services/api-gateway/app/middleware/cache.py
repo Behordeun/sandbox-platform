@@ -1,6 +1,4 @@
 import json
-import time
-from typing import Optional
 
 import redis
 from app.core.config import settings
@@ -15,7 +13,7 @@ class CacheMiddleware(BaseHTTPMiddleware):
         super().__init__(app)
         self.redis_client = None
         self.enabled = settings.rate_limit_enabled  # Reuse Redis connection
-        
+
         if self.enabled:
             try:
                 self.redis_client = redis.from_url(settings.redis_url)
@@ -35,20 +33,21 @@ class CacheMiddleware(BaseHTTPMiddleware):
 
         # Generate cache key
         cache_key = f"cache:{request.url.path}:{request.url.query}"
-        
+
         try:
             # Check cache
             cached = self.redis_client.get(cache_key)
             if cached:
                 data = json.loads(cached)
                 from fastapi.responses import JSONResponse
+
                 return JSONResponse(content=data)
         except Exception:
             pass
 
         # Process request
         response = await call_next(request)
-        
+
         # Cache successful responses
         if response.status_code == 200:
             try:

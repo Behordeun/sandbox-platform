@@ -4,8 +4,14 @@ from contextlib import asynccontextmanager
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import Base, engine
-from app.models import oauth_client, oauth_token, user, token_blacklist, password_reset  # Import to register models
 from app.middleware.logging import UserActivityLoggingMiddleware
+from app.models import (
+    oauth_client,
+    oauth_token,  # Import to register models
+    password_reset,
+    token_blacklist,
+    user,
+)
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
