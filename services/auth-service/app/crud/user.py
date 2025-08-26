@@ -30,15 +30,17 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         db.refresh(db_obj)
         return db_obj
 
-    def authenticate(self, db: Session, *, identifier: str, password: str) -> Optional[User]:
+    def authenticate(
+        self, db: Session, *, identifier: str, password: str
+    ) -> Optional[User]:
         # Try to find user by email first, then by username
         user = self.get_by_email(db, email=identifier)
         if not user:
             user = self.get_by_username(db, username=identifier)
-        
+
         if not user:
             return None
-            
+
         hashed_password = getattr(user, "hashed_password", None)
         if not isinstance(hashed_password, str) or not verify_password(
             password, hashed_password

@@ -28,7 +28,7 @@ class CRUDTokenBlacklist(CRUDBase[TokenBlacklist, dict, dict]):
             token_type=token_type,
             user_id=user_id,
             expires_at=expires_at,
-            reason=reason
+            reason=reason,
         )
         db.add(db_obj)
         db.commit()
@@ -37,9 +37,11 @@ class CRUDTokenBlacklist(CRUDBase[TokenBlacklist, dict, dict]):
 
     def cleanup_expired_tokens(self, db: Session) -> int:
         """Remove expired tokens from blacklist."""
-        count = db.query(TokenBlacklist).filter(
-            TokenBlacklist.expires_at < datetime.now()
-        ).delete()
+        count = (
+            db.query(TokenBlacklist)
+            .filter(TokenBlacklist.expires_at < datetime.now())
+            .delete()
+        )
         db.commit()
         return count
 

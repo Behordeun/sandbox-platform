@@ -235,7 +235,7 @@ releases:
           DEBUG: "{{ ternary "false" "true" (eq .Environment.Name "prod") }}"
         secrets:
           jwtSecretKey: "{{ requiredEnv "JWT_SECRET_KEY" }}"
-          dojaApiKey: "{{ env "DOJA_API_KEY" | default "" }}"
+          dojahApiKey: "{{ env "DOJAH_API_KEY" | default "" }}"
         ingress:
           enabled: {{ .Values.ingress.enabled }}
           className: "{{ .Values.ingress.className }}"

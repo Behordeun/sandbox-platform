@@ -1,4 +1,4 @@
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Any, Optional, Union
 
 from jose import JWTError, jwt
@@ -25,15 +25,13 @@ def create_access_token(
 ) -> str:
     """Create JWT access token with dynamic claims."""
     import secrets
-    import time
-    
-    now = datetime.now()
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc)
     if expires_delta:
         expire = now + expires_delta
     else:
-        expire = now + timedelta(
-            minutes=settings.jwt_access_token_expire_minutes
-        )
+        expire = now + timedelta(minutes=settings.jwt_access_token_expire_minutes)
 
     to_encode = {
         "exp": expire,
@@ -43,7 +41,7 @@ def create_access_token(
         "type": "access",
         "jti": secrets.token_urlsafe(32),  # Unique token ID
         "iss": settings.oauth2_issuer_url,
-        "aud": "sandbox-platform"
+        "aud": "sandbox-platform",
     }
 
     encoded_jwt = jwt.encode(
@@ -57,8 +55,9 @@ def create_refresh_token(
 ) -> str:
     """Create JWT refresh token with dynamic claims."""
     import secrets
-    
-    now = datetime.now()
+    from datetime import datetime, timezone
+
+    now = datetime.now(timezone.utc)
     if expires_delta:
         expire = now + expires_delta
     else:
@@ -72,7 +71,7 @@ def create_refresh_token(
         "type": "refresh",
         "jti": secrets.token_urlsafe(32),  # Unique token ID
         "iss": settings.oauth2_issuer_url,
-        "aud": "sandbox-platform"
+        "aud": "sandbox-platform",
     }
 
     encoded_jwt = jwt.encode(
@@ -85,11 +84,11 @@ def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
     """Verify JWT token and return payload with enhanced validation."""
     try:
         payload = jwt.decode(
-            token, 
-            settings.jwt_secret_key, 
+            token,
+            settings.jwt_secret_key,
             algorithms=[settings.jwt_algorithm],
             audience="sandbox-platform",
-            issuer=settings.oauth2_issuer_url
+            issuer=settings.oauth2_issuer_url,
         )
 
         # Check token type
@@ -100,12 +99,6 @@ def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
         required_claims = ["sub", "exp", "iat", "jti"]
         if not all(claim in payload for claim in required_claims):
             return None
-
-        # Check if token is not used before valid time
-        if "nbf" in payload:
-            import time
-            if time.time() < payload["nbf"]:
-                return None
 
         return payload
 

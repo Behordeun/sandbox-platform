@@ -135,6 +135,9 @@ sandbox-platform/
 # Test APIs with Nigerian examples
 ./test-dpi-apis.sh
 
+# Analyze user activity and usage
+python analyze-logs.py --all
+
 # Generate mock Nigerian data
 python mock-data.py
 ```
@@ -202,7 +205,7 @@ helm install config-service ./services/config-service/helm/config-service
 helm install api-gateway ./services/api-gateway/helm/api-gateway
 ```
 
-## 📊 Monitoring
+## 📊 Monitoring & Analytics
 
 ### Health Checks
 
@@ -218,25 +221,64 @@ curl http://localhost:8006/health             # BVN service
 curl http://localhost:8003/health             # SMS service
 ```
 
+### User Activity & Usage Analytics
+
+```bash
+# Comprehensive log analysis
+python analyze-logs.py --all
+
+# User activity patterns
+python analyze-logs.py --user-activity
+
+# Security monitoring
+python analyze-logs.py --security
+
+# Real-time monitoring
+tail -f services/logs/user_activity.log
+tail -f services/logs/api_access.log
+```
+
+### Rich Logging System
+
+Comprehensive user activity tracking with structured JSON logging:
+
+```json
+{
+  "timestamp": "2025-08-25 20:45:30",
+  "user_id": "123",
+  "auth_method": "jwt_token",
+  "method": "POST",
+  "path": "/api/v1/nin/verify",
+  "service": "nin-service",
+  "status_code": 200,
+  "duration_ms": 245.5,
+  "client_ip": "192.168.1.100",
+  "user_agent": "Mozilla/5.0...",
+  "activity_type": "identity_verification",
+  "success": true
+}
+```
+
+### Log Categories
+
+- **User Activity**: `services/logs/user_activity.log` - All user interactions
+- **API Access**: `services/logs/api_access.log` - Gateway access patterns
+- **Security Events**: `services/logs/security_events.log` - Authentication & security
+- **Service Health**: `services/logs/service_health.log` - System monitoring
+
+### Analytics Capabilities
+
+- **User Engagement**: Track individual user activity patterns
+- **Service Popularity**: Monitor which services are most used
+- **Peak Hours**: Identify high-traffic periods
+- **Security Monitoring**: Detect suspicious activities
+- **Performance Metrics**: Response times and success rates
+
 ### Metrics
 
 - Prometheus: `http://localhost:9090`
 - Grafana: `http://localhost:3001` (admin/admin123)
 - Service Metrics: `http://localhost:8080/metrics`
-
-### Logging
-
-Structured JSON logging with correlation IDs:
-
-```json
-{
-  "timestamp": "2024-01-01T00:00:00Z",
-  "level": "INFO",
-  "service": "auth-service",
-  "correlation_id": "req-123",
-  "message": "User authenticated successfully"
-}
-```
 
 ## 🔐 Auth Service Features
 
@@ -288,7 +330,7 @@ Structured JSON logging with correlation IDs:
 #### Identity Verification
 1. **NIN Verification**: Dedicated NIN service at `/api/v1/nin/verify`
 2. **BVN Verification**: Dedicated BVN service at `/api/v1/bvn/verify`
-3. **Doja API Integration**: Real-time verification through Doja API
+3. **Dojah API Integration**: Real-time verification through Dojah API
 4. **Status Tracking**: Monitor verification status via respective service endpoints
 5. **Enhanced Access**: Verified users receive additional platform privileges
 
@@ -351,8 +393,8 @@ OAUTH2_ISSUER_URL=http://localhost:8000
 OAUTH2_JWKS_URI=http://localhost:8000/.well-known/jwks.json
 
 # Identity Verification
-DOJA_API_KEY=your-doja-api-key
-DOJA_BASE_URL=https://api.dojah.io
+DOJAH_API_KEY=your-dojah-api-key
+DOJAH_BASE_URL=https://api.dojah.io
 
 # CORS Configuration
 CORS_ORIGINS=["*"]
@@ -525,7 +567,7 @@ GET /api/v1/services/health
 ### Service-Specific Documentation
 - **Auth Service**: OAuth2 flows, Nigerian phone validation, JWT management
 - **API Gateway**: Request routing, rate limiting, DPI health monitoring
-- **NIN Service**: Nigerian Identity Number verification via Doja API
+- **NIN Service**: Nigerian Identity Number verification via Dojah API
 - **BVN Service**: Bank Verification Number validation
 - **SMS Service**: Nigerian SMS messaging and notifications
 - **AI Service**: Content generation and data analysis
