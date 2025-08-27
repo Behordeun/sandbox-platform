@@ -56,6 +56,160 @@ helmfile -e prod apply
 
 ## 🏗️ Architecture
 
+```mermaid
+%%{init: { 'theme': 'default', 'themeVariables': { 'background': '#ffffff' } }}%%
+graph TB
+    %% External Users and Systems
+    subgraph "🌍 External Systems"
+        STARTUPS[("🚀 Nigerian Startups<br/>(9 Closed Access)")]
+        ADMIN[("👨‍💼 Platform Admin")]
+        DOJAH[("🔍 Dojah API<br/>(NIN/BVN Verification)")]
+        SMS_PROVIDER[("📱 SMS Provider<br/>(Nigerian Networks)")]
+        AI_PROVIDER[("🤖 AI Provider<br/>(Nigerian Context)")]
+    end
+
+    %% API Gateway Layer
+    subgraph "🌐 API Gateway Layer"
+        GATEWAY["🚪 API Gateway<br/>:8080<br/>• Request Routing<br/>• Rate Limiting<br/>• Circuit Breaking<br/>• Authentication"]
+    end
+
+    %% Platform Services
+    subgraph "🏗️ Platform Services"
+        AUTH["🔐 Auth Service<br/>:8000<br/>• OAuth2/JWT<br/>• Admin User Mgmt<br/>• Session Management"]
+        CONFIG["⚙️ Config Service<br/>:8001<br/>• Centralized Config<br/>• Environment Mgmt<br/>• Encryption"]
+        HEALTH["💚 Health Service<br/>• Service Monitoring<br/>• Health Checks<br/>• Status Reporting"]
+    end
+
+    %% DPI Sandbox Services
+    subgraph "🇳🇬 DPI Sandbox Services"
+        NIN["🆔 NIN Service<br/>:8005<br/>• Identity Verification<br/>• Dojah Integration<br/>• Status Tracking"]
+        BVN["🏦 BVN Service<br/>:8006<br/>• Bank Verification<br/>• Financial Identity<br/>• Validation"]
+        SMS_SVC["📲 SMS Service<br/>:8003<br/>• Nigerian Numbers<br/>• OTP Generation<br/>• Notifications"]
+        AI_SVC["🧠 AI Service<br/>:8002<br/>• Nigerian Context<br/>• Content Generation<br/>• Language Processing"]
+        IVR["📞 IVR Service<br/>• Voice Interactions<br/>• Call Routing<br/>• USSD Integration"]
+        TWO_WAY_SMS["💬 Two-Way SMS<br/>• Interactive SMS<br/>• Response Handling<br/>• Conversation Flow"]
+    end
+
+    %% Data Layer
+    subgraph "💾 Data Stores"
+        POSTGRES[("🐘 PostgreSQL<br/>Primary Database<br/>• User Management<br/>• Service Data<br/>• Audit Logs")]
+        MONGO[("🍃 MongoDB<br/>Document Store<br/>• Flexible Schemas<br/>• JSON Documents<br/>• Analytics Data")]
+        REDIS[("🔴 Redis<br/>Cache & Sessions<br/>• JWT Tokens<br/>• Rate Limiting<br/>• Temporary Data")]
+    end
+
+    %% Configuration & Deployment
+    subgraph "📋 Configuration & Deployment"
+        ENV_CONFIG[("📄 .env<br/>Centralized Config<br/>• All Service Settings<br/>• API Keys<br/>• Database URLs")]
+        YAML_CONFIG[("📝 YAML Configs<br/>• Environment Overrides<br/>• Service Settings<br/>• Feature Flags")]
+        DOCKER[("🐳 Docker<br/>Containerization<br/>• Service Images<br/>• Development<br/>• Production")]
+        K8S[("☸️ Kubernetes<br/>Orchestration<br/>• Auto-scaling<br/>• Load Balancing<br/>• Health Monitoring")]
+    end
+
+    %% Monitoring & Logging
+    subgraph "📊 Monitoring & Analytics"
+        PROMETHEUS[("📈 Prometheus<br/>Metrics Collection<br/>• Service Metrics<br/>• Performance Data<br/>• Alerts")]
+        GRAFANA[("📊 Grafana<br/>Visualization<br/>• Dashboards<br/>• Real-time Monitoring<br/>• Analytics")]
+        LOGS[("📋 Structured Logs<br/>• User Activity<br/>• API Access<br/>• Security Events<br/>• Service Health")]
+    end
+
+    %% Scripts & Automation
+    subgraph "🔧 Automation & Scripts"
+        SETUP_SCRIPTS[("⚡ Setup Scripts<br/>• Database Setup<br/>• Admin User Creation<br/>• Platform Startup")]
+        DEPLOY_SCRIPTS[("🚀 Deployment<br/>• Image Building<br/>• Helm Charts<br/>• Environment Deploy")]
+        TEST_SCRIPTS[("🧪 Testing<br/>• API Testing<br/>• Mock Data<br/>• Health Checks")]
+    end
+
+    %% User Flow Connections
+    STARTUPS --> GATEWAY
+    ADMIN --> GATEWAY
+    
+    %% Gateway Routing
+    GATEWAY --> AUTH
+    GATEWAY --> NIN
+    GATEWAY --> BVN
+    GATEWAY --> SMS_SVC
+    GATEWAY --> AI_SVC
+    GATEWAY --> IVR
+    GATEWAY --> TWO_WAY_SMS
+
+    %% Service Dependencies
+    AUTH --> POSTGRES
+    AUTH --> REDIS
+    CONFIG --> YAML_CONFIG
+    CONFIG --> ENV_CONFIG
+    
+    %% DPI Service Connections
+    NIN --> DOJAH
+    NIN --> POSTGRES
+    BVN --> DOJAH
+    BVN --> POSTGRES
+    SMS_SVC --> SMS_PROVIDER
+    SMS_SVC --> POSTGRES
+    AI_SVC --> AI_PROVIDER
+    AI_SVC --> MONGO
+    IVR --> POSTGRES
+    TWO_WAY_SMS --> SMS_PROVIDER
+    TWO_WAY_SMS --> POSTGRES
+
+    %% Configuration Flow
+    ENV_CONFIG --> AUTH
+    ENV_CONFIG --> NIN
+    ENV_CONFIG --> BVN
+    ENV_CONFIG --> SMS_SVC
+    ENV_CONFIG --> AI_SVC
+    YAML_CONFIG --> CONFIG
+
+    %% Monitoring Connections
+    AUTH --> PROMETHEUS
+    GATEWAY --> PROMETHEUS
+    NIN --> PROMETHEUS
+    BVN --> PROMETHEUS
+    SMS_SVC --> PROMETHEUS
+    AI_SVC --> PROMETHEUS
+    PROMETHEUS --> GRAFANA
+    
+    %% Logging Flow
+    AUTH --> LOGS
+    GATEWAY --> LOGS
+    NIN --> LOGS
+    BVN --> LOGS
+    SMS_SVC --> LOGS
+    AI_SVC --> LOGS
+
+    %% Deployment Flow
+    DOCKER --> K8S
+    SETUP_SCRIPTS --> POSTGRES
+    SETUP_SCRIPTS --> REDIS
+    DEPLOY_SCRIPTS --> K8S
+    TEST_SCRIPTS --> GATEWAY
+
+    %% Health Monitoring
+    HEALTH --> AUTH
+    HEALTH --> NIN
+    HEALTH --> BVN
+    HEALTH --> SMS_SVC
+    HEALTH --> AI_SVC
+    HEALTH --> POSTGRES
+    HEALTH --> REDIS
+
+    %% Light Background Styling
+    classDef external fill:#ffffff,stroke:#2196f3,stroke-width:2px,color:#1565c0
+    classDef platform fill:#ffffff,stroke:#9c27b0,stroke-width:2px,color:#7b1fa2
+    classDef dpi fill:#ffffff,stroke:#4caf50,stroke-width:2px,color:#388e3c
+    classDef data fill:#ffffff,stroke:#ff9800,stroke-width:2px,color:#f57c00
+    classDef config fill:#ffffff,stroke:#e91e63,stroke-width:2px,color:#c2185b
+    classDef monitor fill:#ffffff,stroke:#8bc34a,stroke-width:2px,color:#689f38
+    classDef scripts fill:#ffffff,stroke:#00bcd4,stroke-width:2px,color:#0097a7
+
+    class STARTUPS,ADMIN,DOJAH,SMS_PROVIDER,AI_PROVIDER external
+    class GATEWAY,AUTH,CONFIG,HEALTH platform
+    class NIN,BVN,SMS_SVC,AI_SVC,IVR,TWO_WAY_SMS dpi
+    class POSTGRES,MONGO,REDIS data
+    class ENV_CONFIG,YAML_CONFIG,DOCKER,K8S config
+    class PROMETHEUS,GRAFANA,LOGS monitor
+    class SETUP_SCRIPTS,DEPLOY_SCRIPTS,TEST_SCRIPTS scripts
+```
+
 ### Platform Services
 
 | Service                  | Port | Description                                             |
