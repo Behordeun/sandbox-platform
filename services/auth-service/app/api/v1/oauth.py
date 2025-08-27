@@ -81,12 +81,18 @@ def authorize(
 
         # Redirect to client
         safe_redirect_uri = redirect_uri.replace("\\", "")
-        # Ensure the redirect URI is a valid absolute URI registered for the client
-        parsed = urlparse(safe_redirect_uri)
+        # Normalize the URI for matching (strip scheme and netloc for comparison if desired, or compare full URL)
+        normalized_safe_redirect_uri = safe_redirect_uri.strip()
+        # Get list of registered URIs for client and normalize them
+        registered_uris = [uri.replace("\\", "").strip() for uri in client.redirect_uris]
+        # Perform strict match
+        if normalized_safe_redirect_uri not in registered_uris:
+            raise HTTPException(status_code=400, detail="Unsafe redirect URI")
+        parsed = urlparse(normalized_safe_redirect_uri)
         # Defensive check: Only allow if netloc (host) is present and scheme is http/https
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise HTTPException(status_code=400, detail="Unsafe redirect URI")
-        redirect_url = f"{safe_redirect_uri}?{urlencode(params)}"
+        redirect_url = f"{normalized_safe_redirect_uri}?{urlencode(params)}"
         return RedirectResponse(url=redirect_url)
 
     else:
