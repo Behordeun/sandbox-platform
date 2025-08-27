@@ -50,8 +50,7 @@ def create_user(
         "username": "fintech_dev",
         "password": "TempPass123",
         "first_name": "John",
-        "last_name": "Doe",
-        "phone_number": "+2348012345678"
+        "last_name": "Doe"
     }
     """
     # Check if user already exists
