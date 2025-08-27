@@ -19,6 +19,6 @@ jobs:
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Build images
-      run: ./deployment/scripts/build-images.sh
+      run: ./deployment/scripts/build-images.sh -r ${{ secrets.DOCKERHUB_USERNAME }}
     - name: Push images
-      run: ./deployment/scripts/push-images.sh
+      run: ./deployment/scripts/push-images.sh -r ${{ secrets.DOCKERHUB_USERNAME }}
