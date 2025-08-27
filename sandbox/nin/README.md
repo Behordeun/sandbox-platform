@@ -84,7 +84,11 @@ curl http://localhost:8005/health
 
 All endpoints require authentication via the API Gateway or direct JWT token.
 
-### Core Endpoints
+### Valid NIN Format
+
+- **Length**: Exactly 11 digits
+- **Format**: `12345678901`
+- **No spaces or special characters**
 
 | Method | Endpoint | Description | Example |
 |--------|----------|-------------|---------|
@@ -178,23 +182,48 @@ curl -X GET http://localhost:8005/api/v1/nin/status/12345678901 \
 
 ## 🔧 Configuration
 
-### Environment Variables
+### YAML-Based Configuration
+
+This service uses the centralized YAML configuration system. Configuration is automatically loaded from:
+
+- `config.yaml` - Base configuration
+- `config/environments/{ENVIRONMENT}.yaml` - Environment-specific overrides
+- `.env` - Secrets and API keys only
+
+### Centralized Environment Variables
+
+All services use the **single root .env file**. No service-specific .env files needed:
 
 ```env
-# Service Configuration
-APP_NAME=NIN Verification Service
-APP_VERSION=1.0.0
-DEBUG=false
-HOST=0.0.0.0
-PORT=8005
-
-# Dojah API Configuration (Required)
+# All variables are in the root .env file
+ENVIRONMENT=development
+DATABASE_URL=postgresql://sandbox_user:password@localhost:5432/sandbox_platform
 DOJAH_API_KEY=your-dojah-api-key        # Get from Dojah dashboard
 DOJAH_APP_ID=your-dojah-app-id          # Your application ID
-DOJAH_BASE_URL=https://api.dojah.io     # Dojah API base URL
+SMS_API_KEY=your-sms-api-key
+AI_API_KEY=your-ai-api-key
+# ... all other variables in organized sections
+```
 
-# Auth Service URL
-AUTH_SERVICE_URL=http://auth-service:8000
+### Configuration Structure
+
+Service configuration is defined in `config.yaml`:
+
+```yaml
+sandbox:
+  nin_service:
+    host: "0.0.0.0"
+    port: 8005
+    debug: false
+    cache_ttl: 3600
+    doja_integration: true
+
+providers:
+  dojah:
+    base_url: "https://api.dojah.io"
+    api_key: "${DOJAH_API_KEY}"
+    app_id: "${DOJAH_APP_ID}"
+    timeout: 30
 ```
 
 ### Getting Dojah API Credentials
@@ -203,7 +232,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 2. Create an account
 3. Navigate to API section
 4. Generate API key and App ID
-5. Add credentials to your `.env` file
+5. Add credentials to the **single root .env file** (no service-specific .env files)
 
 ## 📊 Understanding NIN Format
 
@@ -419,4 +448,4 @@ console.log(`Verified: ${result.data.first_name} ${result.data.last_name}`);
 
 **Ready to verify Nigerian identities?** This NIN service integrates seamlessly with your application to provide instant, reliable identity verification for your Nigerian users.
 
-*Built for Nigerian developers, by Nigerian developers* 🇳🇬
+## Built for Nigerian developers, by Nigerian developers 🇳🇬

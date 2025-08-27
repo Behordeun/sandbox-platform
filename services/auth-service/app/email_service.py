@@ -2,7 +2,7 @@ import smtplib
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 
-from app.core.config import settings
+from app.core.yaml_config import settings
 
 
 class EmailService:
@@ -114,6 +114,93 @@ class EmailService:
                 <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <strong>Security Note:</strong><br>
                     This link will expire in 30 minutes. If you didn't request this reset, please ignore this email.
+                </div>
+                
+                <p><strong>The DPI Sandbox Team</strong></p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return self.send_email(to_email, subject, html_content)
+
+
+    def send_account_created_notification(self, to_email: str, first_name: str, username: str, temporary_password: str) -> bool:
+        """Send account created notification with credentials"""
+        subject = "Your DPI Sandbox Account Has Been Created! 🇳🇬"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #2c3e50; color: white; padding: 20px; text-align: center;">
+                <h1>🇳🇬 DPI Sandbox Account Created!</h1>
+            </div>
+            
+            <div style="padding: 20px;">
+                <h2>Hello {first_name}!</h2>
+                
+                <p>Your DPI Sandbox account has been created by our administrators.</p>
+                
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <strong>Your Login Credentials:</strong><br>
+                    Username/Email: <code>{username}</code><br>
+                    Temporary Password: <code>{temporary_password}</code>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <strong>⚠️ Important:</strong><br>
+                    Please change your password after first login for security.
+                </div>
+                
+                <p>You can now access Nigerian Digital Public Infrastructure services:</p>
+                <ul>
+                    <li>🆔 NIN Verification</li>
+                    <li>🏦 BVN Verification</li>
+                    <li>📱 SMS Services</li>
+                    <li>🤖 AI Services</li>
+                </ul>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <a href="http://localhost:8080/docs" 
+                       style="background: #3498db; color: white; padding: 12px 24px; 
+                              text-decoration: none; border-radius: 5px; display: inline-block;">
+                        Access API Documentation
+                    </a>
+                </div>
+                
+                <p>Happy coding!</p>
+                <p><strong>The DPI Sandbox Team</strong></p>
+            </div>
+        </body>
+        </html>
+        """
+
+        return self.send_email(to_email, subject, html_content)
+
+    def send_password_reset_notification(self, to_email: str, first_name: str, new_password: str) -> bool:
+        """Send password reset notification"""
+        subject = "Your DPI Sandbox Password Has Been Reset"
+
+        html_content = f"""
+        <html>
+        <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+            <div style="background: #2c3e50; color: white; padding: 20px; text-align: center;">
+                <h1>🔐 Password Reset</h1>
+            </div>
+            
+            <div style="padding: 20px;">
+                <h2>Hello {first_name}!</h2>
+                
+                <p>Your DPI Sandbox password has been reset by an administrator.</p>
+                
+                <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <strong>Your New Password:</strong><br>
+                    <code>{new_password}</code>
+                </div>
+                
+                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 20px 0;">
+                    <strong>⚠️ Important:</strong><br>
+                    Please change this password after login for security.
                 </div>
                 
                 <p><strong>The DPI Sandbox Team</strong></p>

@@ -1,0 +1,63 @@
+"""
+YAML Configuration for SMS Service
+"""
+
+import os
+from pydantic import BaseSettings
+import sys
+sys.path.append("../../../..")
+from config.config_loader import get_service_config, get_provider_config
+
+
+class Settings(BaseSettings):
+    """SMS Service Settings loaded from YAML configuration."""
+    
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        
+        # Load configuration from YAML
+        environment = os.getenv("ENVIRONMENT", "development")
+        service_config = get_service_config("sms_service", environment)
+        sms_config = get_provider_config("sms", environment)
+        
+        # Apply YAML configuration
+        if service_config:
+            self.app_name = service_config.get("app_name", "SMS Service")
+            self.app_version = service_config.get("app_version", "1.0.0")
+            self.debug = service_config.get("debug", False)
+            self.host = service_config.get("host", "0.0.0.0")
+            self.port = service_config.get("port", 8003)
+            self.rate_limit = service_config.get("rate_limit", 100)
+            self.daily_limit = service_config.get("daily_limit", 10000)
+        
+        # SMS Provider Configuration
+        if sms_config:
+            self.sms_provider = sms_config.get("provider", "termii")
+            self.sms_api_key = sms_config.get("api_key", os.getenv("SMS_API_KEY"))
+            self.sms_sender_id = sms_config.get("sender_id", "DPISandbox")
+            self.sms_base_url = sms_config.get("base_url", "https://api.ng.termii.com")
+    
+    # Default values
+    app_name: str = "SMS Service"
+    app_version: str = "1.0.0"
+    debug: bool = False
+    host: str = "0.0.0.0"
+    port: int = 8003
+    rate_limit: int = 100
+    daily_limit: int = 10000
+    
+    # SMS Provider
+    sms_provider: str = "termii"
+    sms_api_key: str = ""
+    sms_sender_id: str = "DPISandbox"
+    sms_base_url: str = "https://api.ng.termii.com"
+    
+    # Auth Service
+    auth_service_url: str = "http://auth-service:8000"
+    
+    class Config:
+        env_file = "../../../../.env"  # Use root .env file
+        case_sensitive = False
+
+
+settings = Settings()

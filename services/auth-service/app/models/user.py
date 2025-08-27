@@ -1,10 +1,11 @@
 from app.core.database import Base
+from app.core.yaml_config import settings
 from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 
 
 class User(Base):
-    __tablename__ = "users"
+    __tablename__ = f"{settings.table_prefix}users"
 
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), unique=True, index=True, nullable=False)

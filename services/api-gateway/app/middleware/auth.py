@@ -20,6 +20,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
     def __init__(self, app, excluded_paths: Optional[List[str]] = None):
         super().__init__(app)
+        WELL_KNOWN_PATH = "/.well-known/"
         self.excluded_paths = excluded_paths or [
             "/",
             "/health",
@@ -27,14 +28,14 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/redoc",
             "/openapi.json",
-            "/api/v1/openapi.json",
+            "/api/v1/openapi.json",  # <-- Add this line
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/login/json",
             "/api/v1/services/health",
             "/api/v1/services/status",
             "/api/v1/services/",
-            "/.well-known/",
+            WELL_KNOWN_PATH,
         ]
 
     async def dispatch(self, request: Request, call_next):
@@ -47,7 +48,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         if self._is_excluded_path(request.url.path):
             response = await call_next(request)
             self._log_access(
-                request, response, None, "public", start_time, client_ip, user_agent
+                request, response, "", "public", start_time, client_ip, user_agent
             )
             return response
 
@@ -66,7 +67,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             self._log_access(
                 request,
                 response,
-                None,
+                "",
                 "unauthenticated",
                 start_time,
                 client_ip,
@@ -84,7 +85,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 self._log_access(
                     request,
                     response,
-                    None,
+                    "",
                     "invalid_token_format",
                     start_time,
                     client_ip,
@@ -103,7 +104,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 self._log_access(
                     request,
                     response,
-                    None,
+                    "",
                     "invalid_token",
                     start_time,
                     client_ip,
@@ -127,7 +128,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 self._log_access(
                     request,
                     response,
-                    None,
+                    "",
                     "invalid_api_key",
                     start_time,
                     client_ip,

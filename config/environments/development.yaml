@@ -1,0 +1,43 @@
+# Development Environment Configuration
+environment: "development"
+# Development Database Settings
+database:
+  # Use PostgreSQL for development (consistent with production)
+  url: "postgresql://sandbox_user:${DB_PASSWORD:sandbox_password}@localhost:5432/sandbox_platform"
+# Development API Settings (use sandbox endpoints)
+providers:
+  dojah:
+    base_url: "https://sandbox.dojah.io"
+    timeout: 60
+  sms:
+    base_url: "https://sandbox.termii.com"
+# Development Service Settings
+services:
+  auth_service:
+    debug: true
+    jwt:
+      access_token_expire_minutes: 60
+    cors:
+      origins: ["http://localhost:3000", "http://localhost:8080"]
+  api_gateway:
+    debug: true
+    rate_limiting:
+      requests_per_minute: 1000
+# Development Sandbox Settings
+sandbox:
+  nin_service:
+    debug: true
+    cache_ttl: 300
+  bvn_service:
+    debug: true
+    cache_ttl: 300
+  sms_service:
+    debug: true
+    rate_limit: 1000
+    daily_limit: 100000
+# Development Logging
+logging:
+  level: "DEBUG"
+  files:
+    user_activity: "logs/dev_user_activity.log"
+    api_access: "logs/dev_api_access.log"

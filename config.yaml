@@ -1,0 +1,191 @@
+# Sandbox Platform Configuration
+# Centralized configuration for all services
+
+platform:
+  name: "Sandbox Platform"
+  version: "1.0.0"
+  environment: "development" # development, staging, production
+# Database Configuration
+database:
+  # Single PostgreSQL database for all services
+  url: "${DATABASE_URL}"
+  pool_size: 20
+  max_overflow: 40
+  # Table prefixes for each service
+  table_prefixes:
+    auth_service: "auth_"
+    config_service: "config_"
+    nin_service: "nin_"
+    bvn_service: "bvn_"
+    sms_service: "sms_"
+    ai_service: "ai_"
+    ivr_service: "ivr_"
+    two_way_sms_service: "twoway_sms_"
+  # Redis for caching and sessions
+  redis:
+    url: "redis://localhost:6379/0"
+    sessions_db: 1
+    cache_db: 2
+# External API Providers
+providers:
+  dojah:
+    base_url: "https://api.dojah.io"
+    api_key: "${DOJAH_API_KEY}"
+    app_id: "${DOJAH_APP_ID}"
+    timeout: 30
+  sms:
+    provider: "termii"
+    api_key: "${SMS_API_KEY}"
+    sender_id: "DPISandbox"
+    base_url: "https://api.ng.termii.com"
+  ai:
+    provider: "openai"
+    api_key: "${AI_API_KEY}"
+    model: "gpt-3.5-turbo"
+    max_tokens: 2000
+# Service Configuration
+services:
+  auth_service:
+    host: "0.0.0.0"
+    port: 8000
+    debug: false
+    jwt:
+      secret_key: "${JWT_SECRET_KEY}"
+      algorithm: "HS256"
+      access_token_expire_minutes: 30
+      refresh_token_expire_days: 7
+    oauth2:
+      issuer_url: "http://localhost:8000"
+      jwks_uri: "http://localhost:8000/.well-known/jwks.json"
+    email:
+      smtp_host: "${SMTP_HOST}"
+      smtp_port: 587
+      smtp_username: "${SMTP_USERNAME}"
+      smtp_password: "${SMTP_PASSWORD}"
+      from_email: "noreply@dpi-sandbox.ng"
+      from_name: "DPI Sandbox Platform"
+    cors:
+      origins: ["*"]
+      allow_credentials: true
+      allow_methods: ["*"]
+      allow_headers: ["*"]
+  api_gateway:
+    host: "0.0.0.0"
+    port: 8080
+    debug: false
+    auth_service_url: "http://localhost:8000"
+    redis_url: "redis://localhost:6379/0"
+    rate_limiting:
+      requests_per_minute: 100
+      window_seconds: 60
+    circuit_breaker:
+      failure_threshold: 5
+      recovery_timeout: 30
+    services:
+      nin_service: "http://localhost:8005"
+      bvn_service: "http://localhost:8006"
+      sms_service: "http://localhost:8003"
+      ai_service: "http://localhost:8002"
+      ivr_service: "http://localhost:8004"
+      two_way_sms_service: "http://localhost:8007"
+  config_service:
+    host: "0.0.0.0"
+    port: 8001
+    debug: false
+    storage_type: "redis"
+    encryption_key: "${CONFIG_ENCRYPTION_KEY}"
+    versioning_enabled: true
+# Sandbox Services Configuration
+sandbox:
+  nin_service:
+    host: "0.0.0.0"
+    port: 8005
+    debug: false
+    doja_integration: true
+    cache_ttl: 3600 # 1 hour
+  bvn_service:
+    host: "0.0.0.0"
+    port: 8006
+    debug: false
+    doja_integration: true
+    cache_ttl: 3600 # 1 hour
+  sms_service:
+    host: "0.0.0.0"
+    port: 8003
+    debug: false
+    rate_limit: 100
+    daily_limit: 10000
+  ai_service:
+    host: "0.0.0.0"
+    port: 8002
+    debug: false
+    nigerian_context: true
+    default_currency: "NGN"
+    default_location: "Nigeria"
+  ivr_service:
+    host: "0.0.0.0"
+    port: 8004
+    debug: false
+    default_language: "english_ng"
+    default_voice: "nigerian_female"
+  two_way_sms_service:
+    host: "0.0.0.0"
+    port: 8007
+    debug: false
+    ai_replies: true
+    webhook_timeout: 30
+# Logging Configuration
+logging:
+  level: "INFO"
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+  files:
+    user_activity: "services/logs/user_activity.log"
+    api_access: "services/logs/api_access.log"
+    security_events: "services/logs/security_events.log"
+    service_health: "services/logs/service_health.log"
+  rotation:
+    max_bytes: 10485760 # 10MB
+    backup_count: 5
+# Monitoring Configuration
+monitoring:
+  health_check_interval: 30
+  metrics_enabled: true
+  prometheus:
+    enabled: true
+    port: 9090
+  grafana:
+    enabled: true
+    port: 3001
+    username: "admin"
+    password: "admin123"
+# Security Configuration
+security:
+  cors:
+    enabled: true
+    origins: ["*"]
+    methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    headers: ["*"]
+  rate_limiting:
+    enabled: true
+    default_limit: 100
+    window: 60
+  encryption:
+    algorithm: "AES-256-GCM"
+    key_rotation_days: 90
+# Nigerian Specific Configuration
+nigerian_context:
+  phone_formats:
+    - "+234XXXXXXXXXX"
+    - "0XXXXXXXXXX"
+  networks:
+    mtn: "+2348"
+    airtel: "+2348"
+    glo: "+2348"
+    nine_mobile: "+2349"
+  identity:
+    nin_length: 11
+    bvn_length: 11
+  compliance:
+    ndpr_enabled: true
+    cbn_kyc_enabled: true
+    ncc_guidelines: true

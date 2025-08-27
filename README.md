@@ -7,7 +7,7 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 ### Prerequisites
 
 - Docker Desktop (for infrastructure)
-- Python 3.11+ 
+- Python 3.11+
 - Git
 
 ### One-Command Setup
@@ -17,21 +17,26 @@ A modular, cloud-native platform designed for Nigerian startups to rapidly proto
 git clone https://github.com/Behordeun/sandbox-platform.git
 cd sandbox-platform
 
-# Start everything with one command
-./sandbox-start.sh
+# Setup centralized configuration
+cp .env.template .env
+# Edit .env with your API keys and secrets
 
-# Verify DPI services are ready
-./check-services.sh
+# Setup database and create admin users
+./scripts/setup-db.sh
+./scripts/create-admin-user.py
+
+# Start entire sandbox platform
+./scripts/start-sandbox.sh
 ```
 
 ### Test Your Setup
 
 ```bash
 # Generate Nigerian test data
-python mock-data.py
+./scripts/mock-data.py
 
 # Test DPI APIs
-./test-dpi-apis.sh
+./scripts/test-dpi-apis.sh
 
 # Access API documentation
 open http://localhost:8080/docs
@@ -51,16 +56,159 @@ helmfile -e prod apply
 
 ## 🏗️ Architecture
 
-### Sandbox Offerings
+```mermaid
+%%{init: { 'theme': 'default', 'themeVariables': { 'background': '#ffffff' } }}%%
+graph TB
+    %% External Users and Systems
+    subgraph "🌍 External Systems"
+        STARTUPS[("🚀 Nigerian Startups<br/>(9 Closed Access)")]
+        ADMIN[("👨‍💼 Platform Admin")]
+        DOJAH[("🔍 Dojah API<br/>(NIN/BVN Verification)")]
+        SMS_PROVIDER[("📱 SMS Provider<br/>(Nigerian Networks)")]
+        AI_PROVIDER[("🤖 AI Provider<br/>(Nigerian Context)")]
+    end
 
-| Service                  | Port | Description                                             |
-| ------------------------ | ---- | ------------------------------------------------------- |
-| **AI Service**     | 8002 | AI content generation and data analysis                |
-| **SMS Service**    | 8003 | SMS messaging and notifications                         |
-| **IVR Service**    | 8004 | Interactive Voice Response system                       |
-| **NIN Service**    | 8005 | Nigerian Identity Number verification                   |
-| **BVN Service**    | 8006 | Bank Verification Number validation                     |
-| **Two-Way SMS**    | 8007 | Bidirectional SMS communication                         |
+    %% API Gateway Layer
+    subgraph "🌐 API Gateway Layer"
+        GATEWAY["🚪 API Gateway<br/>:8080<br/>• Request Routing<br/>• Rate Limiting<br/>• Circuit Breaking<br/>• Authentication"]
+    end
+
+    %% Platform Services
+    subgraph "🏗️ Platform Services"
+        AUTH["🔐 Auth Service<br/>:8000<br/>• OAuth2/JWT<br/>• Admin User Mgmt<br/>• Session Management"]
+        CONFIG["⚙️ Config Service<br/>:8001<br/>• Centralized Config<br/>• Environment Mgmt<br/>• Encryption"]
+        HEALTH["💚 Health Service<br/>• Service Monitoring<br/>• Health Checks<br/>• Status Reporting"]
+    end
+
+    %% DPI Sandbox Services
+    subgraph "🇳🇬 DPI Sandbox Services"
+        NIN["🆔 NIN Service<br/>:8005<br/>• Identity Verification<br/>• Dojah Integration<br/>• Status Tracking"]
+        BVN["🏦 BVN Service<br/>:8006<br/>• Bank Verification<br/>• Financial Identity<br/>• Validation"]
+        SMS_SVC["📲 SMS Service<br/>:8003<br/>• Nigerian Numbers<br/>• OTP Generation<br/>• Notifications"]
+        AI_SVC["🧠 AI Service<br/>:8002<br/>• Nigerian Context<br/>• Content Generation<br/>• Language Processing"]
+        IVR["📞 IVR Service<br/>• Voice Interactions<br/>• Call Routing<br/>• USSD Integration"]
+        TWO_WAY_SMS["💬 Two-Way SMS<br/>• Interactive SMS<br/>• Response Handling<br/>• Conversation Flow"]
+    end
+
+    %% Data Layer
+    subgraph "💾 Data Stores"
+        POSTGRES[("🐘 PostgreSQL<br/>Primary Database<br/>• User Management<br/>• Service Data<br/>• Audit Logs")]
+        MONGO[("🍃 MongoDB<br/>Document Store<br/>• Flexible Schemas<br/>• JSON Documents<br/>• Analytics Data")]
+        REDIS[("🔴 Redis<br/>Cache & Sessions<br/>• JWT Tokens<br/>• Rate Limiting<br/>• Temporary Data")]
+    end
+
+    %% Configuration & Deployment
+    subgraph "📋 Configuration & Deployment"
+        ENV_CONFIG[("📄 .env<br/>Centralized Config<br/>• All Service Settings<br/>• API Keys<br/>• Database URLs")]
+        YAML_CONFIG[("📝 YAML Configs<br/>• Environment Overrides<br/>• Service Settings<br/>• Feature Flags")]
+        DOCKER[("🐳 Docker<br/>Containerization<br/>• Service Images<br/>• Development<br/>• Production")]
+        K8S[("☸️ Kubernetes<br/>Orchestration<br/>• Auto-scaling<br/>• Load Balancing<br/>• Health Monitoring")]
+    end
+
+    %% Monitoring & Logging
+    subgraph "📊 Monitoring & Analytics"
+        PROMETHEUS[("📈 Prometheus<br/>Metrics Collection<br/>• Service Metrics<br/>• Performance Data<br/>• Alerts")]
+        GRAFANA[("📊 Grafana<br/>Visualization<br/>• Dashboards<br/>• Real-time Monitoring<br/>• Analytics")]
+        LOGS[("📋 Structured Logs<br/>• User Activity<br/>• API Access<br/>• Security Events<br/>• Service Health")]
+    end
+
+    %% Scripts & Automation
+    subgraph "🔧 Automation & Scripts"
+        SETUP_SCRIPTS[("⚡ Setup Scripts<br/>• Database Setup<br/>• Admin User Creation<br/>• Platform Startup")]
+        DEPLOY_SCRIPTS[("🚀 Deployment<br/>• Image Building<br/>• Helm Charts<br/>• Environment Deploy")]
+        TEST_SCRIPTS[("🧪 Testing<br/>• API Testing<br/>• Mock Data<br/>• Health Checks")]
+    end
+
+    %% User Flow Connections
+    STARTUPS --> GATEWAY
+    ADMIN --> GATEWAY
+    
+    %% Gateway Routing
+    GATEWAY --> AUTH
+    GATEWAY --> NIN
+    GATEWAY --> BVN
+    GATEWAY --> SMS_SVC
+    GATEWAY --> AI_SVC
+    GATEWAY --> IVR
+    GATEWAY --> TWO_WAY_SMS
+
+    %% Service Dependencies
+    AUTH --> POSTGRES
+    AUTH --> REDIS
+    CONFIG --> YAML_CONFIG
+    CONFIG --> ENV_CONFIG
+    
+    %% DPI Service Connections
+    NIN --> DOJAH
+    NIN --> POSTGRES
+    BVN --> DOJAH
+    BVN --> POSTGRES
+    SMS_SVC --> SMS_PROVIDER
+    SMS_SVC --> POSTGRES
+    AI_SVC --> AI_PROVIDER
+    AI_SVC --> MONGO
+    IVR --> POSTGRES
+    TWO_WAY_SMS --> SMS_PROVIDER
+    TWO_WAY_SMS --> POSTGRES
+
+    %% Configuration Flow
+    ENV_CONFIG --> AUTH
+    ENV_CONFIG --> NIN
+    ENV_CONFIG --> BVN
+    ENV_CONFIG --> SMS_SVC
+    ENV_CONFIG --> AI_SVC
+    YAML_CONFIG --> CONFIG
+
+    %% Monitoring Connections
+    AUTH --> PROMETHEUS
+    GATEWAY --> PROMETHEUS
+    NIN --> PROMETHEUS
+    BVN --> PROMETHEUS
+    SMS_SVC --> PROMETHEUS
+    AI_SVC --> PROMETHEUS
+    PROMETHEUS --> GRAFANA
+    
+    %% Logging Flow
+    AUTH --> LOGS
+    GATEWAY --> LOGS
+    NIN --> LOGS
+    BVN --> LOGS
+    SMS_SVC --> LOGS
+    AI_SVC --> LOGS
+
+    %% Deployment Flow
+    DOCKER --> K8S
+    SETUP_SCRIPTS --> POSTGRES
+    SETUP_SCRIPTS --> REDIS
+    DEPLOY_SCRIPTS --> K8S
+    TEST_SCRIPTS --> GATEWAY
+
+    %% Health Monitoring
+    HEALTH --> AUTH
+    HEALTH --> NIN
+    HEALTH --> BVN
+    HEALTH --> SMS_SVC
+    HEALTH --> AI_SVC
+    HEALTH --> POSTGRES
+    HEALTH --> REDIS
+
+    %% Light Background Styling
+    classDef external fill:#ffffff,stroke:#2196f3,stroke-width:2px,color:#1565c0
+    classDef platform fill:#ffffff,stroke:#9c27b0,stroke-width:2px,color:#7b1fa2
+    classDef dpi fill:#ffffff,stroke:#4caf50,stroke-width:2px,color:#388e3c
+    classDef data fill:#ffffff,stroke:#ff9800,stroke-width:2px,color:#f57c00
+    classDef config fill:#ffffff,stroke:#e91e63,stroke-width:2px,color:#c2185b
+    classDef monitor fill:#ffffff,stroke:#8bc34a,stroke-width:2px,color:#689f38
+    classDef scripts fill:#ffffff,stroke:#00bcd4,stroke-width:2px,color:#0097a7
+
+    class STARTUPS,ADMIN,DOJAH,SMS_PROVIDER,AI_PROVIDER external
+    class GATEWAY,AUTH,CONFIG,HEALTH platform
+    class NIN,BVN,SMS_SVC,AI_SVC,IVR,TWO_WAY_SMS dpi
+    class POSTGRES,MONGO,REDIS data
+    class ENV_CONFIG,YAML_CONFIG,DOCKER,K8S config
+    class PROMETHEUS,GRAFANA,LOGS monitor
+    class SETUP_SCRIPTS,DEPLOY_SCRIPTS,TEST_SCRIPTS scripts
+```
 
 ### Platform Services
 
@@ -68,10 +216,16 @@ helmfile -e prod apply
 | ------------------------ | ---- | ------------------------------------------------------- |
 | **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens                      |
 | **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
-| **Rate Limiter**   | 8008 | Advanced rate limiting and throttling                   |
-| **Health Service** | 8009 | Service health monitoring and checks                    |
-| **Logging Service**| 8010 | Centralized logging and audit trails                   |
-| **Monitoring**     | 8011 | Metrics collection and alerting                         |
+| **Config Service** | 8001 | Centralized configuration management                    |
+
+### DPI Services
+
+| Service                  | Port | Description                                             |
+| ------------------------ | ---- | ------------------------------------------------------- |
+| **NIN Service**    | 8005 | Nigerian Identity Number verification                   |
+| **BVN Service**    | 8006 | Bank Verification Number validation                     |
+| **SMS Service**    | 8003 | Nigerian SMS messaging and notifications                |
+| **AI Service**     | 8002 | Nigerian-context content generation                     |
 
 ### Data Stores
 
@@ -87,7 +241,7 @@ helmfile -e prod apply
 
 ```plain
 sandbox-platform/
-├── sandbox/                   # Main offerings
+├── sandbox/                   # Main DPI offerings
 │   ├── ai/                    # AI service
 │   ├── sms/                   # SMS service
 │   ├── ivr/                   # IVR service
@@ -95,24 +249,33 @@ sandbox-platform/
 │   ├── bvn/                   # BVN verification
 │   ├── two-way-sms/           # Two-way SMS
 │   └── data-stores/           # Database configurations
-│       ├── postgres/          # PostgreSQL setup
-│       └── mongo/             # MongoDB setup
-├── services/                  # Platform maintenance
+├── services/                  # Platform services
 │   ├── auth-service/          # Authentication & authorization
 │   ├── api-gateway/           # API Gateway & routing
-│   ├── rate-limiter/          # Rate limiting service
-│   ├── health-service/        # Health monitoring
-│   ├── logging/               # Logging service
-│   ├── monitoring/            # Monitoring service
+│   ├── logging/               # Rotational logging system
 │   └── redis/                 # Redis configuration
-├── config/                    # Centralized configuration
+├── config/                    # Centralized YAML configuration
+│   ├── environments/          # Environment-specific configs
+│   ├── config_loader.py       # Configuration loader
+│   ├── logging.yaml           # Rotational logging configuration
+│   └── README.md             # Configuration documentation
 ├── deployment/                # Deployment configurations
 │   ├── scripts/               # Build & deployment scripts
 │   ├── docker-compose/        # Local development setup
 │   ├── helmfile/              # Kubernetes deployment
 │   └── monitoring/            # Monitoring configuration
-├── README.md
-└── .env.example
+├── scripts/                   # Automation scripts
+│   ├── log-rotation-manager.py # Log rotation and management
+│   ├── setup-db.sh           # Database setup
+│   ├── create-admin-user.py   # Admin user creation
+│   ├── start-sandbox.sh       # Platform startup
+│   └── analyze-logs.py        # Log analysis tools
+├── flow_diagrams/             # Architecture diagrams
+│   └── dpi_sandbox_architecture.mmd # Complete system architecture
+├── config.yaml               # Base configuration
+├── .env.template             # Environment variables template
+├── Makefile                  # Comprehensive build and deployment commands
+└── README.md
 ```
 
 ## 🔧 Development for Nigerian DPI
@@ -126,20 +289,29 @@ sandbox-platform/
 ### Quick Development Commands
 
 ```bash
+# Complete setup and start
+make quick-start
+
 # Start all services
-./sandbox-start.sh
+make dev
 
 # Check service health
-./check-services.sh
+make health
 
 # Test APIs with Nigerian examples
-./test-dpi-apis.sh
-
-# Analyze user activity and usage
-python analyze-logs.py --all
+make test
 
 # Generate mock Nigerian data
-python mock-data.py
+make mock-data
+
+# Rotate and manage logs
+make rotate-logs
+
+# View log statistics
+make log-stats
+
+# Analyze user activity and usage
+make analyze-logs
 ```
 
 ### Individual Service Development
@@ -176,20 +348,23 @@ docker-compose -f deployment/docker-compose/docker-compose.dev.yml up
 | Staging     | sandbox-staging | 2 each   | 500m CPU, 512Mi RAM |
 | Production  | sandbox-prod    | 3 each   | 1000m CPU, 1Gi RAM  |
 
-### Helmfile Deployment
+### Makefile Deployment
 
 ```bash
 # Development
-helmfile -e dev apply
+make deploy-dev
 
 # Staging
-helmfile -e staging apply
+make deploy-staging
 
-# Production
-export PROD_POSTGRES_PASSWORD=secure-password
-export PROD_REDIS_PASSWORD=secure-password
-export JWT_SECRET_KEY=secure-jwt-secret
-helmfile -e prod apply
+# Production (with safety prompts)
+make deploy-prod
+
+# Check deployment status
+make k8s-status
+
+# View Kubernetes logs
+make k8s-logs
 ```
 
 ### Manual Helm Deployment
@@ -210,8 +385,11 @@ helm install api-gateway ./services/api-gateway/helm/api-gateway
 ### Health Checks
 
 ```bash
-# Check all DPI services at once
-./check-services.sh
+# Check all services with Makefile
+make health
+
+# Show overall system status
+make status
 
 # Or check individual services
 curl http://localhost:8080/api/v1/dpi/health  # DPI services overview
@@ -221,58 +399,99 @@ curl http://localhost:8006/health             # BVN service
 curl http://localhost:8003/health             # SMS service
 ```
 
-### User Activity & Usage Analytics
+### Log Management & Analytics
 
 ```bash
 # Comprehensive log analysis
-python analyze-logs.py --all
+make analyze-logs
 
-# User activity patterns
-python analyze-logs.py --user-activity
+# Security event analysis
+make analyze-logs-security
 
-# Security monitoring
-python analyze-logs.py --security
+# API performance analysis
+make analyze-logs-performance
+
+# Log rotation and cleanup
+make rotate-logs
+make log-cleanup
+
+# View log statistics
+make log-stats
 
 # Real-time monitoring
-tail -f services/logs/user_activity.log
-tail -f services/logs/api_access.log
+make logs
+make logs-security
 ```
 
-### Rich Logging System
+### Rotational & Persistent Logging System
 
-Comprehensive user activity tracking with structured JSON logging:
+Advanced logging system with automatic rotation, compression, and long-term persistence for continuous auditing:
 
 ```json
 {
-  "timestamp": "2025-08-25 20:45:30",
-  "user_id": "123",
-  "auth_method": "jwt_token",
-  "method": "POST",
-  "path": "/api/v1/nin/verify",
+  "timestamp": "2025-08-25T20:45:30.123Z",
   "service": "nin-service",
-  "status_code": 200,
-  "duration_ms": 245.5,
-  "client_ip": "192.168.1.100",
-  "user_agent": "Mozilla/5.0...",
-  "activity_type": "identity_verification",
-  "success": true
+  "log_type": "user_activity",
+  "user_id": "startup_123",
+  "activity": "DPI_NIN_VERIFY",
+  "details": {
+    "dpi_service": "nin",
+    "action": "verify",
+    "nin_bvn_hash": "sha256_hash",
+    "nigerian_context": true,
+    "startup_name": "TechStartup_NG",
+    "client_ip": "192.168.1.100",
+    "duration_ms": 245.5,
+    "success": true
+  }
 }
 ```
 
-### Log Categories
+### Log Categories & Retention
 
-- **User Activity**: `services/logs/user_activity.log` - All user interactions
-- **API Access**: `services/logs/api_access.log` - Gateway access patterns
-- **Security Events**: `services/logs/security_events.log` - Authentication & security
-- **Service Health**: `services/logs/service_health.log` - System monitoring
+| Category | Size Limit | Retention | Purpose |
+|----------|------------|-----------|----------|
+| **User Activity** | 50MB | 1 year | Track all user interactions |
+| **API Access** | 100MB | 6 months | Monitor API usage patterns |
+| **Security Events** | 25MB | 3 years | Security monitoring & forensics |
+| **Service Health** | 20MB | 3 months | System performance monitoring |
+| **Audit Trail** | 75MB | 7 years | Regulatory compliance |
+
+### Log Management Commands
+
+```bash
+# Rotate and compress logs
+make rotate-logs
+
+# View log statistics
+make log-stats
+
+# Clean up old archives
+make log-cleanup
+
+# Analyze security events
+make analyze-logs-security
+
+# Monitor API performance
+make analyze-logs-performance
+```
+
+### Nigerian DPI Compliance
+
+- **NDPR Compliant**: Nigerian Data Protection Regulation compliance
+- **PII Protection**: Automatic hashing of NIN/BVN numbers
+- **Phone Masking**: Show only last 4 digits of phone numbers
+- **7-Year Audit Trail**: Long-term retention for regulatory compliance
+- **Startup Tracking**: Monitor API usage by the 9 Nigerian startups
 
 ### Analytics Capabilities
 
-- **User Engagement**: Track individual user activity patterns
-- **Service Popularity**: Monitor which services are most used
-- **Peak Hours**: Identify high-traffic periods
-- **Security Monitoring**: Detect suspicious activities
-- **Performance Metrics**: Response times and success rates
+- **User Engagement**: Track individual startup activity patterns
+- **Service Adoption**: Monitor DPI service usage by startups
+- **Peak Hours**: Identify high-traffic periods for capacity planning
+- **Security Monitoring**: Real-time detection of suspicious activities
+- **Performance Metrics**: API response times and success rates
+- **Compliance Reporting**: Generate audit reports for regulatory requirements
 
 ### Metrics
 
@@ -280,63 +499,52 @@ Comprehensive user activity tracking with structured JSON logging:
 - Grafana: `http://localhost:3001` (admin/admin123)
 - Service Metrics: `http://localhost:8080/metrics`
 
-## 🔐 Auth Service Features
+## 🔐 Security & Authentication
 
-### Core Capabilities
-- **OAuth2 Authorization Server**: Full OAuth2 authorization code flow
-- **JWT Token Management**: Secure token generation, validation, and refresh
-- **User Management**: Registration, authentication, and profile management
-- **Integration with Identity Services**: Connects to dedicated NIN/BVN sandbox services
-- **OpenID Connect**: Discovery endpoints and JWKS support
-- **Multi-login Support**: OAuth2 and JSON-based authentication
+### Admin-Only User Management
 
-### Database Schema
-- **Users Table**: User accounts with hashed passwords and profile data
-- **OAuth Clients**: Registered OAuth2 client applications
-- **OAuth Tokens**: Access tokens, refresh tokens, and authorization codes
-- **Alembic Migrations**: Database version control and schema management
-
-### Security Features
-- **Bcrypt Password Hashing**: Secure password storage
-- **JWT Signing**: Configurable secret keys and algorithms
-- **Identity Privacy**: NIN/BVN data hashing for privacy protection
-- **CORS Protection**: Configurable cross-origin policies
-- **Input Validation**: Pydantic models for request/response validation
-
-### Integration Points
-- **API Gateway**: Token validation for all platform services
-- **NIN/BVN Services**: Dedicated sandbox services for identity verification
-- **PostgreSQL**: Primary data storage
-- **Redis**: Session and token caching (via API Gateway)
+- **Closed Sandbox**: Only 9 Nigerian startups have access
+- **Admin Control**: Administrators create all user accounts
+- **Secure Access**: JWT-based authentication for all API calls
+- **Identity Verification**: Integrated NIN/BVN verification services
 
 ## 🔒 Security
 
 ### Authentication Flow
 
-#### OAuth2 Authentication
-1. **Client Registration**: OAuth2 clients register via `/api/v1/oauth2/clients`
-2. **Authorization**: Users authorize via `/api/v1/oauth2/authorize`
-3. **Token Exchange**: Authorization codes exchanged for JWT tokens at `/api/v1/oauth2/token`
-4. **API Access**: Access tokens validated by API Gateway for all service requests
-5. **Token Refresh**: Refresh tokens used to obtain new access tokens
+#### Startup Access (Closed Sandbox)
 
-#### User Authentication
-1. **Registration**: Users register via `/api/v1/auth/register`
-2. **Login**: Multiple login methods:
+1. **Account Request**: Startups contact administrators for account creation
+2. **Admin Creates Account**: Administrators create accounts via `/api/v1/admin/users`
+3. **Credentials Provided**: Startups receive login credentials securely
+4. **Login**: Startups login using:
    - OAuth2 compatible: `/api/v1/auth/login`
    - JSON payload: `/api/v1/auth/login/json`
-3. **User Info**: Access user data via `/api/v1/auth/userinfo` or `/api/v1/auth/me`
+5. **API Access**: Access tokens validated by API Gateway for all service requests
+6. **Logout**: Simple logout via `/api/v1/auth/logout`
+
+#### Admin User Management
+
+1. **Create Accounts**: Administrators create startup accounts
+2. **Manage Users**: Full user lifecycle management
+3. **Reset Passwords**: Admin-controlled password resets
+4. **Account Control**: Activate/deactivate accounts as needed
 
 #### Identity Verification
+
 1. **NIN Verification**: Dedicated NIN service at `/api/v1/nin/verify`
 2. **BVN Verification**: Dedicated BVN service at `/api/v1/bvn/verify`
 3. **Dojah API Integration**: Real-time verification through Dojah API
 4. **Status Tracking**: Monitor verification status via respective service endpoints
-5. **Enhanced Access**: Verified users receive additional platform privileges
 
-### Nigerian Identity Verification
+### Startup Access Examples
 
 ```bash
+# Login to get access token
+curl -X POST http://localhost:8000/api/v1/auth/login/json \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "startup@company.ng", "password": "your-password"}'
+
 # Get examples and test data
 curl http://localhost:8080/api/v1/examples/nin
 curl http://localhost:8080/api/v1/examples/sms
@@ -358,6 +566,40 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"to": "+2348012345678", "message": "Your OTP is 123456"}'
+
+# Logout when done
+curl -X POST http://localhost:8000/api/v1/auth/logout
+```
+
+### Admin User Management
+
+```bash
+# Admin login
+curl -X POST http://localhost:8000/api/v1/auth/login/json \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "admin@dpi-sandbox.ng", "password": "admin-password"}'
+
+# Create startup account
+curl -X POST http://localhost:8000/api/v1/admin/users \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "startup@company.ng",
+    "username": "startup_dev",
+    "password": "TempPass123",
+    "first_name": "Startup",
+    "last_name": "Developer"
+  }'
+
+# List all users
+curl -H "Authorization: Bearer ADMIN_TOKEN" \
+  http://localhost:8000/api/v1/admin/users
+
+# Reset user password
+curl -X POST http://localhost:8000/api/v1/admin/users/1/reset-password \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"new_password": "NewPass123"}'
 ```
 
 ### Configuration Encryption
@@ -375,54 +617,84 @@ Sensitive configuration values are automatically encrypted:
 
 ## 🔧 Configuration
 
-### Environment Variables
+### Hybrid Configuration System
 
-#### Auth Service
+The platform uses a hybrid approach combining YAML configuration with centralized environment variables:
+
+```plain text
+config.yaml                    # Base configuration for all services
+config/environments/
+├── development.yaml          # Environment-specific overrides
+├── staging.yaml             # Staging overrides
+└── production.yaml          # Production overrides
+.env                         # Single centralized environment file
+.env.template               # Template for all environment variables
+```
+
+### Environment Setup
+
+```bash
+# Copy template and customize (single file for all services)
+cp .env.template .env
+
+# Edit the centralized .env file with your actual values
+nano .env
+
+# All services automatically use the centralized configuration
+```
+
+### Centralized Environment Variables (.env)
+
+The platform uses a **single comprehensive .env file** organized into sections:
 
 ```env
-# Database
-DATABASE_URL=postgresql://user:pass@host:5432/db
+# =============================================================================
+# ENVIRONMENT SETTINGS
+# =============================================================================
+ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=INFO
 
-# JWT Configuration
-JWT_SECRET_KEY=your-secret-key
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# =============================================================================
+# DATABASE CONFIGURATION
+# =============================================================================
+# Single PostgreSQL database for all services
+DATABASE_URL=postgresql://sandbox_user:password@localhost:5432/sandbox_platform
+DB_PASSWORD=your-database-password
+REDIS_URL=redis://localhost:6379/0
 
-# OAuth2 Configuration
-OAUTH2_ISSUER_URL=http://localhost:8000
-OAUTH2_JWKS_URI=http://localhost:8000/.well-known/jwks.json
+# =============================================================================
+# SECURITY & AUTHENTICATION
+# =============================================================================
+JWT_SECRET_KEY=your-super-secret-jwt-key
+CONFIG_ENCRYPTION_KEY=your-config-encryption-key
 
-# Identity Verification
+# =============================================================================
+# EXTERNAL API PROVIDERS
+# =============================================================================
 DOJAH_API_KEY=your-dojah-api-key
-DOJAH_BASE_URL=https://api.dojah.io
+DOJAH_APP_ID=your-dojah-app-id
+SMS_API_KEY=your-sms-api-key
+AI_API_KEY=your-ai-api-key
 
-# CORS Configuration
-CORS_ORIGINS=["*"]
-CORS_ALLOW_CREDENTIALS=true
+# =============================================================================
+# EMAIL CONFIGURATION
+# =============================================================================
+SMTP_HOST=smtp.gmail.com
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
 
-# Application Settings
-APP_NAME=Sandbox Auth Service
-APP_VERSION=1.0.0
-DEBUG=false
-HOST=0.0.0.0
-PORT=8000
+# ... and more organized sections
 ```
 
-#### API Gateway
+### Configuration Benefits
 
-```env
-AUTH_SERVICE_URL=http://auth-service:8000
-REDIS_URL=redis://redis:6379/0
-RATE_LIMIT_REQUESTS=100
-```
-
-#### Config Service
-
-```env
-CONFIG_STORAGE_TYPE=redis
-ENCRYPTION_KEY=your-encryption-key
-VERSIONING_ENABLED=true
-```
+- **Single Source of Truth**: One .env file for all services
+- **No Configuration Drift**: Consistent settings across services
+- **Organized Structure**: Well-documented sections and comments
+- **Easy Deployment**: Single file to manage in production
+- **Better Security**: Centralized secret management
+- **YAML + ENV Hybrid**: Structure from YAML, secrets from environment
 
 ## 🧪 Testing
 
@@ -466,15 +738,24 @@ k6 run tests/load/api-gateway.js
 
 ### Key Endpoints
 
-#### Authentication
+#### Authentication (Startup Access)
 
 ```bash
-# User Management
-POST /api/v1/auth/register          # User registration
+# User Authentication
 POST /api/v1/auth/login             # OAuth2 compatible login
 POST /api/v1/auth/login/json        # JSON payload login
-GET  /api/v1/auth/userinfo          # Get user information
+POST /api/v1/auth/logout            # Logout
 GET  /api/v1/auth/me                # Get current user
+
+# Admin User Management (Admin Only)
+POST /api/v1/admin/users            # Create user account
+GET  /api/v1/admin/users            # List all users
+GET  /api/v1/admin/users/{id}       # Get user by ID
+PUT  /api/v1/admin/users/{id}       # Update user
+DELETE /api/v1/admin/users/{id}     # Delete user
+POST /api/v1/admin/users/{id}/activate      # Activate account
+POST /api/v1/admin/users/{id}/deactivate    # Deactivate account
+POST /api/v1/admin/users/{id}/reset-password # Reset password
 
 # OAuth2 Endpoints
 GET  /api/v1/oauth2/authorize       # OAuth2 authorization
@@ -552,25 +833,36 @@ GET /api/v1/services/health
 
 ## 📖 Documentation
 
-### Quick Reference for Nigerian Developers
-- [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
-- [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
-- [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
-- [Service Health Checker](check-services.sh) - Monitor all services
+### Quick Reference for Nigerian Startups
+
+- [Database Guide](docs/DATABASE.md) - Consolidated PostgreSQL database architecture
+- [Configuration Guide](config/README.md) - YAML + centralized .env configuration
+- [Scripts Directory](scripts/README.md) - All platform scripts and utilities
+- [Database Setup](scripts/setup-db.sh) - One-command database setup and migrations
+- [Admin User Setup](scripts/create-admin-user.py) - Create initial admin accounts
+- [Platform Startup](scripts/start-sandbox.sh) - Start entire sandbox platform
+- [DPI API Guide](docs/DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
+- [Mock Data Generator](scripts/mock-data.py) - Generate realistic Nigerian test data
+- [API Testing Script](scripts/test-dpi-apis.sh) - Test complete DPI workflows
+- [Service Health Checker](scripts/check-services.sh) - Monitor all services
+- [Startup Guide](docs/STARTUP-GUIDE.md) - Startup Access Guide
 
 ### Detailed Documentation
+
+- [Configuration Management](config/README.md) - YAML-based configuration system
 - [Deployment Guide](deployment/README.md) - Comprehensive deployment instructions
 - [Auth Service](services/auth-service/README.md) - OAuth2, JWT, and password management
 - [API Gateway](services/api-gateway/README.md) - Gateway configuration and usage
-- [Services Overview](services/README.md) - Platform services management
+- [Sandbox Services](sandbox/README.md) - DPI services overview
 
 ### Service-Specific Documentation
-- **Auth Service**: OAuth2 flows, Nigerian phone validation, JWT management
-- **API Gateway**: Request routing, rate limiting, DPI health monitoring
+
+- **Auth Service**: OAuth2 flows, admin-only user management, JWT tokens
+- **API Gateway**: Request routing, rate limiting, service discovery
 - **NIN Service**: Nigerian Identity Number verification via Dojah API
 - **BVN Service**: Bank Verification Number validation
 - **SMS Service**: Nigerian SMS messaging and notifications
-- **AI Service**: Content generation and data analysis
+- **AI Service**: Nigerian-context content generation
 
 ## 🐛 Troubleshooting
 

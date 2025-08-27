@@ -1,4 +1,5 @@
 import re
+import html
 from typing import Optional
 
 
@@ -20,6 +21,8 @@ def validate_bvn(bvn: str) -> bool:
 
 def format_nigerian_phone(phone: str) -> Optional[str]:
     """Format Nigerian phone to international format"""
+    # Sanitize input to prevent XSS
+    phone = html.escape(phone)
     phone = re.sub(r"[^\d+]", "", phone)
 
     if phone.startswith("0"):

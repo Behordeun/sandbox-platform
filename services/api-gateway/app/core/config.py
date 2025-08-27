@@ -1,9 +1,9 @@
+import os
 from typing import Dict, List
 
 from pydantic_settings import BaseSettings
 
 HEALTH_PATH = "/health"
-
 
 class ServiceConfig(BaseSettings):
     """Configuration for a backend service."""
@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/0"
 
     # JWT settings for token validation
-    jwt_secret_key: str = "default-secret-key-change-in-production"
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
 
     # Service URLs
@@ -51,19 +51,13 @@ class Settings(BaseSettings):
     auth_service_timeout: int = 30
     services: Dict[str, ServiceConfig] = {
         "auth": ServiceConfig(
-            name="auth-service", url="http://localhost:8000", health_path=HEALTH_PATH
+            name="auth-service", url="http://auth-service:8000", health_path=HEALTH_PATH
         ),
         "sms": ServiceConfig(
-            name="sms-service", url="http://localhost:8003", health_path=HEALTH_PATH
+            name="sms-service", url="http://sms-service:8000", health_path=HEALTH_PATH
         ),
         "llm": ServiceConfig(
-            name="llm-service", url="http://localhost:8002", health_path=HEALTH_PATH
-        ),
-        "nin": ServiceConfig(
-            name="nin-service", url="http://localhost:8005", health_path=HEALTH_PATH
-        ),
-        "bvn": ServiceConfig(
-            name="bvn-service", url="http://localhost:8006", health_path=HEALTH_PATH
+            name="llm-service", url="http://llm-service:8000", health_path=HEALTH_PATH
         ),
     }
 
@@ -91,9 +85,10 @@ class Settings(BaseSettings):
     max_timeout: int = 300
 
     class Config:
-        env_file = ".env"
+        env_file = "../../.env"  # Use root .env file
         case_sensitive = False
 
 
 # Global settings instance
-settings = Settings()
+jwt_secret = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
+settings = Settings(jwt_secret_key=jwt_secret)
