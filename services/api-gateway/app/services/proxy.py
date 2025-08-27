@@ -184,10 +184,16 @@ class ProxyService:
                 }
 
         except Exception as e:
+            # Log exception with stack trace internally
+            structured_logger.log_error(
+                f"Error checking health for service '{service_name}' at {health_url}: {str(e)}",
+                exc_info=True
+            )
+            # Return only a generic error message to callers
             return {
                 "service": service_name,
                 "status": "unhealthy",
-                "error": str(e),
+                "error": "An internal error occurred",
                 "url": service_config.url,
             }
 
