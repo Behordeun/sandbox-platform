@@ -60,8 +60,14 @@ class Settings(BaseSettings):
             self.smtp_from_name = email_config.get("from_name", "DPI Sandbox Platform")
         
         # Database Configuration
+        from config.config_loader import get_config
+        config = get_config(environment)
+        db_config = config.get("database", {})
         if db_config:
-            self.database_url = db_config.get("url", os.getenv("DATABASE_URL", "sqlite:///./sandbox_auth.db"))
+            self.database_url = db_config.get("url", os.getenv("DATABASE_URL", "postgresql://sandbox_user:sandbox_password@localhost:5432/sandbox_platform"))
+            # Get table prefix for auth service
+            table_prefixes = db_config.get("table_prefixes", {})
+            self.table_prefix = table_prefixes.get("auth_service", "auth_")
     
     # Default values (fallback if YAML config is not available)
     app_name: str = "Sandbox Auth Service"
@@ -71,7 +77,8 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # Database
-    database_url: str = "sqlite:///./sandbox_auth.db"
+    database_url: str = "postgresql://sandbox_user:sandbox_password@localhost:5432/sandbox_platform"
+    table_prefix: str = "auth_"
     
     # JWT
     jwt_secret_key: str = "your-secret-key-here"

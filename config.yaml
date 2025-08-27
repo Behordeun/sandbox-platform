@@ -4,19 +4,28 @@
 platform:
   name: "Sandbox Platform"
   version: "1.0.0"
-  environment: "development"  # development, staging, production
-
+  environment: "development" # development, staging, production
 # Database Configuration
 database:
-  auth_service:
-    url: "postgresql://sandbox_user:Muhammad__1234@localhost:5432/sandbox_auth"
-    pool_size: 10
-    max_overflow: 20
-  
-  config_service:
-    type: "redis"
-    url: "redis://localhost:6379/1"
-
+  # Single PostgreSQL database for all services
+  url: "${DATABASE_URL}"
+  pool_size: 20
+  max_overflow: 40
+  # Table prefixes for each service
+  table_prefixes:
+    auth_service: "auth_"
+    config_service: "config_"
+    nin_service: "nin_"
+    bvn_service: "bvn_"
+    sms_service: "sms_"
+    ai_service: "ai_"
+    ivr_service: "ivr_"
+    two_way_sms_service: "twoway_sms_"
+  # Redis for caching and sessions
+  redis:
+    url: "redis://localhost:6379/0"
+    sessions_db: 1
+    cache_db: 2
 # External API Providers
 providers:
   doja:
@@ -24,19 +33,16 @@ providers:
     api_key: "${DOJAH_API_KEY}"
     app_id: "${DOJAH_APP_ID}"
     timeout: 30
-  
   sms:
     provider: "termii"
     api_key: "${SMS_API_KEY}"
     sender_id: "DPISandbox"
     base_url: "https://api.ng.termii.com"
-  
   ai:
     provider: "openai"
     api_key: "${AI_API_KEY}"
     model: "gpt-3.5-turbo"
     max_tokens: 2000
-
 # Service Configuration
 services:
   auth_service:
@@ -63,7 +69,6 @@ services:
       allow_credentials: true
       allow_methods: ["*"]
       allow_headers: ["*"]
-
   api_gateway:
     host: "0.0.0.0"
     port: 8080
@@ -83,7 +88,6 @@ services:
       ai_service: "http://localhost:8002"
       ivr_service: "http://localhost:8004"
       two_way_sms_service: "http://localhost:8007"
-
   config_service:
     host: "0.0.0.0"
     port: 8001
@@ -91,7 +95,6 @@ services:
     storage_type: "redis"
     encryption_key: "${CONFIG_ENCRYPTION_KEY}"
     versioning_enabled: true
-
 # Sandbox Services Configuration
 sandbox:
   nin_service:
@@ -99,22 +102,19 @@ sandbox:
     port: 8005
     debug: false
     doja_integration: true
-    cache_ttl: 3600  # 1 hour
-    
+    cache_ttl: 3600 # 1 hour
   bvn_service:
     host: "0.0.0.0"
     port: 8006
     debug: false
     doja_integration: true
-    cache_ttl: 3600  # 1 hour
-    
+    cache_ttl: 3600 # 1 hour
   sms_service:
     host: "0.0.0.0"
     port: 8003
     debug: false
     rate_limit: 100
     daily_limit: 10000
-    
   ai_service:
     host: "0.0.0.0"
     port: 8002
@@ -122,21 +122,18 @@ sandbox:
     nigerian_context: true
     default_currency: "NGN"
     default_location: "Nigeria"
-    
   ivr_service:
     host: "0.0.0.0"
     port: 8004
     debug: false
     default_language: "english_ng"
     default_voice: "nigerian_female"
-    
   two_way_sms_service:
     host: "0.0.0.0"
     port: 8007
     debug: false
     ai_replies: true
     webhook_timeout: 30
-
 # Logging Configuration
 logging:
   level: "INFO"
@@ -147,9 +144,8 @@ logging:
     security_events: "services/logs/security_events.log"
     service_health: "services/logs/service_health.log"
   rotation:
-    max_bytes: 10485760  # 10MB
+    max_bytes: 10485760 # 10MB
     backup_count: 5
-
 # Monitoring Configuration
 monitoring:
   health_check_interval: 30
@@ -162,7 +158,6 @@ monitoring:
     port: 3001
     username: "admin"
     password: "admin123"
-
 # Security Configuration
 security:
   cors:
@@ -177,7 +172,6 @@ security:
   encryption:
     algorithm: "AES-256-GCM"
     key_rotation_days: 90
-
 # Nigerian Specific Configuration
 nigerian_context:
   phone_formats:

@@ -3,8 +3,8 @@ environment: "development"
 
 # Development Database Settings
 database:
-  auth_service:
-    url: "sqlite:///./sandbox_auth.db"
+  # Use PostgreSQL for development (consistent with production)
+  url: "postgresql://sandbox_user:${DB_PASSWORD:sandbox_password}@localhost:5432/sandbox_platform"
 
 # Development API Settings (use sandbox endpoints)
 providers:
