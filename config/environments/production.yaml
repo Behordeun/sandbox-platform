@@ -3,10 +3,9 @@ environment: "production"
 
 # Production Database Settings
 database:
-  auth_service:
-    url: "postgresql://sandbox_user:${DB_PASSWORD}@postgres:5432/sandbox_auth"
-    pool_size: 20
-    max_overflow: 40
+  url: "postgresql://sandbox_user:${DB_PASSWORD}@postgres:5432/sandbox_platform"
+  pool_size: 30
+  max_overflow: 60
 
 # Production API Settings
 providers:
