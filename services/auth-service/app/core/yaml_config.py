@@ -7,8 +7,20 @@ import os
 from typing import List, Optional
 from pydantic import BaseSettings
 import sys
-sys.path.append("../..")
-from config.config_loader import get_service_config
+from pathlib import Path
+
+# Add config directory to path
+config_path = Path(__file__).parent.parent.parent.parent / "config"
+sys.path.insert(0, str(config_path))
+
+try:
+    from config_loader import get_service_config, get_config
+except ImportError:
+    # Fallback if config loader not available
+    def get_service_config(_service, _env):
+        return None
+    def get_config(_env):
+        return {}
 
 
 class Settings(BaseSettings):
@@ -58,14 +70,17 @@ class Settings(BaseSettings):
             self.smtp_from_name = email_config.get("from_name", "DPI Sandbox Platform")
         
         # Database Configuration
-        from config.config_loader import get_config
         config = get_config(environment)
         db_config = config.get("database", {})
         if db_config:
-            self.database_url = db_config.get("url", os.getenv("DATABASE_URL"))
+            self.database_url = db_config.get("url", os.getenv("DATABASE_URL", "postgresql://sandbox_user:password@localhost:5432/sandbox_platform"))
             # Get table prefix for auth service
             table_prefixes = db_config.get("table_prefixes", {})
             self.table_prefix = table_prefixes.get("auth_service", "auth_")
+        else:
+            # Fallback to environment variables
+            self.database_url = os.getenv("DATABASE_URL", "postgresql://sandbox_user:password@localhost:5432/sandbox_platform")
+            self.table_prefix = "auth_"
     
     # Default values (fallback if YAML config is not available)
     app_name: str = "Sandbox Auth Service"
@@ -75,11 +90,11 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # Database
-    database_url: str = "${DATABASE_URL}"
+    database_url: str = "postgresql://sandbox_user:password@localhost:5432/sandbox_platform"
     table_prefix: str = "auth_"
     
     # JWT
-    jwt_secret_key: str = "${JWT_SECRET_KEY}"
+    jwt_secret_key: str = "change-this-secret-key-in-production"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7

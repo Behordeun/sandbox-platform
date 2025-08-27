@@ -60,14 +60,10 @@ class ConfigLoader:
         # Return empty dict if service not found
         return {}
     
-    def get_database_config(self, service_name: str, environment: Optional[str] = None) -> Dict[str, Any]:
-        """Get database configuration for a specific service."""
+    def get_database_config(self, environment: Optional[str] = None) -> Dict[str, Any]:
+        """Get database configuration."""
         config = self.load_config(environment)
-        
-        if "database" in config and service_name in config["database"]:
-            return config["database"][service_name]
-        
-        return {}
+        return config.get("database", {})
     
     def get_provider_config(self, provider_name: str, environment: Optional[str] = None) -> Dict[str, Any]:
         """Get external provider configuration."""
@@ -139,9 +135,9 @@ def get_service_config(service_name: str, environment: Optional[str] = None) -> 
     return config_loader.get_service_config(service_name, environment)
 
 
-def get_database_config(service_name: str, environment: Optional[str] = None) -> Dict[str, Any]:
-    """Get database configuration for a specific service."""
-    return config_loader.get_database_config(service_name, environment)
+def get_database_config(environment: Optional[str] = None) -> Dict[str, Any]:
+    """Get database configuration."""
+    return config_loader.get_database_config(environment)
 
 
 def get_provider_config(provider_name: str, environment: Optional[str] = None) -> Dict[str, Any]:
