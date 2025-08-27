@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: sandbox-postgres
-    env_file: .env
+    env_file: ../../.env
     environment:
       POSTGRES_DB: ${POSTGRES_DB}
       POSTGRES_USER: ${POSTGRES_USER}
@@ -34,7 +34,7 @@ services:
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
     ports:
-      - "6378:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -87,7 +87,7 @@ services:
   # Config Service
   config-service:
     build:
-      context: ../../services/config-service
+      context: ../../config
       dockerfile: Dockerfile
     container_name: sandbox-config-service
     env_file: .env
@@ -104,7 +104,7 @@ services:
       - ENCRYPTION_KEY=${ENCRYPTION_KEY}
       - CORS_ORIGINS=${CORS_ORIGINS}
       - DEBUG=${DEBUG}
-      - VERSIONING_ENABLED=${VERSIONING_ENABLED}
+      - ENVIRONMENT=${ENVIRONMENT}
     ports:
       - "8001:8000"
     depends_on:
@@ -113,7 +113,7 @@ services:
     networks:
       - sandbox-network
     volumes:
-      - ../../services/config-service:/app
+      - ../../config:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
