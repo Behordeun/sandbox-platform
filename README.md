@@ -281,6 +281,7 @@ Comprehensive user activity tracking with structured JSON logging:
 ## 🔐 Security & Authentication
 
 ### Admin-Only User Management
+
 - **Closed Sandbox**: Only 9 Nigerian startups have access
 - **Admin Control**: Administrators create all user accounts
 - **Secure Access**: JWT-based authentication for all API calls
@@ -613,16 +614,17 @@ GET /api/v1/services/health
 
 ### Quick Reference for Nigerian Startups
 
-- [Database Guide](DATABASE.md) - Consolidated PostgreSQL database architecture
+- [Database Guide](docs/DATABASE.md) - Consolidated PostgreSQL database architecture
 - [Configuration Guide](config/README.md) - YAML + centralized .env configuration
 - [Scripts Directory](scripts/README.md) - All platform scripts and utilities
 - [Database Setup](scripts/setup-db.sh) - One-command database setup and migrations
 - [Admin User Setup](scripts/create-admin-user.py) - Create initial admin accounts
 - [Platform Startup](scripts/start-sandbox.sh) - Start entire sandbox platform
-- [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
+- [DPI API Guide](docs/DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
 - [Mock Data Generator](scripts/mock-data.py) - Generate realistic Nigerian test data
 - [API Testing Script](scripts/test-dpi-apis.sh) - Test complete DPI workflows
 - [Service Health Checker](scripts/check-services.sh) - Monitor all services
+- [Startup Guide](docs/STARTUP-GUIDE.md) - Startup Access Guide
 
 ### Detailed Documentation
 
