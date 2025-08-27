@@ -3,12 +3,12 @@ services:
   postgres:
     image: postgres:16-alpine
     container_name: sandbox-postgres
-    env_file: .env
+    env_file: ../../.env
     environment:
-      POSTGRES_DB: ${POSTGRES_DB}
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_INITDB_ARGS: ${POSTGRES_INITDB_ARGS}
+      POSTGRES_DB: sandbox_platform
+      POSTGRES_USER: sandbox_user
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
     ports:
       - "5432:5432"
     volumes:
@@ -27,9 +27,10 @@ services:
   redis:
     image: redis:7-alpine
     container_name: sandbox-redis
-    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD}
+    env_file: ../../.env
+    command: redis-server --appendonly yes
     ports:
-      - "6378:6379"
+      - "6379:6379"
     volumes:
       - redis_data:/data
     networks:
@@ -45,14 +46,14 @@ services:
     build:
       context: ../../services/auth-service
       dockerfile: Dockerfile
-    env_file: .env
+    container_name: sandbox-auth-service
+    env_file: ../../.env
     environment:
       - DATABASE_URL=${DATABASE_URL}
       - REDIS_URL=${REDIS_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - CORS_ORIGINS=${CORS_ORIGINS}
       - DEBUG=${DEBUG}
-      - DOJA_API_KEY=${DOJA_API_KEY}
+      - ENVIRONMENT=${ENVIRONMENT}
     ports:
       - "8000:8000"
     depends_on:
@@ -75,17 +76,15 @@ services:
   # Config Service
   config-service:
     build:
-      context: ../../services/config-service
+      context: ../../config
       dockerfile: Dockerfile
     container_name: sandbox-config-service
-    env_file: .env
+    env_file: ../../.env
     environment:
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/1
-      - CONFIG_STORAGE_TYPE=${CONFIG_STORAGE_TYPE}
-      - ENCRYPTION_KEY=${ENCRYPTION_KEY}
-      - CORS_ORIGINS=${CORS_ORIGINS}
+      - REDIS_URL=${REDIS_URL}
+      - CONFIG_ENCRYPTION_KEY=${CONFIG_ENCRYPTION_KEY}
       - DEBUG=${DEBUG}
-      - VERSIONING_ENABLED=${VERSIONING_ENABLED}
+      - ENVIRONMENT=${ENVIRONMENT}
     ports:
       - "8001:8000"
     depends_on:
@@ -94,7 +93,7 @@ services:
     networks:
       - sandbox-network
     volumes:
-      - ../../services/config-service:/app
+      - ../../config:/app
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
@@ -109,15 +108,13 @@ services:
       context: ../../services/api-gateway
       dockerfile: Dockerfile
     container_name: sandbox-api-gateway
-    env_file: .env
+    env_file: ../../.env
     environment:
       - AUTH_SERVICE_URL=${AUTH_SERVICE_URL}
-      - CONFIG_SERVICE_URL=${CONFIG_SERVICE_URL}
-      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379/2
+      - REDIS_URL=${REDIS_URL}
       - JWT_SECRET_KEY=${JWT_SECRET_KEY}
-      - CORS_ORIGINS=["http://localhost:3000"]
       - DEBUG=${DEBUG}
-      - RATE_LIMIT_ENABLED=${RATE_LIMIT_ENABLED}
+      - ENVIRONMENT=${ENVIRONMENT}
       - METRICS_ENABLED=${METRICS_ENABLED}
     ports:
       - "8080:8080"
@@ -167,9 +164,9 @@ services:
     container_name: sandbox-grafana
     ports:
       - "3001:3000"
-    env_file: .env
+    env_file: ../../.env
     environment:
-      - GF_SECURITY_ADMIN_PASSWORD=${GF_SECURITY_ADMIN_PASSWORD}
+      - GF_SECURITY_ADMIN_PASSWORD=${GRAFANA_PASSWORD}
     volumes:
       - grafana_data:/var/lib/grafana
       - ./monitoring/grafana/provisioning:/etc/grafana/provisioning
