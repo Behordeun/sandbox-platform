@@ -4,7 +4,7 @@
 
 replicaCount: 1
 image:
-  repository: your-dockerhub-username/sandbox-auth-service
+  repository: sandbox/auth-service
   pullPolicy: IfNotPresent
   # Overrides the image tag whose default is the chart appVersion.
   tag: "1.0.0"
@@ -58,7 +58,7 @@ resources:
 autoscaling:
   enabled: false
   minReplicas: 1
-  maxReplicas: 100
+  maxReplicas: 10
   targetCPUUtilizationPercentage: 80
   # targetMemoryUtilizationPercentage: 80
 nodeSelector: {}
@@ -79,7 +79,7 @@ config:
   # NIN/BVN Integration settings
   dojaBaseUrl: "https://api.dojah.io"
   # CORS settings
-  corsOrigins: ["*"]
+  corsOrigins: ["http://localhost:3000", "http://localhost:8080"]
   corsAllowCredentials: true
   corsAllowMethods: ["*"]
   corsAllowHeaders: ["*"]
@@ -89,11 +89,11 @@ config:
 # Secrets (these should be created separately or via external secret management)
 secrets:
   # Database connection
-  databaseUrl: "postgresql://sandbox_user:changeme@auth-service-postgresql:5432/sandbox_auth"
+  databaseUrl: "postgresql://sandbox_user:CHANGE_ME@auth-service-postgresql:5432/sandbox_auth"
   # JWT secret key
-  jwtSecretKey: "your-secret-key-change-in-production"
+  jwtSecretKey: "CHANGE_THIS_SECRET_KEY_IN_PRODUCTION"
   # Dojah API key for NIN/BVN verification
-  dojaApiKey: ""
+  dojaApiKey: "CHANGE_ME"
 # PostgreSQL dependency configuration
 postgresql:
   enabled: true
