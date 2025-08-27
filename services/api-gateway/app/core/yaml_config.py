@@ -75,11 +75,11 @@ class Settings(BaseSettings):
     circuit_breaker_recovery_timeout: int = 30
     
     # JWT
-    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "your-secret-key")
+    jwt_secret_key: str = "${JWT_SECRET_KEY}"
     jwt_algorithm: str = "HS256"
     
     class Config:
-        env_file = ".env"
+        env_file = "../../../.env"  # Use root .env file
         case_sensitive = False
 
 
