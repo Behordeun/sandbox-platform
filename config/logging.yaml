@@ -1,0 +1,186 @@
+# Logging Configuration for DPI Sandbox Platform
+# Rotational and Persistent Logging System
+
+logging:
+  version: 1
+  disable_existing_loggers: false
+  
+  formatters:
+    json:
+      format: '%(message)s'
+    
+    detailed:
+      format: '%(asctime)s - %(name)s - %(levelname)s - %(funcName)s:%(lineno)d - %(message)s'
+      datefmt: '%Y-%m-%d %H:%M:%S'
+    
+    simple:
+      format: '%(levelname)s - %(message)s'
+  
+  handlers:
+    # User Activity Logs - High retention for audit
+    user_activity:
+      class: logging.handlers.RotatingFileHandler
+      filename: logs/user_activity.log
+      maxBytes: 52428800  # 50MB
+      backupCount: 20     # Keep 20 rotated files (1GB total)
+      formatter: json
+      level: INFO
+    
+    # API Access Logs - Medium retention
+    api_access:
+      class: logging.handlers.RotatingFileHandler
+      filename: logs/api_access.log
+      maxBytes: 104857600  # 100MB
+      backupCount: 15      # Keep 15 rotated files (1.5GB total)
+      formatter: json
+      level: INFO
+    
+    # Security Events - Very high retention
+    security_events:
+      class: logging.handlers.RotatingFileHandler
+      filename: logs/security_events.log
+      maxBytes: 26214400   # 25MB
+      backupCount: 50      # Keep 50 rotated files (1.25GB total)
+      formatter: json
+      level: WARNING
+    
+    # Service Health - Low retention
+    service_health:
+      class: logging.handlers.RotatingFileHandler
+      filename: logs/service_health.log
+      maxBytes: 20971520   # 20MB
+      backupCount: 10      # Keep 10 rotated files (200MB total)
+      formatter: json
+      level: INFO
+    
+    # Audit Trail - Maximum retention for compliance
+    audit_trail:
+      class: logging.handlers.RotatingFileHandler
+      filename: logs/audit_trail.log
+      maxBytes: 78643200   # 75MB
+      backupCount: 100     # Keep 100 rotated files (7.5GB total)
+      formatter: json
+      level: INFO
+    
+    # Console output for development
+    console:
+      class: logging.StreamHandler
+      stream: ext://sys.stdout
+      formatter: detailed
+      level: DEBUG
+    
+    # Error file for critical issues
+    error_file:
+      class: logging.handlers.RotatingFileHandler
+      filename: logs/errors.log
+      maxBytes: 10485760   # 10MB
+      backupCount: 5
+      formatter: detailed
+      level: ERROR
+  
+  loggers:
+    # Service-specific loggers
+    auth_service:
+      level: INFO
+      handlers: [user_activity, api_access, security_events, audit_trail, console]
+      propagate: false
+    
+    api_gateway:
+      level: INFO
+      handlers: [api_access, security_events, console]
+      propagate: false
+    
+    nin_service:
+      level: INFO
+      handlers: [user_activity, api_access, audit_trail, console]
+      propagate: false
+    
+    bvn_service:
+      level: INFO
+      handlers: [user_activity, api_access, audit_trail, console]
+      propagate: false
+    
+    sms_service:
+      level: INFO
+      handlers: [user_activity, api_access, console]
+      propagate: false
+    
+    ai_service:
+      level: INFO
+      handlers: [user_activity, api_access, console]
+      propagate: false
+    
+    # Security logger for all services
+    security:
+      level: WARNING
+      handlers: [security_events, error_file, console]
+      propagate: false
+    
+    # Health monitoring
+    health:
+      level: INFO
+      handlers: [service_health, console]
+      propagate: false
+    
+    # Root logger
+    root:
+      level: INFO
+      handlers: [console, error_file]
+
+# Log rotation schedule (for cron jobs)
+rotation:
+  schedule: "0 2 * * *"  # Daily at 2 AM
+  retention_days:
+    user_activity: 365    # 1 year
+    api_access: 180       # 6 months
+    security_events: 1095 # 3 years
+    service_health: 90    # 3 months
+    audit_trail: 2555     # 7 years (compliance)
+    errors: 365           # 1 year
+  
+  compression:
+    enabled: true
+    algorithm: gzip
+    compress_after_days: 7
+  
+  archival:
+    enabled: true
+    archive_after_days: 30
+    archive_location: logs/archive/
+    
+# Monitoring and alerting
+monitoring:
+  log_size_alert_mb: 500    # Alert when total logs exceed 500MB
+  disk_usage_alert_percent: 85  # Alert when disk usage > 85%
+  
+  critical_events:
+    - "AUTHENTICATION_FAILURE"
+    - "RATE_LIMIT_EXCEEDED"
+    - "SUSPICIOUS_PATH_ACCESS"
+    - "DATA_BREACH_ATTEMPT"
+    - "UNAUTHORIZED_ADMIN_ACCESS"
+  
+  notification:
+    email_alerts: true
+    slack_alerts: false
+    webhook_url: "${LOG_ALERT_WEBHOOK_URL}"
+
+# Nigerian DPI specific logging
+nigerian_dpi:
+  sensitive_data_handling:
+    hash_nin: true          # Hash NIN numbers in logs
+    hash_bvn: true          # Hash BVN numbers in logs
+    mask_phone_numbers: true # Mask phone numbers (show only last 4 digits)
+    encrypt_pii: true       # Encrypt other PII data
+  
+  compliance:
+    gdpr_compliant: true
+    ndpr_compliant: true    # Nigerian Data Protection Regulation
+    audit_trail_required: true
+    data_retention_policy: "7_years"
+  
+  startup_tracking:
+    track_api_usage: true
+    track_service_adoption: true
+    track_error_patterns: true
+    generate_usage_reports: true

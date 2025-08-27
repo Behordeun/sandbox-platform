@@ -252,18 +252,29 @@ sandbox-platform/
 ├── services/                  # Platform services
 │   ├── auth-service/          # Authentication & authorization
 │   ├── api-gateway/           # API Gateway & routing
+│   ├── logging/               # Rotational logging system
 │   └── redis/                 # Redis configuration
 ├── config/                    # Centralized YAML configuration
 │   ├── environments/          # Environment-specific configs
 │   ├── config_loader.py       # Configuration loader
+│   ├── logging.yaml           # Rotational logging configuration
 │   └── README.md             # Configuration documentation
 ├── deployment/                # Deployment configurations
 │   ├── scripts/               # Build & deployment scripts
 │   ├── docker-compose/        # Local development setup
 │   ├── helmfile/              # Kubernetes deployment
 │   └── monitoring/            # Monitoring configuration
+├── scripts/                   # Automation scripts
+│   ├── log-rotation-manager.py # Log rotation and management
+│   ├── setup-db.sh           # Database setup
+│   ├── create-admin-user.py   # Admin user creation
+│   ├── start-sandbox.sh       # Platform startup
+│   └── analyze-logs.py        # Log analysis tools
+├── flow_diagrams/             # Architecture diagrams
+│   └── dpi_sandbox_architecture.mmd # Complete system architecture
 ├── config.yaml               # Base configuration
 ├── .env.template             # Environment variables template
+├── Makefile                  # Comprehensive build and deployment commands
 └── README.md
 ```
 
@@ -278,20 +289,29 @@ sandbox-platform/
 ### Quick Development Commands
 
 ```bash
+# Complete setup and start
+make quick-start
+
 # Start all services
-./scripts/start-sandbox.sh
+make dev
 
 # Check service health
-./scripts/check-services.sh
+make health
 
 # Test APIs with Nigerian examples
-./scripts/test-dpi-apis.sh
-
-# Analyze user activity and usage
-./scripts/analyze-logs.py --all
+make test
 
 # Generate mock Nigerian data
-./scripts/mock-data.py
+make mock-data
+
+# Rotate and manage logs
+make rotate-logs
+
+# View log statistics
+make log-stats
+
+# Analyze user activity and usage
+make analyze-logs
 ```
 
 ### Individual Service Development
@@ -328,20 +348,23 @@ docker-compose -f deployment/docker-compose/docker-compose.dev.yml up
 | Staging     | sandbox-staging | 2 each   | 500m CPU, 512Mi RAM |
 | Production  | sandbox-prod    | 3 each   | 1000m CPU, 1Gi RAM  |
 
-### Helmfile Deployment
+### Makefile Deployment
 
 ```bash
 # Development
-helmfile -e dev apply
+make deploy-dev
 
 # Staging
-helmfile -e staging apply
+make deploy-staging
 
-# Production
-export PROD_POSTGRES_PASSWORD=secure-password
-export PROD_REDIS_PASSWORD=secure-password
-export JWT_SECRET_KEY=secure-jwt-secret
-helmfile -e prod apply
+# Production (with safety prompts)
+make deploy-prod
+
+# Check deployment status
+make k8s-status
+
+# View Kubernetes logs
+make k8s-logs
 ```
 
 ### Manual Helm Deployment
@@ -362,8 +385,11 @@ helm install api-gateway ./services/api-gateway/helm/api-gateway
 ### Health Checks
 
 ```bash
-# Check all DPI services at once
-./check-services.sh
+# Check all services with Makefile
+make health
+
+# Show overall system status
+make status
 
 # Or check individual services
 curl http://localhost:8080/api/v1/dpi/health  # DPI services overview
@@ -373,58 +399,99 @@ curl http://localhost:8006/health             # BVN service
 curl http://localhost:8003/health             # SMS service
 ```
 
-### User Activity & Usage Analytics
+### Log Management & Analytics
 
 ```bash
 # Comprehensive log analysis
-python analyze-logs.py --all
+make analyze-logs
 
-# User activity patterns
-python analyze-logs.py --user-activity
+# Security event analysis
+make analyze-logs-security
 
-# Security monitoring
-python analyze-logs.py --security
+# API performance analysis
+make analyze-logs-performance
+
+# Log rotation and cleanup
+make rotate-logs
+make log-cleanup
+
+# View log statistics
+make log-stats
 
 # Real-time monitoring
-tail -f services/logs/user_activity.log
-tail -f services/logs/api_access.log
+make logs
+make logs-security
 ```
 
-### Rich Logging System
+### Rotational & Persistent Logging System
 
-Comprehensive user activity tracking with structured JSON logging:
+Advanced logging system with automatic rotation, compression, and long-term persistence for continuous auditing:
 
 ```json
 {
-  "timestamp": "2025-08-25 20:45:30",
-  "user_id": "123",
-  "auth_method": "jwt_token",
-  "method": "POST",
-  "path": "/api/v1/nin/verify",
+  "timestamp": "2025-08-25T20:45:30.123Z",
   "service": "nin-service",
-  "status_code": 200,
-  "duration_ms": 245.5,
-  "client_ip": "192.168.1.100",
-  "user_agent": "Mozilla/5.0...",
-  "activity_type": "identity_verification",
-  "success": true
+  "log_type": "user_activity",
+  "user_id": "startup_123",
+  "activity": "DPI_NIN_VERIFY",
+  "details": {
+    "dpi_service": "nin",
+    "action": "verify",
+    "nin_bvn_hash": "sha256_hash",
+    "nigerian_context": true,
+    "startup_name": "TechStartup_NG",
+    "client_ip": "192.168.1.100",
+    "duration_ms": 245.5,
+    "success": true
+  }
 }
 ```
 
-### Log Categories
+### Log Categories & Retention
 
-- **User Activity**: `services/logs/user_activity.log` - All user interactions
-- **API Access**: `services/logs/api_access.log` - Gateway access patterns
-- **Security Events**: `services/logs/security_events.log` - Authentication & security
-- **Service Health**: `services/logs/service_health.log` - System monitoring
+| Category | Size Limit | Retention | Purpose |
+|----------|------------|-----------|----------|
+| **User Activity** | 50MB | 1 year | Track all user interactions |
+| **API Access** | 100MB | 6 months | Monitor API usage patterns |
+| **Security Events** | 25MB | 3 years | Security monitoring & forensics |
+| **Service Health** | 20MB | 3 months | System performance monitoring |
+| **Audit Trail** | 75MB | 7 years | Regulatory compliance |
+
+### Log Management Commands
+
+```bash
+# Rotate and compress logs
+make rotate-logs
+
+# View log statistics
+make log-stats
+
+# Clean up old archives
+make log-cleanup
+
+# Analyze security events
+make analyze-logs-security
+
+# Monitor API performance
+make analyze-logs-performance
+```
+
+### Nigerian DPI Compliance
+
+- **NDPR Compliant**: Nigerian Data Protection Regulation compliance
+- **PII Protection**: Automatic hashing of NIN/BVN numbers
+- **Phone Masking**: Show only last 4 digits of phone numbers
+- **7-Year Audit Trail**: Long-term retention for regulatory compliance
+- **Startup Tracking**: Monitor API usage by the 9 Nigerian startups
 
 ### Analytics Capabilities
 
-- **User Engagement**: Track individual user activity patterns
-- **Service Popularity**: Monitor which services are most used
-- **Peak Hours**: Identify high-traffic periods
-- **Security Monitoring**: Detect suspicious activities
-- **Performance Metrics**: Response times and success rates
+- **User Engagement**: Track individual startup activity patterns
+- **Service Adoption**: Monitor DPI service usage by startups
+- **Peak Hours**: Identify high-traffic periods for capacity planning
+- **Security Monitoring**: Real-time detection of suspicious activities
+- **Performance Metrics**: API response times and success rates
+- **Compliance Reporting**: Generate audit reports for regulatory requirements
 
 ### Metrics
 
