@@ -1,4 +1,4 @@
-# SMS Service Dockerfile
+# Two-Way SMS Service Dockerfile
 FROM python:3.11-slim
 
 # Set environment variables
@@ -22,16 +22,16 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
-# Create non-root user for SMS service
-RUN adduser --disabled-password --gecos '' smsuser && chown -R smsuser:smsuser /app
-USER smsuser
+# Create non-root user for Two-Way SMS service
+RUN adduser --disabled-password --gecos '' twowaysmsuser && chown -R twowaysmsuser:twowaysmsuser /app
+USER twowaysmsuser
 
-# Expose SMS service port
-EXPOSE 8003
+# Expose Two-Way SMS service port
+EXPOSE 8007
 
-# Health check for SMS service
+# Health check for Two-Way SMS service
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8003/health || exit 1
+    CMD curl -f http://localhost:8007/health || exit 1
 
-# Run the SMS service
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8003"]
+# Run the Two-Way SMS service
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8007"]

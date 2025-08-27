@@ -2,7 +2,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.api.v1.router import api_router
-from app.core.config import settings
+from app.core.yaml_config import settings
 from app.core.database import Base, engine
 from app.middleware.logging import UserActivityLoggingMiddleware
 from app.models import (

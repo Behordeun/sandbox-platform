@@ -18,6 +18,13 @@ git clone https://github.com/Behordeun/sandbox-platform.git
 
 cd sandbox-platform
 
+# Setup configuration
+cp .env.template .env
+# Edit .env with your API keys and secrets
+
+# Set environment
+export ENVIRONMENT=development
+
 # Start infrastructure services
 docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
 
@@ -86,7 +93,7 @@ helmfile -e prod apply
 
 ```plain
 sandbox-platform/
-├── sandbox/                   # Main offerings
+├── sandbox/                   # Main DPI offerings
 │   ├── ai/                    # AI service
 │   ├── sms/                   # SMS service
 │   ├── ivr/                   # IVR service
@@ -94,24 +101,22 @@ sandbox-platform/
 │   ├── bvn/                   # BVN verification
 │   ├── two-way-sms/           # Two-way SMS
 │   └── data-stores/           # Database configurations
-│       ├── postgres/          # PostgreSQL setup
-│       └── mongo/             # MongoDB setup
-├── services/                  # Platform maintenance
+├── services/                  # Platform services
 │   ├── auth-service/          # Authentication & authorization
 │   ├── api-gateway/           # API Gateway & routing
-│   ├── rate-limiter/          # Rate limiting service
-│   ├── health-service/        # Health monitoring
-│   ├── logging/               # Logging service
-│   ├── monitoring/            # Monitoring service
 │   └── redis/                 # Redis configuration
-├── config/                    # Centralized configuration
+├── config/                    # Centralized YAML configuration
+│   ├── environments/          # Environment-specific configs
+│   ├── config_loader.py       # Configuration loader
+│   └── README.md             # Configuration documentation
 ├── deployment/                # Deployment configurations
 │   ├── scripts/               # Build & deployment scripts
 │   ├── docker-compose/        # Local development setup
 │   ├── helmfile/              # Kubernetes deployment
 │   └── monitoring/            # Monitoring configuration
-├── README.md
-└── .env.example
+├── config.yaml               # Base configuration
+├── .env.template             # Environment variables template
+└── README.md
 ```
 
 ## 🔧 Development for Nigerian DPI
@@ -381,54 +386,63 @@ Sensitive configuration values are automatically encrypted:
 
 ## 🔧 Configuration
 
-### Environment Variables
+### YAML-Based Configuration System
 
-#### Auth Service
+The platform uses a centralized YAML configuration system for better maintainability:
+
+```
+config.yaml                    # Base configuration for all services
+config/environments/
+├── development.yaml          # Development overrides
+├── staging.yaml             # Staging overrides
+└── production.yaml          # Production overrides
+.env                         # Only secrets and API keys
+```
+
+### Environment Setup
+
+```bash
+# Copy template and add your secrets
+cp .env.template .env
+
+# Set environment
+export ENVIRONMENT=development  # or staging, production
+
+# Services automatically load correct configuration
+```
+
+### Required Environment Variables (.env)
 
 ```env
-# Database
-DATABASE_URL=postgresql://user:pass@host:5432/db
+# Environment
+ENVIRONMENT=development
 
-# JWT Configuration
-JWT_SECRET_KEY=your-secret-key
-JWT_ALGORITHM=HS256
-ACCESS_TOKEN_EXPIRE_MINUTES=30
+# Security
+JWT_SECRET_KEY=your-super-secret-jwt-key
+CONFIG_ENCRYPTION_KEY=your-config-encryption-key
 
-# OAuth2 Configuration
-OAUTH2_ISSUER_URL=http://localhost:8000
-OAUTH2_JWKS_URI=http://localhost:8000/.well-known/jwks.json
-
-# Identity Verification
+# External APIs
 DOJAH_API_KEY=your-dojah-api-key
-DOJAH_BASE_URL=https://api.dojah.io
+DOJAH_APP_ID=your-dojah-app-id
+SMS_API_KEY=your-sms-api-key
+AI_API_KEY=your-ai-api-key
 
-# CORS Configuration
-CORS_ORIGINS=["*"]
-CORS_ALLOW_CREDENTIALS=true
+# Database (production)
+DB_PASSWORD=your-database-password
 
-# Application Settings
-APP_NAME=Sandbox Auth Service
-APP_VERSION=1.0.0
-DEBUG=false
-HOST=0.0.0.0
-PORT=8000
+# Email (optional)
+SMTP_HOST=smtp.gmail.com
+SMTP_USERNAME=your-email@gmail.com
+SMTP_PASSWORD=your-app-password
 ```
 
-#### API Gateway
+### Configuration Benefits
 
-```env
-AUTH_SERVICE_URL=http://auth-service:8000
-REDIS_URL=redis://redis:6379/0
-RATE_LIMIT_REQUESTS=100
-```
-
-#### Config Service
-
-```env
-CONFIG_STORAGE_TYPE=redis
-ENCRYPTION_KEY=your-encryption-key
-VERSIONING_ENABLED=true
-```
+- **Centralized Management**: Single source of truth for all services
+- **Environment Overrides**: Easy dev/staging/prod configurations
+- **Type Safety**: Structured YAML instead of flat key-value pairs
+- **Security**: Secrets via environment variables only
+- **Documentation**: Self-documenting configuration files
 
 ## 🧪 Testing
 
@@ -560,6 +574,7 @@ GET /api/v1/services/health
 
 ### Quick Reference for Nigerian Developers
 
+- [Configuration Guide](config/README.md) - YAML configuration system documentation
 - [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
 - [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
 - [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
@@ -567,10 +582,11 @@ GET /api/v1/services/health
 
 ### Detailed Documentation
 
+- [Configuration Management](config/README.md) - YAML-based configuration system
 - [Deployment Guide](deployment/README.md) - Comprehensive deployment instructions
 - [Auth Service](services/auth-service/README.md) - OAuth2, JWT, and password management
 - [API Gateway](services/api-gateway/README.md) - Gateway configuration and usage
-- [Services Overview](services/README.md) - Platform services management
+- [Sandbox Services](sandbox/README.md) - DPI services overview
 
 ### Service-Specific Documentation
 
