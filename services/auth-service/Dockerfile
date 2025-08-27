@@ -25,11 +25,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY alembic.ini ./
 
-# Create empty migrations directory for runtime
-RUN mkdir -p ./migrations
-
-# Create non-root user for auth service
-RUN adduser --disabled-password --gecos '' authuser && chown -R authuser:authuser /app
+# Create empty migrations directory for runtime and non-root user for auth service
+RUN mkdir -p ./migrations \
+    && adduser --disabled-password --gecos '' authuser \
+    && chown -R authuser:authuser /app
 USER authuser
 
 # Expose auth service port
