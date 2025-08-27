@@ -1,0 +1,63 @@
+# Production Environment Configuration
+environment: "production"
+
+# Production Database Settings
+database:
+  auth_service:
+    url: "postgresql://sandbox_user:${DB_PASSWORD}@postgres:5432/sandbox_auth"
+    pool_size: 20
+    max_overflow: 40
+
+# Production API Settings
+providers:
+  doja:
+    base_url: "https://api.dojah.io"
+    timeout: 30
+  
+  sms:
+    base_url: "https://api.ng.termii.com"
+
+# Production Service Settings
+services:
+  auth_service:
+    debug: false
+    jwt:
+      access_token_expire_minutes: 15
+    cors:
+      origins: ["https://yourdomain.com"]
+
+  api_gateway:
+    debug: false
+    rate_limiting:
+      requests_per_minute: 100
+
+# Production Sandbox Settings
+sandbox:
+  nin_service:
+    debug: false
+    cache_ttl: 3600
+    
+  bvn_service:
+    debug: false
+    cache_ttl: 3600
+    
+  sms_service:
+    debug: false
+    rate_limit: 100
+    daily_limit: 10000
+
+# Production Logging
+logging:
+  level: "INFO"
+  files:
+    user_activity: "/var/log/sandbox/user_activity.log"
+    api_access: "/var/log/sandbox/api_access.log"
+
+# Production Security
+security:
+  cors:
+    origins: ["https://yourdomain.com"]
+  rate_limiting:
+    default_limit: 100
+  encryption:
+    key_rotation_days: 30

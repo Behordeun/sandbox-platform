@@ -178,23 +178,42 @@ curl -X GET http://localhost:8005/api/v1/nin/status/12345678901 \
 
 ## 🔧 Configuration
 
-### Environment Variables
+### YAML-Based Configuration
+
+This service uses the centralized YAML configuration system. Configuration is automatically loaded from:
+
+- `config.yaml` - Base configuration
+- `config/environments/{ENVIRONMENT}.yaml` - Environment-specific overrides
+- `.env` - Secrets and API keys only
+
+### Required Environment Variables
 
 ```env
-# Service Configuration
-APP_NAME=NIN Verification Service
-APP_VERSION=1.0.0
-DEBUG=false
-HOST=0.0.0.0
-PORT=8005
-
-# Dojah API Configuration (Required)
+# Set in root .env file
+ENVIRONMENT=development
 DOJAH_API_KEY=your-dojah-api-key        # Get from Dojah dashboard
 DOJAH_APP_ID=your-dojah-app-id          # Your application ID
-DOJAH_BASE_URL=https://api.dojah.io     # Dojah API base URL
+```
 
-# Auth Service URL
-AUTH_SERVICE_URL=http://auth-service:8000
+### Configuration Structure
+
+Service configuration is defined in `config.yaml`:
+
+```yaml
+sandbox:
+  nin_service:
+    host: "0.0.0.0"
+    port: 8005
+    debug: false
+    cache_ttl: 3600
+    doja_integration: true
+
+providers:
+  doja:
+    base_url: "https://api.dojah.io"
+    api_key: "${DOJAH_API_KEY}"
+    app_id: "${DOJAH_APP_ID}"
+    timeout: 30
 ```
 
 ### Getting Dojah API Credentials
@@ -203,7 +222,7 @@ AUTH_SERVICE_URL=http://auth-service:8000
 2. Create an account
 3. Navigate to API section
 4. Generate API key and App ID
-5. Add credentials to your `.env` file
+5. Add credentials to the root `.env` file
 
 ## 📊 Understanding NIN Format
 
