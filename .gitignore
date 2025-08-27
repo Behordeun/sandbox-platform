@@ -40,3 +40,4 @@ build
 flow_diagrams
 logs
 migrations
+Makefile
