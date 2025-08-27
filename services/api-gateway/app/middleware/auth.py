@@ -139,7 +139,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             # Add API key info to request state
             request.state.api_key = api_key
             auth_method = "api_key"
-            user_id = f"api_key_{api_key[:8]}..."
+            user_id = "api_key_user"
 
         response = await call_next(request)
         self._log_access(
