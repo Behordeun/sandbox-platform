@@ -28,7 +28,7 @@ database:
     cache_db: 2
 # External API Providers
 providers:
-  doja:
+  dojah:
     base_url: "https://api.dojah.io"
     api_key: "${DOJAH_API_KEY}"
     app_id: "${DOJAH_APP_ID}"

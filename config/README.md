@@ -90,7 +90,7 @@ service_config = get_service_config("nin_service")
 port = service_config.get("port", 8005)
 
 # Get provider configuration
-doja_config = get_provider_config("doja")
+doja_config = get_provider_config("dojah")
 api_key = doja_config.get("api_key")
 ```
 
@@ -98,7 +98,7 @@ api_key = doja_config.get("api_key")
 Configuration supports environment variable substitution:
 ```yaml
 providers:
-  doja:
+  dojah:
     api_key: "${DOJAH_API_KEY}"           # Required env var
     timeout: "${DOJA_TIMEOUT:30}"        # Optional with default
 ```
@@ -131,7 +131,7 @@ sandbox:
     doja_integration: true
 
 providers:
-  doja:
+  dojah:
     base_url: "https://api.dojah.io"
     api_key: "${DOJAH_API_KEY}"
     app_id: "${DOJAH_APP_ID}"

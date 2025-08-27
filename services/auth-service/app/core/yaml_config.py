@@ -103,7 +103,7 @@ class Settings(BaseSettings):
     smtp_from_name: str = "DPI Sandbox Platform"
     
     class Config:
-        env_file = ".env"
+        env_file = "../../.env"  # Use root .env file
         case_sensitive = False
 
 

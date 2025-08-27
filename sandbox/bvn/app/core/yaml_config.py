@@ -18,7 +18,7 @@ class Settings(BaseSettings):
         # Load configuration from YAML
         environment = os.getenv("ENVIRONMENT", "development")
         service_config = get_service_config("bvn_service", environment)
-        doja_config = get_provider_config("doja", environment)
+        doja_config = get_provider_config("dojah", environment)
         
         # Apply YAML configuration
         if service_config:
@@ -54,7 +54,7 @@ class Settings(BaseSettings):
     auth_service_url: str = "http://auth-service:8000"
     
     class Config:
-        env_file = ".env"
+        env_file = "../../../../.env"  # Use root .env file
         case_sensitive = False
 
 

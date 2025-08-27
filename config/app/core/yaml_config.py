@@ -44,7 +44,7 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/1"
     
     class Config:
-        env_file = ".env"
+        env_file = "../../../.env"  # Use root .env file
         case_sensitive = False
 
 

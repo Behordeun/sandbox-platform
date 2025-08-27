@@ -186,13 +186,19 @@ This service uses the centralized YAML configuration system. Configuration is au
 - `config/environments/{ENVIRONMENT}.yaml` - Environment-specific overrides
 - `.env` - Secrets and API keys only
 
-### Required Environment Variables
+### Centralized Environment Variables
+
+All services use the **single root .env file**. No service-specific .env files needed:
 
 ```env
-# Set in root .env file
+# All variables are in the root .env file
 ENVIRONMENT=development
+DATABASE_URL=postgresql://sandbox_user:password@localhost:5432/sandbox_platform
 DOJAH_API_KEY=your-dojah-api-key        # Get from Dojah dashboard
 DOJAH_APP_ID=your-dojah-app-id          # Your application ID
+SMS_API_KEY=your-sms-api-key
+AI_API_KEY=your-ai-api-key
+# ... all other variables in organized sections
 ```
 
 ### Configuration Structure
@@ -209,7 +215,7 @@ sandbox:
     doja_integration: true
 
 providers:
-  doja:
+  dojah:
     base_url: "https://api.dojah.io"
     api_key: "${DOJAH_API_KEY}"
     app_id: "${DOJAH_APP_ID}"
@@ -222,7 +228,7 @@ providers:
 2. Create an account
 3. Navigate to API section
 4. Generate API key and App ID
-5. Add credentials to the root `.env` file
+5. Add credentials to the **single root .env file** (no service-specific .env files)
 
 ## 📊 Understanding NIN Format
 

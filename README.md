@@ -18,15 +18,12 @@ git clone https://github.com/Behordeun/sandbox-platform.git
 
 cd sandbox-platform
 
-# Setup configuration
+# Setup centralized configuration
 cp .env.template .env
-# Edit .env with your API keys and secrets
+# Edit .env with your API keys and secrets (single file for all services)
 
-# Set environment
-export ENVIRONMENT=development
-
-# Start infrastructure services
-docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
+# Setup database and run migrations
+./setup-db.sh
 
 # Start application services (in separate terminals)
 cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
@@ -386,63 +383,84 @@ Sensitive configuration values are automatically encrypted:
 
 ## 🔧 Configuration
 
-### YAML-Based Configuration System
+### Hybrid Configuration System
 
-The platform uses a centralized YAML configuration system for better maintainability:
+The platform uses a hybrid approach combining YAML configuration with centralized environment variables:
 
 ```
-config.yaml                    # Base configuration for all services
+config.yaml                    # Base configuration structure
 config/environments/
-├── development.yaml          # Development overrides
+├── development.yaml          # Environment-specific overrides
 ├── staging.yaml             # Staging overrides
 └── production.yaml          # Production overrides
-.env                         # Only secrets and API keys
+.env                         # Single centralized environment file
+.env.template               # Template for all environment variables
 ```
 
 ### Environment Setup
 
 ```bash
-# Copy template and add your secrets
+# Copy template and customize (single file for all services)
 cp .env.template .env
 
-# Set environment
-export ENVIRONMENT=development  # or staging, production
+# Edit the centralized .env file with your actual values
+nano .env
 
-# Services automatically load correct configuration
+# All services automatically use the centralized configuration
 ```
 
-### Required Environment Variables (.env)
+### Centralized Environment Variables (.env)
+
+The platform uses a **single comprehensive .env file** organized into sections:
 
 ```env
-# Environment
+# =============================================================================
+# ENVIRONMENT SETTINGS
+# =============================================================================
 ENVIRONMENT=development
+DEBUG=true
+LOG_LEVEL=INFO
 
-# Security
+# =============================================================================
+# DATABASE CONFIGURATION
+# =============================================================================
+# Single PostgreSQL database for all services
+DATABASE_URL=postgresql://sandbox_user:password@localhost:5432/sandbox_platform
+DB_PASSWORD=your-database-password
+REDIS_URL=redis://localhost:6379/0
+
+# =============================================================================
+# SECURITY & AUTHENTICATION
+# =============================================================================
 JWT_SECRET_KEY=your-super-secret-jwt-key
 CONFIG_ENCRYPTION_KEY=your-config-encryption-key
 
-# External APIs
+# =============================================================================
+# EXTERNAL API PROVIDERS
+# =============================================================================
 DOJAH_API_KEY=your-dojah-api-key
 DOJAH_APP_ID=your-dojah-app-id
 SMS_API_KEY=your-sms-api-key
 AI_API_KEY=your-ai-api-key
 
-# Database (production)
-DB_PASSWORD=your-database-password
-
-# Email (optional)
+# =============================================================================
+# EMAIL CONFIGURATION
+# =============================================================================
 SMTP_HOST=smtp.gmail.com
 SMTP_USERNAME=your-email@gmail.com
 SMTP_PASSWORD=your-app-password
+
+# ... and more organized sections
 ```
 
 ### Configuration Benefits
 
-- **Centralized Management**: Single source of truth for all services
-- **Environment Overrides**: Easy dev/staging/prod configurations
-- **Type Safety**: Structured YAML instead of flat key-value pairs
-- **Security**: Secrets via environment variables only
-- **Documentation**: Self-documenting configuration files
+- **Single Source of Truth**: One .env file for all services
+- **No Configuration Drift**: Consistent settings across services
+- **Organized Structure**: Well-documented sections and comments
+- **Easy Deployment**: Single file to manage in production
+- **Better Security**: Centralized secret management
+- **YAML + ENV Hybrid**: Structure from YAML, secrets from environment
 
 ## 🧪 Testing
 
@@ -574,7 +592,9 @@ GET /api/v1/services/health
 
 ### Quick Reference for Nigerian Developers
 
-- [Configuration Guide](config/README.md) - YAML configuration system documentation
+- [Database Guide](DATABASE.md) - Consolidated PostgreSQL database architecture
+- [Configuration Guide](config/README.md) - YAML + centralized .env configuration
+- [Database Setup](setup-db.sh) - One-command database setup and migrations
 - [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
 - [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
 - [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
