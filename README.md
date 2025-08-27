@@ -22,13 +22,17 @@ cd sandbox-platform
 cp .env.template .env
 # Edit .env with your API keys and secrets (single file for all services)
 
-# Setup database and run migrations
+# Setup database and create admin users
 ./setup-db.sh
+python create-admin-user.py
 
-# Start application services (in separate terminals)
-cd services/auth-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8000
-cd services/config-service && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8001
-cd services/api-gateway && pip install -r requirements.txt && uvicorn app.main:app --reload --port 8080
+# Start entire sandbox platform
+./start-sandbox.sh
+
+# Platform will be available at:
+# - API Gateway: http://localhost:8080/docs
+# - Auth Service: http://localhost:8000/docs
+# - Admin can create startup accounts via API
 
 ### Test Your Setup
 
@@ -318,21 +322,23 @@ Comprehensive user activity tracking with structured JSON logging:
 
 ### Authentication Flow
 
-#### OAuth2 Authentication
+#### Startup Access (Closed Sandbox)
 
-1. **Client Registration**: OAuth2 clients register via `/api/v1/oauth2/clients`
-2. **Authorization**: Users authorize via `/api/v1/oauth2/authorize`
-3. **Token Exchange**: Authorization codes exchanged for JWT tokens at `/api/v1/oauth2/token`
-4. **API Access**: Access tokens validated by API Gateway for all service requests
-5. **Token Refresh**: Refresh tokens used to obtain new access tokens
-
-#### User Authentication
-
-1. **Registration**: Users register via `/api/v1/auth/register`
-2. **Login**: Multiple login methods:
+1. **Account Request**: Startups contact administrators for account creation
+2. **Admin Creates Account**: Administrators create accounts via `/api/v1/admin/users`
+3. **Credentials Provided**: Startups receive login credentials securely
+4. **Login**: Startups login using:
    - OAuth2 compatible: `/api/v1/auth/login`
    - JSON payload: `/api/v1/auth/login/json`
-3. **User Info**: Access user data via `/api/v1/auth/userinfo` or `/api/v1/auth/me`
+5. **API Access**: Access tokens validated by API Gateway for all service requests
+6. **Logout**: Simple logout via `/api/v1/auth/logout`
+
+#### Admin User Management
+
+1. **Create Accounts**: Administrators create startup accounts
+2. **Manage Users**: Full user lifecycle management
+3. **Reset Passwords**: Admin-controlled password resets
+4. **Account Control**: Activate/deactivate accounts as needed
 
 #### Identity Verification
 
@@ -340,11 +346,15 @@ Comprehensive user activity tracking with structured JSON logging:
 2. **BVN Verification**: Dedicated BVN service at `/api/v1/bvn/verify`
 3. **Dojah API Integration**: Real-time verification through Dojah API
 4. **Status Tracking**: Monitor verification status via respective service endpoints
-5. **Enhanced Access**: Verified users receive additional platform privileges
 
-### Nigerian Identity Verification
+### Startup Access Examples
 
 ```bash
+# Login to get access token
+curl -X POST http://localhost:8000/api/v1/auth/login/json \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "startup@company.ng", "password": "your-password"}'
+
 # Get examples and test data
 curl http://localhost:8080/api/v1/examples/nin
 curl http://localhost:8080/api/v1/examples/sms
@@ -366,6 +376,40 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"to": "+2348012345678", "message": "Your OTP is 123456"}'
+
+# Logout when done
+curl -X POST http://localhost:8000/api/v1/auth/logout
+```
+
+### Admin User Management
+
+```bash
+# Admin login
+curl -X POST http://localhost:8000/api/v1/auth/login/json \
+  -H "Content-Type: application/json" \
+  -d '{"identifier": "admin@dpi-sandbox.ng", "password": "admin-password"}'
+
+# Create startup account
+curl -X POST http://localhost:8000/api/v1/admin/users \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "startup@company.ng",
+    "username": "startup_dev",
+    "password": "TempPass123",
+    "first_name": "Startup",
+    "last_name": "Developer"
+  }'
+
+# List all users
+curl -H "Authorization: Bearer ADMIN_TOKEN" \
+  http://localhost:8000/api/v1/admin/users
+
+# Reset user password
+curl -X POST http://localhost:8000/api/v1/admin/users/1/reset-password \
+  -H "Authorization: Bearer ADMIN_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"new_password": "NewPass123"}'
 ```
 
 ### Configuration Encryption
@@ -504,15 +548,24 @@ k6 run tests/load/api-gateway.js
 
 ### Key Endpoints
 
-#### Authentication
+#### Authentication (Startup Access)
 
 ```bash
-# User Management
-POST /api/v1/auth/register          # User registration
+# User Authentication
 POST /api/v1/auth/login             # OAuth2 compatible login
 POST /api/v1/auth/login/json        # JSON payload login
-GET  /api/v1/auth/userinfo          # Get user information
+POST /api/v1/auth/logout            # Logout
 GET  /api/v1/auth/me                # Get current user
+
+# Admin User Management (Admin Only)
+POST /api/v1/admin/users            # Create user account
+GET  /api/v1/admin/users            # List all users
+GET  /api/v1/admin/users/{id}       # Get user by ID
+PUT  /api/v1/admin/users/{id}       # Update user
+DELETE /api/v1/admin/users/{id}     # Delete user
+POST /api/v1/admin/users/{id}/activate      # Activate account
+POST /api/v1/admin/users/{id}/deactivate    # Deactivate account
+POST /api/v1/admin/users/{id}/reset-password # Reset password
 
 # OAuth2 Endpoints
 GET  /api/v1/oauth2/authorize       # OAuth2 authorization
@@ -590,11 +643,13 @@ GET /api/v1/services/health
 
 ## 📖 Documentation
 
-### Quick Reference for Nigerian Developers
+### Quick Reference for Nigerian Startups
 
 - [Database Guide](DATABASE.md) - Consolidated PostgreSQL database architecture
 - [Configuration Guide](config/README.md) - YAML + centralized .env configuration
 - [Database Setup](setup-db.sh) - One-command database setup and migrations
+- [Admin User Setup](create-admin-user.py) - Create initial admin accounts
+- [Platform Startup](start-sandbox.sh) - Start entire sandbox platform
 - [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
 - [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
 - [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
