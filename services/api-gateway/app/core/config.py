@@ -85,12 +85,10 @@ class Settings(BaseSettings):
     max_timeout: int = 300
 
     class Config:
-        env_file = ".env"
+        env_file = "../../.env"  # Use root .env file
         case_sensitive = False
 
 
 # Global settings instance
-jwt_secret = os.getenv("JWT_SECRET_KEY")
-if jwt_secret is None:
-    raise ValueError("JWT_SECRET_KEY environment variable is not set")
+jwt_secret = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
 settings = Settings(jwt_secret_key=jwt_secret)
