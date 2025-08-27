@@ -27,59 +27,26 @@ from sqlalchemy.orm import Session
 router = APIRouter()
 
 
-@router.post("/register", response_model=UserResponse)
+@router.post("/register", response_model=dict)
 def register_user(
     *,
     db: Session = Depends(get_db),
     user_in: UserCreate,
 ) -> Any:
-    """Register a new user.
-
-    Example for Nigerian DPI developers:
-    {
-        "email": "adebayo@fintech.ng",
-        "username": "adebayo_dev",
-        "password": "SecurePass123",
-        "first_name": "Adebayo",
-        "last_name": "Ogundimu",
-        "phone_number": "+2348012345678"
-    }
-    """
-    # Check if user already exists
-    user = user_crud.get_by_email(db, email=user_in.email)
-    if user:
-        raise HTTPException(
-            status_code=400,
-            detail={
-                "success": False,
-                "message": "Email already registered",
-                "error_code": "EMAIL_EXISTS",
-                "details": {
-                    "suggestion": "Try logging in or use password reset if you forgot your password",
-                    "login_url": "/api/v1/auth/login",
-                    "reset_url": "/api/v1/auth/password-reset/request",
-                },
+    """Public registration is disabled. Contact sandbox administrators for account creation."""
+    raise HTTPException(
+        status_code=status.HTTP_403_FORBIDDEN,
+        detail={
+            "success": False,
+            "message": "Public registration is disabled",
+            "error_code": "REGISTRATION_DISABLED",
+            "details": {
+                "contact": "Contact sandbox administrators for account creation",
+                "email": "admin@dpi-sandbox.ng",
+                "documentation": "https://docs.dpi-sandbox.ng/account-request"
             },
-        )
-
-    # Check username if provided
-    if user_in.username:
-        existing_user = user_crud.get_by_username(db, username=user_in.username)
-        if existing_user:
-            raise HTTPException(
-                status_code=400,
-                detail="The user with this username already exists in the system.",
-            )
-
-    # Create user
-    user = user_crud.create(db, obj_in=user_in)
-
-    # Send registration confirmation email
-    email_service.send_registration_confirmation(
-        to_email=user.email, first_name=user.first_name or "Developer"
+        },
     )
-
-    return user
 
 
 @router.post("/login", response_model=TokenResponse)
