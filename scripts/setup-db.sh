@@ -104,7 +104,7 @@ run_migrations() {
     export DB_PASSWORD=${DB_PASSWORD:-sandbox_password}
     
     # Run the migration script
-    python migrate-db.py
+    python "$(dirname "$0")/migrate-db.py"
     
     if [ $? -eq 0 ]; then
         log_success "Database migrations completed successfully"
