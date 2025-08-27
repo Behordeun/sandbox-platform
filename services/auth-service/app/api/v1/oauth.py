@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from urllib.parse import urlencode
+from urllib.parse import urlencode, urlparse
 
 from app.crud.oauth_client import oauth_client_crud
 from app.crud.oauth_token import oauth_token_crud
@@ -80,7 +80,13 @@ def authorize(
             params["state"] = state
 
         # Redirect to client
-        redirect_url = f"{redirect_uri}?{urlencode(params)}"
+        safe_redirect_uri = redirect_uri.replace("\\", "")
+        # Ensure the redirect URI is a valid absolute URI registered for the client
+        parsed = urlparse(safe_redirect_uri)
+        # Defensive check: Only allow if netloc (host) is present and scheme is http/https
+        if parsed.scheme not in ("http", "https") or not parsed.netloc:
+            raise HTTPException(status_code=400, detail="Unsafe redirect URI")
+        redirect_url = f"{safe_redirect_uri}?{urlencode(params)}"
         return RedirectResponse(url=redirect_url)
 
     else:
