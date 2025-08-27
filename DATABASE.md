@@ -27,7 +27,7 @@ Table Prefixes:
 ### **One-Command Setup**
 ```bash
 # Complete database setup with migrations
-./setup-db.sh
+./scripts/setup-db.sh
 ```
 
 ### **Manual Setup**
@@ -42,7 +42,7 @@ docker run -d \
   postgres:14
 
 # 2. Run migrations
-python migrate-db.py
+./scripts/migrate-db.py
 ```
 
 ## 🔧 Configuration
@@ -76,7 +76,7 @@ DB_PASSWORD=sandbox_password
 ### **Migration Commands**
 ```bash
 # Run all migrations
-python migrate-db.py
+./scripts/migrate-db.py
 
 # Individual service migration
 cd services/auth-service

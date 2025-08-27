@@ -35,10 +35,10 @@ docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgre
 
 ```bash
 # Generate Nigerian test data
-python mock-data.py
+./scripts/mock-data.py
 
 # Test DPI APIs
-./test-dpi-apis.sh
+./scripts/test-dpi-apis.sh
 
 # Access API documentation
 open http://localhost:8080/docs
@@ -140,19 +140,19 @@ sandbox-platform/
 
 ```bash
 # Start all services
-./sandbox-start.sh
+./scripts/start-sandbox.sh
 
 # Check service health
-./check-services.sh
+./scripts/check-services.sh
 
 # Test APIs with Nigerian examples
-./test-dpi-apis.sh
+./scripts/test-dpi-apis.sh
 
 # Analyze user activity and usage
-python analyze-logs.py --all
+./scripts/analyze-logs.py --all
 
 # Generate mock Nigerian data
-python mock-data.py
+./scripts/mock-data.py
 ```
 
 ### Individual Service Development
@@ -687,13 +687,14 @@ GET /api/v1/services/health
 
 - [Database Guide](DATABASE.md) - Consolidated PostgreSQL database architecture
 - [Configuration Guide](config/README.md) - YAML + centralized .env configuration
-- [Database Setup](setup-db.sh) - One-command database setup and migrations
-- [Admin User Setup](create-admin-user.py) - Create initial admin accounts
-- [Platform Startup](start-sandbox.sh) - Start entire sandbox platform
+- [Scripts Directory](scripts/README.md) - All platform scripts and utilities
+- [Database Setup](scripts/setup-db.sh) - One-command database setup and migrations
+- [Admin User Setup](scripts/create-admin-user.py) - Create initial admin accounts
+- [Platform Startup](scripts/start-sandbox.sh) - Start entire sandbox platform
 - [DPI API Guide](DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
-- [Mock Data Generator](mock-data.py) - Generate realistic Nigerian test data
-- [API Testing Script](test-dpi-apis.sh) - Test complete DPI workflows
-- [Service Health Checker](check-services.sh) - Monitor all services
+- [Mock Data Generator](scripts/mock-data.py) - Generate realistic Nigerian test data
+- [API Testing Script](scripts/test-dpi-apis.sh) - Test complete DPI workflows
+- [Service Health Checker](scripts/check-services.sh) - Monitor all services
 
 ### Detailed Documentation
 
