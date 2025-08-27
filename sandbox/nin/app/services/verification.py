@@ -1,5 +1,5 @@
 import httpx
-from app.core.config import settings
+from app.core.yaml_config import settings
 from fastapi import HTTPException
 
 

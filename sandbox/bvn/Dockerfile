@@ -1,4 +1,4 @@
-# Use Python 3.11 slim image
+# BVN Verification Service Dockerfile
 FROM python:3.11-slim
 
 # Set environment variables
@@ -15,23 +15,23 @@ RUN apt-get update \
         curl \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
+# Copy requirements first for better caching
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY . .
+COPY app/ ./app/
 
-# Create non-root user
-RUN adduser --disabled-password --gecos '' appuser && chown -R appuser:appuser /app
-USER appuser
+# Create non-root user for BVN service
+RUN adduser --disabled-password --gecos '' bvnuser && chown -R bvnuser:bvnuser /app
+USER bvnuser
 
-# Expose port
+# Expose BVN service port
 EXPOSE 8006
 
-# Health check
+# Health check for BVN service
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:8006/health || exit 1
 
-# Run the application
+# Run the BVN verification service
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8006"]
