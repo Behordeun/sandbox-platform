@@ -8,7 +8,7 @@ from typing import List, Optional
 from pydantic import BaseSettings
 import sys
 sys.path.append("../..")
-from config.config_loader import get_service_config, get_database_config, get_provider_config
+from config.config_loader import get_service_config
 
 
 class Settings(BaseSettings):
@@ -20,8 +20,6 @@ class Settings(BaseSettings):
         # Load configuration from YAML
         environment = os.getenv("ENVIRONMENT", "development")
         service_config = get_service_config("auth_service", environment)
-        db_config = get_database_config("auth_service", environment)
-        email_config = get_provider_config("email", environment)
         
         # Apply YAML configuration
         if service_config:
@@ -64,7 +62,7 @@ class Settings(BaseSettings):
         config = get_config(environment)
         db_config = config.get("database", {})
         if db_config:
-            self.database_url = db_config.get("url", os.getenv("DATABASE_URL", "postgresql://sandbox_user:sandbox_password@localhost:5432/sandbox_platform"))
+            self.database_url = db_config.get("url", os.getenv("DATABASE_URL"))
             # Get table prefix for auth service
             table_prefixes = db_config.get("table_prefixes", {})
             self.table_prefix = table_prefixes.get("auth_service", "auth_")
@@ -77,11 +75,11 @@ class Settings(BaseSettings):
     port: int = 8000
     
     # Database
-    database_url: str = "postgresql://sandbox_user:sandbox_password@localhost:5432/sandbox_platform"
+    database_url: str = "${DATABASE_URL}"
     table_prefix: str = "auth_"
     
     # JWT
-    jwt_secret_key: str = "your-secret-key-here"
+    jwt_secret_key: str = "${JWT_SECRET_KEY}"
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
