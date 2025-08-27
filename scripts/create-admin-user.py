@@ -8,13 +8,14 @@ import sys
 import os
 from pathlib import Path
 
-# Add the auth service to Python path
-auth_service_path = Path(__file__).parent / "services" / "auth-service"
-sys.path.append(str(auth_service_path))
+# Add the auth service to Python path first
+auth_service_path = Path(__file__).parent.parent / "services" / "auth-service"
+sys.path.insert(0, str(auth_service_path))
 
-from app.core.database import SessionLocal
-from app.crud.user import user_crud
-from app.schemas.user import UserCreate
+# Import after path setup
+from app.core.database import SessionLocal  # noqa: E402
+from app.crud.user import user_crud  # noqa: E402
+from app.schemas.user import UserCreate  # noqa: E402
 
 def create_admin_user(email: str, username: str, password: str, first_name: str, last_name: str):
     """Create an admin user."""
@@ -40,7 +41,7 @@ def create_admin_user(email: str, username: str, password: str, first_name: str,
         
         user = user_crud.create(db, obj_in=user_data)
         
-        print(f"✅ Admin user created successfully:")
+        print("✅ Admin user created successfully:")
         print(f"   Email: {user.email}")
         print(f"   Username: {user.username}")
         print(f"   Name: {user.first_name} {user.last_name}")
@@ -65,14 +66,14 @@ def main():
         {
             "email": "admin@dpi-sandbox.ng",
             "username": "admin",
-            "password": "AdminPass123!",
+            "password": os.getenv("ADMIN_PASSWORD", "AdminPass123!"),
             "first_name": "DPI",
             "last_name": "Administrator"
         },
         {
-            "email": "muhammad@dpi-sandbox.ng", 
+            "email": "muhammad@dpi-sandbox.ng",
             "username": "muhammad",
-            "password": "MuhammadPass123!",
+            "password": os.getenv("MUHAMMAD_PASSWORD", "MuhammadPass123!"),
             "first_name": "Muhammad",
             "last_name": "Behordeun"
         }
@@ -95,8 +96,8 @@ def main():
         print("   • Reset passwords")
         print("   • Activate/deactivate accounts")
         
-        print(f"\n🔗 API Documentation: http://localhost:8000/docs")
-        print(f"🔗 Admin Endpoints: http://localhost:8000/docs#/admin")
+        print("\n🔗 API Documentation: http://localhost:8000/docs")
+        print("🔗 Admin Endpoints: http://localhost:8000/docs#/admin")
 
 if __name__ == "__main__":
     main()

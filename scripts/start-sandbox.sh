@@ -98,7 +98,9 @@ start_infrastructure() {
 setup_database() {
     if [ "$SETUP_DB" = "true" ]; then
         log_info "Setting up database..."
-        if [ -f "./setup-db.sh" ]; then
+        if [ -f "./scripts/setup-db.sh" ]; then
+            ./scripts/setup-db.sh
+        elif [ -f "./setup-db.sh" ]; then
             ./setup-db.sh
         else
             log_warning "setup-db.sh not found, skipping database setup"
@@ -324,7 +326,7 @@ main() {
     
     echo ""
     log_info "📝 Logs: ./logs/"
-    log_info "🛑 To stop: ./start-sandbox.sh --stop"
+    log_info "🛑 To stop: ./scripts/stop-sandbox.sh"
     
     echo ""
     log_info "🚀 Platform is ready for development!"

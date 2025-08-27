@@ -10,8 +10,12 @@ import subprocess
 from pathlib import Path
 
 # Add config to path
-sys.path.append(str(Path(__file__).parent))
-from config.config_loader import get_config
+sys.path.append(str(Path(__file__).parent.parent / "config"))
+try:
+    from config_loader import get_config
+except ImportError:
+    print("❌ Config loader not found. Please ensure config directory exists.")
+    sys.exit(1)
 
 def run_migrations():
     """Run database migrations for all services."""
@@ -45,7 +49,7 @@ def run_migrations():
     for service in services_with_migrations:
         print(f"\n🔄 Running migrations for {service['name']}...")
         
-        service_path = Path(service["path"])
+        service_path = Path(__file__).parent.parent / service["path"]
         if not service_path.exists():
             print(f"⚠️  Service path not found: {service_path}")
             continue

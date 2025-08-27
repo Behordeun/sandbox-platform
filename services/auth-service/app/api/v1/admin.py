@@ -23,7 +23,7 @@ def get_admin_user(current_user: User = Depends(get_current_active_user)) -> Use
     # In production, implement proper role-based access control
     admin_emails = [
         "admin@dpi-sandbox.ng",
-        "muhammad@dpi-sandbox.ng", 
+        "muhammad@datasciencenigeria.ai", 
         "behordeun@dpi-sandbox.ng"
     ]
     
