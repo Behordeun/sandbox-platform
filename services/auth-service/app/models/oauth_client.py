@@ -1,10 +1,11 @@
 from app.core.database import Base
+from app.core.yaml_config import settings
 from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 
 
 class OAuthClient(Base):
-    __tablename__ = "oauth_clients"
+    __tablename__ = f"{settings.table_prefix}oauth_clients"
 
     id = Column(Integer, primary_key=True, index=True)
     client_id = Column(String(255), unique=True, index=True, nullable=False)
