@@ -138,7 +138,7 @@ fi
 declare -A SERVICES=(
     ["auth-service"]="${PROJECT_ROOT}/../services/auth-service"
     ["api-gateway"]="${PROJECT_ROOT}/../services/api-gateway"
-    ["config-service"]="${PROJECT_ROOT}/../services/config-service"
+    ["config-service"]="${PROJECT_ROOT}/../config"
 )
 
 # Build specific service or all services
