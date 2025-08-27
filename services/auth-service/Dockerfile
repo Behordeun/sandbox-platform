@@ -15,6 +15,7 @@ RUN apt-get update \
         build-essential \
          curl \
         libpq-dev \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
