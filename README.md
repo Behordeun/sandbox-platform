@@ -19,16 +19,14 @@ cd sandbox-platform
 
 # Setup centralized configuration
 cp .env.template .env
-# Edit .env with your API keys and secrets (single file for all services)
+# Edit .env with your API keys and secrets
 
-# Set environment
-export ENVIRONMENT=development
+# Setup database and create admin users
+./scripts/setup-db.sh
+./scripts/create-admin-user.py
 
-# Start infrastructure services
-docker compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis mongo
-
-# Verify DPI services are ready
-./check-services.sh
+# Start entire sandbox platform
+./scripts/start-sandbox.sh
 ```
 
 ### Test Your Setup
@@ -58,35 +56,22 @@ helmfile -e prod apply
 
 ## 🏗️ Architecture
 
-### Sandbox Offerings
-
-| Service                  | Port | Description                                             |
-| ------------------------ | ---- | ------------------------------------------------------- |
-| **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens, NIN/BVN verification |
-| **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
-| **Config Service** | 8000 | Centralized configuration management with encryption    |
-
 ### Platform Services
 
 | Service                  | Port | Description                                             |
 | ------------------------ | ---- | ------------------------------------------------------- |
 | **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens                      |
 | **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
-| **Rate Limiter**   | 8008 | Advanced rate limiting and throttling                   |
-| **Health Service** | 8009 | Service health monitoring and checks                    |
-| **Logging Service**| 8010 | Centralized logging and audit trails                   |
-| **Monitoring**     | 8011 | Metrics collection and alerting                         |
+| **Config Service** | 8001 | Centralized configuration management                    |
 
-### Platform Services
+### DPI Services
 
 | Service                  | Port | Description                                             |
 | ------------------------ | ---- | ------------------------------------------------------- |
-| **Auth Service**   | 8000 | OAuth2 authentication, JWT tokens                      |
-| **API Gateway**    | 8080 | Request routing, rate limiting, circuit breaking        |
-| **Rate Limiter**   | 8008 | Advanced rate limiting and throttling                   |
-| **Health Service** | 8009 | Service health monitoring and checks                    |
-| **Logging Service**| 8010 | Centralized logging and audit trails                   |
-| **Monitoring**     | 8011 | Metrics collection and alerting                         |
+| **NIN Service**    | 8005 | Nigerian Identity Number verification                   |
+| **BVN Service**    | 8006 | Bank Verification Number validation                     |
+| **SMS Service**    | 8003 | Nigerian SMS messaging and notifications                |
+| **AI Service**     | 8002 | Nigerian-context content generation                     |
 
 ### Data Stores
 
@@ -293,70 +278,13 @@ Comprehensive user activity tracking with structured JSON logging:
 - Grafana: `http://localhost:3001` (admin/admin123)
 - Service Metrics: `http://localhost:8080/metrics`
 
-## 🔐 Auth Service Features
+## 🔐 Security & Authentication
 
-### Core Capabilities
-
-- **OAuth2 Authorization Server**: Full OAuth2 authorization code flow
-- **JWT Token Management**: Secure token generation, validation, and refresh
-- **User Management**: Registration, authentication, and profile management
-- **Integration with Identity Services**: Connects to dedicated NIN/BVN sandbox services
-- **OpenID Connect**: Discovery endpoints and JWKS support
-- **Multi-login Support**: OAuth2 and JSON-based authentication
-
-### Database Schema
-
-- **Users Table**: User accounts with hashed passwords and profile data
-- **OAuth Clients**: Registered OAuth2 client applications
-- **OAuth Tokens**: Access tokens, refresh tokens, and authorization codes
-- **Alembic Migrations**: Database version control and schema management
-
-### Security Features
-
-- **Bcrypt Password Hashing**: Secure password storage
-- **JWT Signing**: Configurable secret keys and algorithms
-- **Identity Privacy**: NIN/BVN data hashing for privacy protection
-- **CORS Protection**: Configurable cross-origin policies
-- **Input Validation**: Pydantic models for request/response validation
-
-### Integration Points
-
-- **API Gateway**: Token validation for all platform services
-- **NIN/BVN Services**: Dedicated sandbox services for identity verification
-- **PostgreSQL**: Primary data storage
-- **Redis**: Session and token caching (via API Gateway)
-
-## 🔐 Auth Service Features
-
-### Core Capabilities
-
-- **OAuth2 Authorization Server**: Full OAuth2 authorization code flow
-- **JWT Token Management**: Secure token generation, validation, and refresh
-- **User Management**: Registration, authentication, and profile management
-- **Integration with Identity Services**: Connects to dedicated NIN/BVN sandbox services
-- **OpenID Connect**: Discovery endpoints and JWKS support
-- **Multi-login Support**: OAuth2 and JSON-based authentication
-
-### Database Schema
-
-- **Users Table**: User accounts with hashed passwords and profile data
-- **OAuth Clients**: Registered OAuth2 client applications
-- **OAuth Tokens**: Access tokens, refresh tokens, and authorization codes
-- **Alembic Migrations**: Database version control and schema management
-
-### Security Features
-- **Bcrypt Password Hashing**: Secure password storage
-- **JWT Signing**: Configurable secret keys and algorithms
-- **Identity Privacy**: NIN/BVN data hashing for privacy protection
-- **CORS Protection**: Configurable cross-origin policies
-- **Input Validation**: Pydantic models for request/response validation
-
-### Integration Points
-
-- **API Gateway**: Token validation for all platform services
-- **NIN/BVN Services**: Dedicated sandbox services for identity verification
-- **PostgreSQL**: Primary data storage
-- **Redis**: Session and token caching (via API Gateway)
+### Admin-Only User Management
+- **Closed Sandbox**: Only 9 Nigerian startups have access
+- **Admin Control**: Administrators create all user accounts
+- **Secure Access**: JWT-based authentication for all API calls
+- **Identity Verification**: Integrated NIN/BVN verification services
 
 ## 🔒 Security
 
@@ -706,19 +634,12 @@ GET /api/v1/services/health
 
 ### Service-Specific Documentation
 
-- **Auth Service**: OAuth2 flows, Nigerian phone validation, JWT management
-- **API Gateway**: Request routing, rate limiting, DPI health monitoring
+- **Auth Service**: OAuth2 flows, admin-only user management, JWT tokens
+- **API Gateway**: Request routing, rate limiting, service discovery
 - **NIN Service**: Nigerian Identity Number verification via Dojah API
 - **BVN Service**: Bank Verification Number validation
 - **SMS Service**: Nigerian SMS messaging and notifications
-- **AI Service**: Content generation and data analysis
-
-### Service-Specific Documentation
-
-- **Auth Service**: OAuth2 flows, identity verification, JWT management
-- **API Gateway**: Request routing, rate limiting, circuit breaking
-- **Config Service**: Encrypted configuration, versioning, environment management
-- **Sandbox Services**: AI, SMS, IVR, NIN, BVN, Two-Way SMS capabilities
+- **AI Service**: Nigerian-context content generation
 
 ## 🐛 Troubleshooting
 
