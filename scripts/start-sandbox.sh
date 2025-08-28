@@ -33,16 +33,10 @@ ENVIRONMENT=${ENVIRONMENT:-development}
 SETUP_DB=${SETUP_DB:-true}
 START_INFRASTRUCTURE=${START_INFRASTRUCTURE:-true}
 
-# Service definitions
-declare -A SERVICES=(
-    ["auth-service"]="services/auth-service:8000"
-    ["api-gateway"]="services/api-gateway:8080"
-    ["config-service"]="config:8001"
-    ["nin-service"]="sandbox/nin:8005"
-    ["bvn-service"]="sandbox/bvn:8006"
-    ["sms-service"]="sandbox/sms:8003"
-    ["ai-service"]="sandbox/ai:8002"
-)
+# Service definitions (compatible with older bash)
+SERVICE_NAMES=("auth-service" "api-gateway" "config-service" "nin-service" "bvn-service" "sms-service" "ai-service")
+SERVICE_PATHS=("services/auth-service" "services/api-gateway" "config" "sandbox/nin" "sandbox/bvn" "sandbox/sms" "sandbox/ai")
+SERVICE_PORTS=("8000" "8080" "8001" "8005" "8006" "8003" "8002")
 
 # Function to check if port is available
 check_port() {
@@ -66,7 +60,7 @@ start_infrastructure() {
             -e POSTGRES_PASSWORD=sandbox_password \
             -e POSTGRES_DB=sandbox_platform \
             -p 5432:5432 \
-            postgres:14
+            postgres:16
         
         # Wait for PostgreSQL to be ready
         log_info "Waiting for PostgreSQL to be ready..."
@@ -124,9 +118,8 @@ install_dependencies() {
 # Function to start a service
 start_service() {
     local service_name=$1
-    local service_info=$2
-    local service_path=$(echo $service_info | cut -d: -f1)
-    local service_port=$(echo $service_info | cut -d: -f2)
+    local service_path=$2
+    local service_port=$3
     
     log_info "Starting $service_name on port $service_port..."
     
@@ -177,9 +170,9 @@ start_service() {
 check_services() {
     log_info "Checking service health..."
     
-    for service_name in "${!SERVICES[@]}"; do
-        local service_info=${SERVICES[$service_name]}
-        local service_port=$(echo $service_info | cut -d: -f2)
+    for i in "${!SERVICE_NAMES[@]}"; do
+        local service_name="${SERVICE_NAMES[$i]}"
+        local service_port="${SERVICE_PORTS[$i]}"
         
         if curl -s "http://localhost:$service_port/health" >/dev/null 2>&1; then
             log_success "$service_name is healthy"
@@ -211,7 +204,8 @@ stop_services() {
     log_info "Stopping all services..."
     
     # Stop application services
-    for service_name in "${!SERVICES[@]}"; do
+    for i in "${!SERVICE_NAMES[@]}"; do
+        local service_name="${SERVICE_NAMES[$i]}"
         local pid_file="logs/${service_name}.pid"
         if [ -f "$pid_file" ]; then
             local pid=$(cat "$pid_file")
@@ -298,8 +292,8 @@ main() {
     
     # Start all services
     log_info "Starting application services..."
-    for service_name in "${!SERVICES[@]}"; do
-        start_service "$service_name" "${SERVICES[$service_name]}"
+    for i in "${!SERVICE_NAMES[@]}"; do
+        start_service "${SERVICE_NAMES[$i]}" "${SERVICE_PATHS[$i]}" "${SERVICE_PORTS[$i]}"
     done
     
     # Wait a moment for services to fully start
@@ -313,10 +307,8 @@ main() {
     log_success "🎉 Sandbox Platform started successfully!"
     echo ""
     log_info "📋 Service URLs:"
-    for service_name in "${!SERVICES[@]}"; do
-        local service_info=${SERVICES[$service_name]}
-        local service_port=$(echo $service_info | cut -d: -f2)
-        log_info "   $service_name: http://localhost:$service_port"
+    for i in "${!SERVICE_NAMES[@]}"; do
+        log_info "   ${SERVICE_NAMES[$i]}: http://localhost:${SERVICE_PORTS[$i]}"
     done
     
     echo ""

@@ -886,7 +886,7 @@ kubectl get secret
 
 ```bash
 # Test database connectivity
-kubectl run postgres-client --image=postgres:14 -it --rm --restart=Never -- \
+kubectl run postgres-client --image=postgres:16 -it --rm --restart=Never -- \
   psql -h postgres -U postgres -d sandbox
 ```
 

@@ -59,7 +59,7 @@ start_postgres_docker() {
             -e POSTGRES_PASSWORD=sandbox_password \
             -e POSTGRES_DB=sandbox_platform \
             -p 5432:5432 \
-            postgres:14
+            postgres:16
     fi
     
     # Wait for PostgreSQL to be ready

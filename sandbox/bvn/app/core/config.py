@@ -1,4 +1,5 @@
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
@@ -17,9 +18,11 @@ class Settings(BaseSettings):
     # Auth service URL for user updates
     auth_service_url: str = "http://auth-service:8000"
 
-    class Config:
-        env_file = ".env"
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 settings = Settings()

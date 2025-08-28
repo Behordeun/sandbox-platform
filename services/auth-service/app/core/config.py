@@ -1,7 +1,8 @@
 import os
-from typing import Optional
+from typing import Optional, List, Union
 
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict, field_validator
 
 
 class Settings(BaseSettings):
@@ -28,10 +29,52 @@ class Settings(BaseSettings):
     doja_base_url: str = "https://api.dojah.io"
 
     # CORS settings
-    cors_origins: list = ["*"]
+    cors_origins: Union[str, List[str]] = ["*"]
     cors_allow_credentials: bool = True
-    cors_allow_methods: list = ["*"]
-    cors_allow_headers: list = ["*"]
+    cors_allow_methods: Union[str, List[str]] = ["*"]
+    cors_allow_headers: Union[str, List[str]] = ["*"]
+    
+    @field_validator('cors_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if v is None or v == "":
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if not v or v == "*":
+                return ["*"]
+            return [item.strip() for item in v.split(',') if item.strip()]
+        return ["*"]
+    
+    @field_validator('cors_allow_methods', mode='before')
+    @classmethod
+    def parse_cors_methods(cls, v):
+        if v is None or v == "":
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if not v or v == "*":
+                return ["*"]
+            return [item.strip() for item in v.split(',') if item.strip()]
+        return ["*"]
+    
+    @field_validator('cors_allow_headers', mode='before')
+    @classmethod
+    def parse_cors_headers(cls, v):
+        if v is None or v == "":
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if not v or v == "*":
+                return ["*"]
+            return [item.strip() for item in v.split(',') if item.strip()]
+        return ["*"]
 
     # App settings
     host: str = "0.0.0.0"
@@ -58,9 +101,11 @@ class Settings(BaseSettings):
     supported_environments: list = ["development", "staging", "production"]
 
     # Server settings
-    class Config:
-        env_file = "../../.env"  # Use root .env file
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 # Global settings instance

@@ -3,7 +3,8 @@ YAML Configuration for SMS Service
 """
 
 import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 import sys
 sys.path.append("../../../..")
 from config.config_loader import get_service_config, get_provider_config
@@ -55,9 +56,11 @@ class Settings(BaseSettings):
     # Auth Service
     auth_service_url: str = "http://auth-service:8000"
     
-    class Config:
-        env_file = "../../../../.env"  # Use root .env file
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 settings = Settings()
