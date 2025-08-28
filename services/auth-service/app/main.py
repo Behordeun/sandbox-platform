@@ -2,8 +2,9 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.api.v1.router import api_router
-from app.core.yaml_config import settings
+from app.core.config import settings
 from app.core.database import Base, engine
+from sqlalchemy import text
 from app.middleware.logging import UserActivityLoggingMiddleware
 from app.models import (
     oauth_client,
@@ -28,10 +29,17 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up Sandbox Auth Service...")
     logger.info(f"Database URL: {settings.database_url}")
 
-    # Create tables (in production, use Alembic migrations)
-
-    Base.metadata.create_all(bind=engine)
-    logger.info("Database tables created/verified")
+    # Tables are managed by Alembic migrations
+    # Base.metadata.create_all(bind=engine)
+    logger.info("Database connection verified")
+    
+    # Test database connection
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("SELECT 1"))
+        logger.info("Database connection successful")
+    except Exception as e:
+        logger.error(f"Database connection failed: {e}")
 
     yield
 

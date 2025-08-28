@@ -290,28 +290,28 @@ sandbox-platform/
 
 ```bash
 # Complete setup and start
-make quick-start
+./scripts/start-sandbox.sh
 
-# Start all services
-make dev
+# Stop all services
+./scripts/stop-sandbox.sh
 
 # Check service health
-make health
+curl http://localhost:8000/health  # Auth service
+curl http://localhost:8080/health  # API Gateway
+curl http://localhost:8001/health  # Config service
 
-# Test APIs with Nigerian examples
-make test
+# Test configuration loading
+cd services/auth-service && python3 -c "from app.core.config import settings; print('✅ Config OK')"
 
-# Generate mock Nigerian data
-make mock-data
+# Run database migrations
+cd services/auth-service && python3 -m alembic upgrade head
 
-# Rotate and manage logs
-make rotate-logs
+# Generate mock Nigerian data (if available)
+./scripts/mock-data.py
 
-# View log statistics
-make log-stats
-
-# Analyze user activity and usage
-make analyze-logs
+# View service logs
+tail -f logs/auth-service.log
+tail -f logs/api-gateway.log
 ```
 
 ### Individual Service Development
@@ -617,18 +617,19 @@ Sensitive configuration values are automatically encrypted:
 
 ## 🔧 Configuration
 
-### Hybrid Configuration System
+### Centralized Configuration System
 
-The platform uses a hybrid approach combining YAML configuration with centralized environment variables:
+The platform uses a **centralized configuration approach** with a single .env file and optional YAML overlays:
 
 ```plain text
-config.yaml                    # Base configuration for all services
-config/environments/
-├── development.yaml          # Environment-specific overrides
-├── staging.yaml             # Staging overrides
-└── production.yaml          # Production overrides
-.env                         # Single centralized environment file
+.env                         # Single centralized environment file (PRIMARY)
 .env.template               # Template for all environment variables
+config/                     # Optional YAML configuration overlays
+├── environments/
+│   ├── development.yaml    # Environment-specific overrides
+│   ├── staging.yaml       # Staging overrides
+│   └── production.yaml    # Production overrides
+└── config_loader.py       # YAML configuration loader
 ```
 
 ### Environment Setup
@@ -641,11 +642,12 @@ cp .env.template .env
 nano .env
 
 # All services automatically use the centralized configuration
+# Both regular config.py and yaml_config.py read from the same .env file
 ```
 
 ### Centralized Environment Variables (.env)
 
-The platform uses a **single comprehensive .env file** organized into sections:
+The platform uses a **single comprehensive .env file** that all services read from:
 
 ```env
 # =============================================================================
@@ -659,7 +661,7 @@ LOG_LEVEL=INFO
 # DATABASE CONFIGURATION
 # =============================================================================
 # Single PostgreSQL database for all services
-DATABASE_URL=postgresql://sandbox_user:password@localhost:5432/sandbox_platform
+DATABASE_URL=postgresql://postgres:your-password@localhost:5432/sandbox_platform
 DB_PASSWORD=your-database-password
 REDIS_URL=redis://localhost:6379/0
 
@@ -687,14 +689,23 @@ SMTP_PASSWORD=your-app-password
 # ... and more organized sections
 ```
 
+### Configuration Architecture
+
+**Dual Configuration Support:**
+- **config.py**: Direct .env file reading with Pydantic validation
+- **yaml_config.py**: YAML configuration with .env file fallback
+- **Environment Variable Priority**: .env values override YAML configuration
+- **Automatic Fallback**: Services work without YAML files using .env defaults
+
 ### Configuration Benefits
 
 - **Single Source of Truth**: One .env file for all services
 - **No Configuration Drift**: Consistent settings across services
-- **Organized Structure**: Well-documented sections and comments
+- **Environment Variable Priority**: .env overrides YAML configuration
+- **Flexible Architecture**: Support both simple and complex configuration needs
 - **Easy Deployment**: Single file to manage in production
 - **Better Security**: Centralized secret management
-- **YAML + ENV Hybrid**: Structure from YAML, secrets from environment
+- **Robust Fallbacks**: Services work even without YAML configuration
 
 ## 🧪 Testing
 
@@ -835,17 +846,22 @@ GET /api/v1/services/health
 
 ### Quick Reference for Nigerian Startups
 
-- [Database Guide](docs/DATABASE.md) - Consolidated PostgreSQL database architecture
-- [Configuration Guide](config/README.md) - YAML + centralized .env configuration
-- [Scripts Directory](scripts/README.md) - All platform scripts and utilities
-- [Database Setup](scripts/setup-db.sh) - One-command database setup and migrations
-- [Admin User Setup](scripts/create-admin-user.py) - Create initial admin accounts
-- [Platform Startup](scripts/start-sandbox.sh) - Start entire sandbox platform
-- [DPI API Guide](docs/DPI-API-GUIDE.md) - Complete API reference with Nigerian examples
-- [Mock Data Generator](scripts/mock-data.py) - Generate realistic Nigerian test data
-- [API Testing Script](scripts/test-dpi-apis.sh) - Test complete DPI workflows
-- [Service Health Checker](scripts/check-services.sh) - Monitor all services
-- [Startup Guide](docs/STARTUP-GUIDE.md) - Startup Access Guide
+- **Configuration**: Single .env file for all services with optional YAML overlays
+- **Database**: Consolidated PostgreSQL with service-specific table prefixes
+- **Scripts**: Centralized automation in `scripts/` directory
+- **Startup**: `./scripts/start-sandbox.sh` - One-command platform startup
+- **Database Setup**: `./scripts/setup-db.sh` - Database setup and migrations
+- **Admin Users**: `./scripts/create-admin-user.py` - Create initial admin accounts
+- **Health Checks**: Built-in `/health` endpoints for all services
+- **Logs**: Centralized logging in `logs/` directory
+- **API Documentation**: Available at service `/docs` endpoints
+
+### Configuration Files
+
+- **.env**: Single source of truth for all environment variables
+- **config.py**: Direct environment variable loading with Pydantic validation
+- **yaml_config.py**: YAML configuration with .env fallback (optional)
+- **config/**: Optional YAML configuration overlays for complex scenarios
 
 ### Detailed Documentation
 
@@ -857,60 +873,93 @@ GET /api/v1/services/health
 
 ### Service-Specific Documentation
 
-- **Auth Service**: OAuth2 flows, admin-only user management, JWT tokens
-- **API Gateway**: Request routing, rate limiting, service discovery
+- **Auth Service**: OAuth2 flows, admin-only user management, JWT tokens, database migrations
+- **API Gateway**: Request routing, rate limiting, service discovery, CORS handling
+- **Config Service**: Centralized configuration management with encryption
 - **NIN Service**: Nigerian Identity Number verification via Dojah API
 - **BVN Service**: Bank Verification Number validation
 - **SMS Service**: Nigerian SMS messaging and notifications
 - **AI Service**: Nigerian-context content generation
 
+### Recent Updates
+
+- **✅ Fixed Configuration Issues**: All services now use centralized .env file
+- **✅ Resolved Import Errors**: Fixed module import paths across all services
+- **✅ Database Connectivity**: Updated to use correct PostgreSQL credentials
+- **✅ CORS Configuration**: Fixed CORS field parsing with Union types and field validators
+- **✅ Service Health**: All services now start successfully with proper health checks
+- **✅ Centralized Logging**: Structured logging with automatic rotation and retention
+
 ## 🐛 Troubleshooting
 
 ### Common Issues
 
+#### Configuration Issues
+
+```bash
+# Test configuration loading
+cd services/auth-service
+python3 -c "from app.core.config import settings; print('Config OK:', settings.database_url)"
+
+# Test YAML configuration (if used)
+python3 -c "from app.core.yaml_config import settings; print('YAML Config OK:', settings.database_url)"
+
+# Check environment variables
+echo $DATABASE_URL
+grep DATABASE_URL .env
+```
+
 #### Service Won't Start
 
 ```bash
-# Check logs
-kubectl logs -f deployment/auth-service
+# Check service logs
+tail -f logs/auth-service.log
+tail -f logs/api-gateway.log
 
-# Check resources
-kubectl describe pod <pod-name>
+# Check configuration loading
+cd services/auth-service
+python3 -c "from app.core.config import settings; print('✅ Config loads successfully')"
 
-# Check configuration
-kubectl get configmap
-kubectl get secret
+# Check database connection
+psql $DATABASE_URL -c "SELECT 1;"
 ```
 
 #### Database Connection Issues
 
 ```bash
-# Test database connectivity
-kubectl run postgres-client --image=postgres:16 -it --rm --restart=Never -- \
-  psql -h postgres -U postgres -d sandbox
+# Test database connectivity with correct credentials
+psql postgresql://postgres:your-password@localhost:5432/sandbox_platform -c "\dt"
+
+# Check if database exists
+psql postgresql://postgres:your-password@localhost:5432/postgres -c "SELECT datname FROM pg_database WHERE datname='sandbox_platform';"
+
+# Run migrations if needed
+cd services/auth-service
+python3 -m alembic upgrade head
 ```
 
-#### Gateway Routing Issues
+#### Import/Module Issues
 
 ```bash
-# Check service discovery
-kubectl get endpoints
+# Check Python path and imports
+cd services/auth-service
+python3 -c "import sys; sys.path.append('.'); from app.core.config import settings; print('✅ Imports work')"
 
-# Test service connectivity
-kubectl run debug --image=busybox -it --rm --restart=Never -- \
-  nslookup auth-service.sandbox-dev.svc.cluster.local
+# Check if required packages are installed
+pip list | grep -E "pydantic|fastapi|sqlalchemy"
 ```
 
 ### Performance Issues
 
 ```bash
 # Check resource usage
-kubectl top pods
-kubectl top nodes
+ps aux | grep python
+df -h
+free -h
 
-# Check HPA status
-kubectl get hpa
-kubectl describe hpa auth-service-hpa
+# Check service health
+curl http://localhost:8000/health
+curl http://localhost:8080/health
 ```
 
 ## 📄 License

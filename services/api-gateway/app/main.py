@@ -3,7 +3,7 @@ import logging
 from contextlib import asynccontextmanager
 
 from app.api.v1.router import api_router
-from app.core.yaml_config import settings
+from app.core.config import settings
 from app.middleware.auth import AuthMiddleware
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.metrics import MetricsMiddleware, get_metrics

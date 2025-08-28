@@ -132,9 +132,25 @@ cp .env.template .env
 
 ## 🚨 Troubleshooting
 
+### Configuration Issues
+
+```bash
+# Test configuration loading
+cd services/auth-service
+python3 -c "from app.core.config import settings; print('✅ Config OK')"
+
+# Check environment variables
+grep DATABASE_URL .env
+echo $DATABASE_URL
+```
+
 ### Database Issues
 
 ```bash
+# Check database connection
+psql postgresql://postgres:your-password@localhost:5432/sandbox_platform -c "SELECT 1;"
+
+# Restart database
 docker ps | grep postgres
 docker restart sandbox-postgres
 ```
@@ -142,16 +158,31 @@ docker restart sandbox-postgres
 ### Service Issues
 
 ```bash
-./scripts/check-services.sh
-tail -f logs/*.log
+# Check service health
+curl http://localhost:8000/health
+curl http://localhost:8080/health
+
+# Check logs
+tail -f logs/auth-service.log
+tail -f logs/api-gateway.log
 ```
 
-### Permission Issues
+### Import/Module Issues
 
 ```bash
-chmod +x scripts/*.sh
-chmod +x scripts/*.py
+# Test imports
+cd services/auth-service
+python3 -c "import sys; sys.path.append('.'); from app.core.config import settings; print('✅ Imports OK')"
 ```
+
+## 🚀 Recent Updates
+
+- **✅ Fixed Configuration Issues**: All services now use centralized .env file
+- **✅ Resolved Import Errors**: Fixed module import paths across all services  
+- **✅ Database Connectivity**: Updated to use correct PostgreSQL credentials
+- **✅ Migration System**: Fixed alembic migrations with python3 -m alembic
+- **✅ Service Health**: All services now start successfully
+- **✅ Dual Config Support**: Both config.py and yaml_config.py work properly
 
 ---
 

@@ -24,13 +24,17 @@ def run_migrations():
     environment = os.getenv("ENVIRONMENT", "development")
     print(f"Running migrations for environment: {environment}")
     
-    # Get database configuration
-    config = get_config(environment)
-    db_config = config.get("database", {})
-    db_url = db_config.get("url")
+    # Get database URL from environment variable first, then config
+    db_url = os.getenv("DATABASE_URL")
     
     if not db_url:
-        print("❌ Database URL not found in configuration")
+        # Fallback to config
+        config = get_config(environment)
+        db_config = config.get("database", {})
+        db_url = db_config.get("url")
+    
+    if not db_url:
+        print("❌ Database URL not found in environment or configuration")
         return False
     
     print(f"📊 Database: {db_url.split('@')[1] if '@' in db_url else db_url}")
@@ -66,8 +70,23 @@ def run_migrations():
                 env["DATABASE_URL"] = db_url
                 
                 # Run alembic upgrade
+                # Try different alembic paths
+                alembic_cmd = None
+                for cmd in ["python3", "python"]:
+                    try:
+                        subprocess.run([cmd, "-m", "alembic", "--version"], capture_output=True, check=True)
+                        alembic_cmd = [cmd, "-m", "alembic"]
+                        break
+                    except (subprocess.CalledProcessError, FileNotFoundError):
+                        continue
+                
+                if not alembic_cmd:
+                    print(f"❌ Alembic not found for {service['name']}")
+                    success = False
+                    continue
+                
                 result = subprocess.run(
-                    ["alembic", "upgrade", "head"],
+                    alembic_cmd + ["upgrade", "head"],
                     env=env,
                     capture_output=True,
                     text=True
@@ -97,10 +116,15 @@ def run_migrations():
 def create_database():
     """Create the database if it doesn't exist."""
     
-    environment = os.getenv("ENVIRONMENT", "development")
-    config = get_config(environment)
-    db_config = config.get("database", {})
-    db_url = db_config.get("url")
+    # Get database URL from environment variable first, then config
+    db_url = os.getenv("DATABASE_URL")
+    
+    if not db_url:
+        # Fallback to config
+        environment = os.getenv("ENVIRONMENT", "development")
+        config = get_config(environment)
+        db_config = config.get("database", {})
+        db_url = db_config.get("url")
     
     if not db_url or not db_url.startswith("postgresql://"):
         print("⚠️  Not a PostgreSQL database, skipping database creation")

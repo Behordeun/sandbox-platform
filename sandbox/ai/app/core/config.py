@@ -3,20 +3,17 @@ from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "BVN Verification Service"
+    app_name: str = "AI Service"
     app_version: str = "1.0.0"
     debug: bool = False
 
     host: str = "0.0.0.0"
-    port: int = 8006
+    port: int = 8002
 
-    # Dojah API settings
-    dojah_api_key: str = ""
-    dojah_app_id: str = ""
-    dojah_base_url: str = "https://api.dojah.io"
-
-    # Auth service URL for user updates
-    auth_service_url: str = "http://auth-service:8000"
+    # AI API settings
+    ai_api_key: str = ""
+    ai_model: str = "gpt-3.5-turbo"
+    ai_max_tokens: int = 2000
 
     model_config = ConfigDict(
         env_file="../../../../.env",  # Use root .env file
