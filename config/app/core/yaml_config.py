@@ -43,9 +43,36 @@ class Settings(BaseSettings):
 
     # CORS settings
     cors_origins: list = ["*"]
+
+    @classmethod
+    def _validate_cors_origins(cls, value):
+        import json
+        if value is None or value == "":
+            return ["*"]
+        if isinstance(value, list):
+            return value
+        if isinstance(value, str):
+            try:
+                parsed = json.loads(value)
+                if isinstance(parsed, list):
+                    return parsed
+                return [parsed]
+            except Exception:
+                # Fallback: comma-separated string
+                return [v.strip() for v in value.split(",") if v.strip()]
+        return ["*"]
+
+    @classmethod
+    def __get_validators__(cls):
+        yield cls._validate_cors_origins
     cors_allow_credentials: bool = True
     cors_allow_methods: list = ["*"]
     cors_allow_headers: list = ["*"]
+
+    @property
+    def config_storage_type(self):
+        # For backward compatibility with code expecting config_storage_type
+        return self.storage_type
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
@@ -55,6 +82,18 @@ class Settings(BaseSettings):
             self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/1")
         if not self.encryption_key:
             self.encryption_key = os.getenv("CONFIG_ENCRYPTION_KEY", "")
+
+        # Handle CORS origins from environment variable (supports JSON or comma-separated)
+        cors_origins_env = os.getenv("CORS_ORIGINS", None)
+        if cors_origins_env:
+            import json
+            try:
+                self.cors_origins = json.loads(cors_origins_env)
+                if not isinstance(self.cors_origins, list):
+                    self.cors_origins = [self.cors_origins]
+            except Exception:
+                # Fallback: comma-separated string
+                self.cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
 
         # Load configuration from YAML
         environment = os.getenv("ENVIRONMENT", "development")
@@ -74,7 +113,8 @@ class Settings(BaseSettings):
             self.versioning_enabled = service_config.get("versioning_enabled", True)
             # Load CORS config if present
             cors = service_config.get("cors", {})
-            self.cors_origins = cors.get("origins", ["*"])
+            if "origins" in cors:
+                self.cors_origins = cors.get("origins", ["*"])
             self.cors_allow_credentials = cors.get("allow_credentials", True)
             self.cors_allow_methods = cors.get("allow_methods", ["*"])
             self.cors_allow_headers = cors.get("allow_headers", ["*"])
