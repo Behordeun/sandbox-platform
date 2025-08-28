@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from urllib.parse import urlencode, urlparse
+from urllib.parse import urlencode, urlparse, unquote
 
 from app.crud.oauth_client import oauth_client_crud
 from app.crud.oauth_token import oauth_token_crud
@@ -80,19 +80,35 @@ def authorize(
             params["state"] = state
 
         # Redirect to client
-        safe_redirect_uri = redirect_uri.replace("\\", "")
-        # Normalize the URI for matching (strip scheme and netloc for comparison if desired, or compare full URL)
-        normalized_safe_redirect_uri = safe_redirect_uri.strip()
-        # Get list of registered URIs for client and normalize them
-        registered_uris = [uri.replace("\\", "").strip() for uri in client.redirect_uris]
-        # Perform strict match
+        # Helper to robustly normalize URIs for safe comparison
+        def normalize_uri(uri: str) -> str:
+            # Remove backslashes, strip whitespace
+            uri = uri.replace('\\', '').strip()
+            # Lowercase scheme and netloc for case-insensitive matching
+            parsed = urlparse(uri)
+            scheme = parsed.scheme.lower()
+            netloc = parsed.netloc.lower()
+            path = parsed.path
+            # Remove any percent-encoding from path
+            from urllib.parse import unquote
+            path = unquote(path)
+            # Construct normalized URI
+            normalized = f"{scheme}://{netloc}{path}"
+            if parsed.query:
+                normalized += f"?{parsed.query}"
+            return normalized.rstrip('/')
+
+        normalized_safe_redirect_uri = normalize_uri(redirect_uri)
+        registered_uris = [normalize_uri(uri) for uri in client.redirect_uris]
+        # Perform strict case-insensitive match
         if normalized_safe_redirect_uri not in registered_uris:
             raise HTTPException(status_code=400, detail="Unsafe redirect URI")
         parsed = urlparse(normalized_safe_redirect_uri)
         # Defensive check: Only allow if netloc (host) is present and scheme is http/https
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise HTTPException(status_code=400, detail="Unsafe redirect URI")
-        redirect_url = f"{normalized_safe_redirect_uri}?{urlencode(params)}"
+        # Use original redirect_uri (with only the safe normalization) for redirection
+        redirect_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}?{urlencode(params)}"
         return RedirectResponse(url=redirect_url)
 
     else:
