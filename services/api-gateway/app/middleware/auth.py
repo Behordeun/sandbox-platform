@@ -146,7 +146,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
         self._log_access(
-            request, response, user_id, auth_method, start_time, client_ip, user_agent
+            request, response, user_id if user_id is not None else "", auth_method if auth_method is not None else "", start_time, client_ip, user_agent
         )
         return response
 
