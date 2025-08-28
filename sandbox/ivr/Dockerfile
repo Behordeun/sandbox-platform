@@ -22,6 +22,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
+# Copy root .env file for centralized configuration
+COPY ../../.env ./.env
+
 # Create non-root user for IVR service
 RUN adduser --disabled-password --gecos '' ivruser && chown -R ivruser:ivruser /app
 USER ivruser

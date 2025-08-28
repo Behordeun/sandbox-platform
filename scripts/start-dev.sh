@@ -21,6 +21,8 @@ fi
 
 # Start infrastructure services
 echo "🐘 Starting PostgreSQL and Redis..."
+# Ensure we're in the root directory and .env is available
+cd "$(dirname "$0")/.." || exit 1
 docker-compose -f deployment/docker-compose/docker-compose.dev.yml up -d postgres redis
 
 # Wait for services to be ready

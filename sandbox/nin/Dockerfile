@@ -18,6 +18,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
+# Copy root .env file for centralized configuration
+COPY ../../.env ./.env
+
 # Create non-root user
 RUN useradd -m -u 1000 ninuser && chown -R ninuser:ninuser /app
 USER ninuser
