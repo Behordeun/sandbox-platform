@@ -166,17 +166,17 @@ start_service() {
     cd "$service_path"
     
     # Create logs directory if it doesn't exist
-    mkdir -p ../../logs
+    mkdir -p "$(pwd)/logs"
     
     # Start service with uvicorn
     nohup uvicorn app.main:app \
         --host 0.0.0.0 \
         --port $service_port \
         --reload \
-        > "../../logs/${service_name}.log" 2>&1 &
+        > "$(pwd)/logs/${service_name}.log" 2>&1 &
     
     local pid=$!
-    echo $pid > "../../logs/${service_name}.pid"
+    echo $pid > "$(pwd)/logs/${service_name}.pid"
     
     cd - >/dev/null
     
