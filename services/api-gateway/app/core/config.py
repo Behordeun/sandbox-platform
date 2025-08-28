@@ -103,8 +103,8 @@ class Settings(BaseSettings):
         "sms": ServiceConfig(
             name="sms-service", url="http://localhost:8003", health_path=HEALTH_PATH
         ),
-        "llm": ServiceConfig(
-            name="llm-service", url="http://localhost:8002", health_path=HEALTH_PATH
+        "ai": ServiceConfig(
+            name="ai-service", url="http://localhost:8002", health_path=HEALTH_PATH
         ),
     }
 
