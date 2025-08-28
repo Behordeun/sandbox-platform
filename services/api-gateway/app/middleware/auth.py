@@ -36,6 +36,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/api/v1/services/status",
             "/api/v1/services/",
             WELL_KNOWN_PATH,
+            f"{WELL_KNOWN_PATH}/openid_configuration",
+            f"{WELL_KNOWN_PATH}/oauth-authorization-server",
+            f"{WELL_KNOWN_PATH}/jwks.json",
         ]
 
     async def dispatch(self, request: Request, call_next):
