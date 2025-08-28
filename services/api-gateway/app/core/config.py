@@ -98,13 +98,13 @@ class Settings(BaseSettings):
     auth_service_timeout: int = 30
     services: Dict[str, ServiceConfig] = {
         "auth": ServiceConfig(
-            name="auth-service", url="http://auth-service:8000", health_path=HEALTH_PATH
+            name="auth-service", url="http://localhost:8000", health_path=HEALTH_PATH
         ),
         "sms": ServiceConfig(
-            name="sms-service", url="http://sms-service:8000", health_path=HEALTH_PATH
+            name="sms-service", url="http://localhost:8003", health_path=HEALTH_PATH
         ),
         "llm": ServiceConfig(
-            name="llm-service", url="http://llm-service:8000", health_path=HEALTH_PATH
+            name="llm-service", url="http://localhost:8002", health_path=HEALTH_PATH
         ),
     }
 
