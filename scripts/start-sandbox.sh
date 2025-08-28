@@ -174,7 +174,7 @@ start_service() {
     local pid_file="$project_root/logs/${service_name}.pid"
     
     # Start service with uvicorn
-    nohup uvicorn app.main:app \
+    nohup python3 -m uvicorn app.main:app \
         --host 0.0.0.0 \
         --port $service_port \
         --reload \
