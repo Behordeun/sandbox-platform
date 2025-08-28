@@ -169,7 +169,10 @@ start_service() {
     cd "$service_path"
     
     # Use centralized logs directory
-    local project_root="$(cd ../.. && pwd)"
+    local project_root="$(pwd)"
+    while [[ ! -f "$project_root/.env" && "$project_root" != "/" ]]; do
+        project_root="$(dirname "$project_root")"
+    done
     local log_file="$project_root/logs/${service_name}.log"
     local pid_file="$project_root/logs/${service_name}.pid"
     
