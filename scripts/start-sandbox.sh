@@ -63,8 +63,11 @@ cleanup_processes() {
     pkill -f "uvicorn.*sandbox" 2>/dev/null || true
     pkill -f "python.*sandbox" 2>/dev/null || true
     
-    # Clean up old PID files
+    # Clean up old PID files from centralized logs directory
     rm -f logs/*.pid 2>/dev/null || true
+    rm -f services/*/logs/*.pid 2>/dev/null || true
+    rm -f sandbox/*/logs/*.pid 2>/dev/null || true
+    rm -f config/logs/*.pid 2>/dev/null || true
     
     sleep 2
     log_info "Process cleanup completed"
@@ -165,18 +168,20 @@ start_service() {
     # Start service in background
     cd "$service_path"
     
-    # Create logs directory if it doesn't exist
-    mkdir -p "$(pwd)/logs"
+    # Use centralized logs directory
+    local project_root="$(cd ../.. && pwd)"
+    local log_file="$project_root/logs/${service_name}.log"
+    local pid_file="$project_root/logs/${service_name}.pid"
     
     # Start service with uvicorn
     nohup uvicorn app.main:app \
         --host 0.0.0.0 \
         --port $service_port \
         --reload \
-        > "$(pwd)/logs/${service_name}.log" 2>&1 &
+        > "$log_file" 2>&1 &
     
     local pid=$!
-    echo $pid > "$(pwd)/logs/${service_name}.pid"
+    echo $pid > "$pid_file"
     
     cd - >/dev/null
     

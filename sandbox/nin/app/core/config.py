@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    app_name: str = "NIN Verification Service"
+    app_name: str = "NIN Service"
     app_version: str = "1.0.0"
     debug: bool = False
 
@@ -13,10 +13,9 @@ class Settings(BaseSettings):
     # Dojah API settings
     dojah_api_key: str = ""
     dojah_app_id: str = ""
-    dojah_base_url: str = "https://api.dojah.io"
 
-    # Auth service URL for user updates
-    auth_service_url: str = "http://auth-service:8000"
+    # Auth Service
+    auth_service_url: str = "http://localhost:8000"
 
     model_config = ConfigDict(
         env_file="../../../../.env",  # Use root .env file
