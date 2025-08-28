@@ -137,7 +137,11 @@ class StructuredLogger:
             self.logger.info(f"Service call: {json.dumps(log_data)}")
 
     def log_circuit_breaker_event(
-        self, service_name: str, event: str, state: str, failure_count: Optional[int] = None
+        self,
+        service_name: str,
+        event: str,
+        state: str,
+        failure_count: Optional[int] = None,
     ):
         """Log circuit breaker event."""
         log_data = {

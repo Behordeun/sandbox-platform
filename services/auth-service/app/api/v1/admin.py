@@ -4,15 +4,15 @@ Only accessible by sandbox administrators
 """
 
 from typing import Any, List
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
-from app.dependencies.database import get_db
-from app.dependencies.auth import get_current_active_user
 from app.crud.user import user_crud
+from app.dependencies.auth import get_current_active_user
+from app.dependencies.database import get_db
+from app.email_service import email_service
 from app.models.user import User
 from app.schemas.user import UserCreate, UserResponse, UserUpdate
-from app.email_service import email_service
+from fastapi import APIRouter, Depends, HTTPException, status
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -23,14 +23,16 @@ def get_admin_user(current_user: User = Depends(get_current_active_user)) -> Use
     # In production, implement proper role-based access control
     admin_emails = [
         "admin@dpi-sandbox.ng",
-        "muhammad@datasciencenigeria.ai", 
-        "behordeun@dpi-sandbox.ng"
+        "muhammad@datasciencenigeria.ai",
+        "behordeun@dpi-sandbox.ng",
     ]
-    
-    if current_user.email not in admin_emails and "admin" not in current_user.email.lower():
+
+    if (
+        current_user.email not in admin_emails
+        and "admin" not in current_user.email.lower()
+    ):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin access required"
+            status_code=status.HTTP_403_FORBIDDEN, detail="Admin access required"
         )
     return current_user
 
@@ -43,7 +45,7 @@ def create_user(
     admin_user: User = Depends(get_admin_user)
 ) -> Any:
     """Create a new user account (Admin only).
-    
+
     Example:
     {
         "email": "developer@fintech.ng",
@@ -57,8 +59,7 @@ def create_user(
     user = user_crud.get_by_email(db, email=user_in.email)
     if user:
         raise HTTPException(
-            status_code=400,
-            detail="User with this email already exists"
+            status_code=400, detail="User with this email already exists"
         )
 
     # Check username if provided
@@ -66,8 +67,7 @@ def create_user(
         existing_user = user_crud.get_by_username(db, username=user_in.username)
         if existing_user:
             raise HTTPException(
-                status_code=400,
-                detail="User with this username already exists"
+                status_code=400, detail="User with this username already exists"
             )
 
     # Create user
@@ -78,7 +78,7 @@ def create_user(
         to_email=user.email,
         first_name=user.first_name or "Developer",
         username=user.username or user.email,
-        temporary_password=user_in.password
+        temporary_password=user_in.password,
     )
 
     return user
@@ -89,7 +89,7 @@ def list_users(
     db: Session = Depends(get_db),
     admin_user: User = Depends(get_admin_user),
     skip: int = 0,
-    limit: int = 100
+    limit: int = 100,
 ) -> Any:
     """List all users (Admin only)."""
     users = user_crud.get_multi(db, skip=skip, limit=limit)
@@ -106,10 +106,7 @@ def get_user(
     """Get user by ID (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
+        raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
@@ -124,11 +121,8 @@ def update_user(
     """Update user (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="User not found")
+
     user = user_crud.update(db, db_obj=user, obj_in=user_in)
     return user
 
@@ -143,11 +137,8 @@ def delete_user(
     """Delete user (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="User not found")
+
     user_crud.remove(db, id=user_id)
     return {"message": "User deleted successfully"}
 
@@ -162,15 +153,12 @@ def activate_user(
     """Activate user account (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="User not found")
+
     user.is_active = True
     db.add(user)
     db.commit()
-    
+
     return {"message": "User activated successfully"}
 
 
@@ -184,15 +172,12 @@ def deactivate_user(
     """Deactivate user account (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="User not found")
+
     user.is_active = False
     db.add(user)
     db.commit()
-    
+
     return {"message": "User deactivated successfully"}
 
 
@@ -206,23 +191,20 @@ def reset_user_password(
 ) -> Any:
     """Reset user password (Admin only)."""
     from app.core.security import get_password_hash
-    
+
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(
-            status_code=404,
-            detail="User not found"
-        )
-    
+        raise HTTPException(status_code=404, detail="User not found")
+
     user.hashed_password = get_password_hash(new_password)
     db.add(user)
     db.commit()
-    
+
     # Send password reset notification
     email_service.send_password_reset_notification(
         to_email=user.email,
         first_name=user.first_name or "Developer",
-        new_password=new_password
+        new_password=new_password,
     )
-    
+
     return {"message": "Password reset successfully"}

@@ -47,6 +47,29 @@ check_port() {
     return 0
 }
 
+# Function to clean up existing processes
+cleanup_processes() {
+    log_info "Cleaning up existing sandbox processes..."
+    
+    # Kill processes on sandbox ports
+    for port in 8000 8001 8002 8003 8004 8005 8006 8007 8080; do
+        if ! check_port $port; then
+            log_info "Killing process on port $port..."
+            lsof -ti :$port | xargs kill -9 2>/dev/null || true
+        fi
+    done
+    
+    # Kill any uvicorn processes related to sandbox
+    pkill -f "uvicorn.*sandbox" 2>/dev/null || true
+    pkill -f "python.*sandbox" 2>/dev/null || true
+    
+    # Clean up old PID files
+    rm -f logs/*.pid 2>/dev/null || true
+    
+    sleep 2
+    log_info "Process cleanup completed"
+}
+
 # Function to start infrastructure
 start_infrastructure() {
     log_info "Starting infrastructure services..."
@@ -129,10 +152,11 @@ start_service() {
         return 1
     fi
     
-    # Check if port is available
+    # Kill any existing processes on the port
     if ! check_port $service_port; then
-        log_warning "Port $service_port is already in use, skipping $service_name"
-        return 0
+        log_info "Killing existing process on port $service_port..."
+        lsof -ti :$service_port | xargs kill -9 2>/dev/null || true
+        sleep 2
     fi
     
     # Install dependencies
@@ -278,6 +302,9 @@ main() {
     set -a
     source .env
     set +a
+    
+    # Clean up existing processes
+    cleanup_processes
     
     # Start infrastructure
     if [ "$START_INFRASTRUCTURE" = "true" ]; then

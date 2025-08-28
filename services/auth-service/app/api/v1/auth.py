@@ -2,13 +2,7 @@ from datetime import timedelta
 from typing import Any
 
 from app.core.config import settings
-from app.core.security import (
-    create_access_token,
-    create_refresh_token,
-)
-from app.crud.password_reset import password_reset_crud
-from app.crud.user import user_crud
-from app.crud.password_reset import password_reset_crud
+from app.core.security import create_access_token, create_refresh_token
 from app.crud.user import user_crud
 from app.dependencies.auth import get_current_active_user
 from app.dependencies.database import get_db
@@ -19,9 +13,6 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 
 router = APIRouter()
-
-
-
 
 
 @router.post("/login", response_model=TokenResponse)
@@ -117,6 +108,3 @@ def read_user_me(
 def logout_user() -> Any:
     """Logout user (client-side token removal)."""
     return {"message": "Successfully logged out"}
-
-
-

@@ -3,19 +3,14 @@ from contextlib import asynccontextmanager
 
 from app.api.v1.router import api_router
 from app.core.config import settings
-from app.core.database import Base, engine
-from sqlalchemy import text
+from app.core.database import engine
 from app.middleware.logging import UserActivityLoggingMiddleware
-from app.models import (
-    oauth_client,
-    oauth_token,  # Import to register models
-    password_reset,
-    token_blacklist,
-    user,
-)
+from app.models import oauth_token  # Import to register models
+from app.models import oauth_client, password_reset, token_blacklist, user
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from sqlalchemy import text
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -32,7 +27,7 @@ async def lifespan(app: FastAPI):
     # Tables are managed by Alembic migrations
     # Base.metadata.create_all(bind=engine)
     logger.info("Database connection verified")
-    
+
     # Test database connection
     try:
         with engine.connect() as conn:

@@ -3,9 +3,10 @@ YAML Configuration for Config Service
 """
 
 import os
-from pydantic_settings import BaseSettings
-from pydantic import ConfigDict
+
 from dotenv import load_dotenv
+from pydantic import ConfigDict
+from pydantic_settings import BaseSettings
 
 # Load environment variables from root .env file
 load_dotenv("../../../.env")
@@ -26,9 +27,7 @@ except ImportError:
 
 class Settings(BaseSettings):
     """Config Service Settings loaded from YAML configuration."""
-    
 
-    
     # Default values
     app_name: str = "Config Service"
     app_version: str = "1.0.0"
@@ -38,23 +37,23 @@ class Settings(BaseSettings):
     storage_type: str = "redis"
     encryption_key: str = ""
     versioning_enabled: bool = True
-    
-    # Redis URL for config storage  
+
+    # Redis URL for config storage
     redis_url: str = ""
-    
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        
+
         # Load from centralized environment variables
         if not self.redis_url:
             self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/1")
         if not self.encryption_key:
             self.encryption_key = os.getenv("CONFIG_ENCRYPTION_KEY", "")
-        
+
         # Load configuration from YAML
         environment = os.getenv("ENVIRONMENT", "development")
         service_config = get_service_config("config_service", environment)
-        
+
         # Apply YAML configuration
         if service_config:
             self.app_name = service_config.get("app_name", "Config Service")
@@ -63,13 +62,15 @@ class Settings(BaseSettings):
             self.host = service_config.get("host", "0.0.0.0")
             self.port = service_config.get("port", 8001)
             self.storage_type = service_config.get("storage_type", "redis")
-            self.encryption_key = os.getenv("CONFIG_ENCRYPTION_KEY") or service_config.get("encryption_key", "")
+            self.encryption_key = os.getenv(
+                "CONFIG_ENCRYPTION_KEY"
+            ) or service_config.get("encryption_key", "")
             self.versioning_enabled = service_config.get("versioning_enabled", True)
-    
+
     model_config = ConfigDict(
         env_file="../../../.env",  # Use root .env file
         case_sensitive=False,
-        extra="ignore"  # Ignore extra fields from .env
+        extra="ignore",  # Ignore extra fields from .env
     )
 
 
