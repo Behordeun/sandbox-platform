@@ -96,7 +96,7 @@ class DPIRotationalLogger:
     def log_user_activity(self, user_id: str, activity: str, details: Dict[str, Any]):
         """Log user activity with structured data"""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "service": self.service_name,
             "log_type": "user_activity",
             "user_id": user_id,
@@ -119,7 +119,7 @@ class DPIRotationalLogger:
     ):
         """Log API access with performance metrics"""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "service": self.service_name,
             "log_type": "api_access",
             "method": method,
@@ -137,7 +137,7 @@ class DPIRotationalLogger:
     ):
         """Log security events for audit and monitoring"""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "service": self.service_name,
             "log_type": "security_event",
             "event_type": event_type,
@@ -156,7 +156,7 @@ class DPIRotationalLogger:
     def log_service_health(self, component: str, status: str, metrics: Dict[str, Any]):
         """Log service health and performance metrics"""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "service": self.service_name,
             "log_type": "service_health",
             "component": component,
@@ -177,7 +177,7 @@ class DPIRotationalLogger:
     ):
         """Log audit trail for compliance and tracking"""
         log_entry = {
-            "timestamp": datetime.utcnow().isoformat(),
+            "timestamp": datetime.now().isoformat(),
             "service": self.service_name,
             "log_type": "audit_trail",
             "action": action,

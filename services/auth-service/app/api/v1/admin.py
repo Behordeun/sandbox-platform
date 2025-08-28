@@ -3,6 +3,8 @@ Admin endpoints for user management
 Only accessible by sandbox administrators
 """
 
+USER_NOT_FOUND_MSG = "User not found"
+
 from typing import Any, List
 
 from app.crud.user import user_crud
@@ -24,7 +26,6 @@ def get_admin_user(current_user: User = Depends(get_current_active_user)) -> Use
     admin_emails = [
         "admin@dpi-sandbox.ng",
         "muhammad@datasciencenigeria.ai",
-        "behordeun@dpi-sandbox.ng",
     ]
 
     if (
@@ -102,10 +103,10 @@ def get_user(
     db: Session = Depends(get_db),
     user_id: int,
     admin_user: User = Depends(get_admin_user)
-) -> Any:
-    """Get user by ID (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
+        raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)
+    return user
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
@@ -117,12 +118,12 @@ def update_user(
     user_id: int,
     user_in: UserUpdate,
     admin_user: User = Depends(get_admin_user)
-) -> Any:
-    """Update user (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)
 
+    user = user_crud.update(db, db_obj=user, obj_in=user_in)
+    return user
     user = user_crud.update(db, db_obj=user, obj_in=user_in)
     return user
 
@@ -133,12 +134,12 @@ def delete_user(
     db: Session = Depends(get_db),
     user_id: int,
     admin_user: User = Depends(get_admin_user)
-) -> Any:
-    """Delete user (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)
 
+    user_crud.remove(db, id=user_id)
+    return {"message": "User deleted successfully"}
     user_crud.remove(db, id=user_id)
     return {"message": "User deleted successfully"}
 
@@ -149,13 +150,13 @@ def activate_user(
     db: Session = Depends(get_db),
     user_id: int,
     admin_user: User = Depends(get_admin_user)
-) -> Any:
-    """Activate user account (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)
 
     user.is_active = True
+    db.add(user)
+    db.commit()
     db.add(user)
     db.commit()
 
@@ -168,13 +169,13 @@ def deactivate_user(
     db: Session = Depends(get_db),
     user_id: int,
     admin_user: User = Depends(get_admin_user)
-) -> Any:
-    """Deactivate user account (Admin only)."""
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)
 
     user.is_active = False
+    db.add(user)
+    db.commit()
     db.add(user)
     db.commit()
 
@@ -190,13 +191,13 @@ def reset_user_password(
     admin_user: User = Depends(get_admin_user)
 ) -> Any:
     """Reset user password (Admin only)."""
-    from app.core.security import get_password_hash
-
     user = user_crud.get(db, id=user_id)
     if not user:
-        raise HTTPException(status_code=404, detail="User not found")
+        raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)
 
     user.hashed_password = get_password_hash(new_password)
+    db.add(user)
+    db.commit()
     db.add(user)
     db.commit()
 

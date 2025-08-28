@@ -37,15 +37,16 @@ class Settings(BaseSettings):
     @field_validator("cors_allow_methods", mode="before")
     @classmethod
     def parse_cors_methods(cls, v):
+        # This validator is specifically for allowed HTTP methods in CORS
         if v is None or v == "":
             return ["*"]
         if isinstance(v, list):
-            return v
+            return [method.upper() for method in v]
         if isinstance(v, str):
             v = v.strip()
             if v == "*":
                 return ["*"]
-            return [item.strip() for item in v.split(",") if item.strip()]
+            return [item.strip().upper() for item in v.split(",") if item.strip()]
         return ["*"]
 
     @field_validator("cors_allow_headers", mode="before")
@@ -54,12 +55,14 @@ class Settings(BaseSettings):
         if v is None or v == "":
             return ["*"]
         if isinstance(v, list):
-            return v
+            # Normalize header names to lowercase
+            return [header.lower() for header in v]
         if isinstance(v, str):
             v = v.strip()
             if v == "*":
                 return ["*"]
-            return [item.strip() for item in v.split(",") if item.strip()]
+            # Normalize header names to lowercase
+            return [item.strip().lower() for item in v.split(",") if item.strip()]
         return ["*"]
 
     # Redis settings (for caching and pub/sub)
