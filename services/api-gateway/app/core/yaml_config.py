@@ -4,7 +4,8 @@ YAML Configuration for API Gateway
 
 import os
 from typing import List
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 import sys
 sys.path.append("../../..")
 from config.config_loader import get_service_config
@@ -78,9 +79,11 @@ class Settings(BaseSettings):
     jwt_secret_key: str = "${JWT_SECRET_KEY}"
     jwt_algorithm: str = "HS256"
     
-    class Config:
-        env_file = "../../../.env"  # Use root .env file
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 settings = Settings()

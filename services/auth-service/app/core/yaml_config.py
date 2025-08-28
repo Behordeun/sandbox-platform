@@ -5,7 +5,8 @@ Replaces the traditional config.py with YAML-based configuration
 
 import os
 from typing import List, Optional
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 import sys
 from pathlib import Path
 
@@ -117,9 +118,11 @@ class Settings(BaseSettings):
     smtp_from_email: str = "noreply@dpi-sandbox.ng"
     smtp_from_name: str = "DPI Sandbox Platform"
     
-    class Config:
-        env_file = "../../.env"  # Use root .env file
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 # Global settings instance

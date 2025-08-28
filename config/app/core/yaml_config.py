@@ -3,7 +3,8 @@ YAML Configuration for Config Service
 """
 
 import os
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
+from pydantic import ConfigDict
 import sys
 sys.path.append("../../..")
 from config.config_loader import get_service_config
@@ -43,9 +44,11 @@ class Settings(BaseSettings):
     # Redis URL for config storage
     redis_url: str = "redis://localhost:6379/1"
     
-    class Config:
-        env_file = "../../../.env"  # Use root .env file
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 settings = Settings()

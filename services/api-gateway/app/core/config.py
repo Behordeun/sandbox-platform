@@ -1,7 +1,8 @@
 import os
-from typing import Dict, List
+from typing import Dict, List, Union
 
 from pydantic_settings import BaseSettings
+from pydantic import ConfigDict, field_validator
 
 HEALTH_PATH = "/health"
 
@@ -28,10 +29,52 @@ class Settings(BaseSettings):
     port: int = 8080
 
     # CORS settings
-    cors_origins: List[str] = ["http://localhost:3000", "http://localhost:8080"]
+    cors_origins: Union[str, List[str]] = ["http://localhost:3000", "http://localhost:8080"]
     cors_allow_credentials: bool = False
-    cors_allow_methods: List[str] = ["*"]
-    cors_allow_headers: List[str] = ["*"]
+    cors_allow_methods: Union[str, List[str]] = ["*"]
+    cors_allow_headers: Union[str, List[str]] = ["*"]
+    
+    @field_validator('cors_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        if v is None or v == "":
+            return ["http://localhost:3000", "http://localhost:8080"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "*":
+                return ["*"]
+            return [item.strip() for item in v.split(',') if item.strip()]
+        return ["http://localhost:3000", "http://localhost:8080"]
+    
+    @field_validator('cors_allow_methods', mode='before')
+    @classmethod
+    def parse_cors_methods(cls, v):
+        if v is None or v == "":
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "*":
+                return ["*"]
+            return [item.strip() for item in v.split(',') if item.strip()]
+        return ["*"]
+    
+    @field_validator('cors_allow_headers', mode='before')
+    @classmethod
+    def parse_cors_headers(cls, v):
+        if v is None or v == "":
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            v = v.strip()
+            if v == "*":
+                return ["*"]
+            return [item.strip() for item in v.split(',') if item.strip()]
+        return ["*"]
 
     # Rate limiting
     rate_limit_enabled: bool = True
@@ -84,9 +127,11 @@ class Settings(BaseSettings):
     default_timeout: int = 30
     max_timeout: int = 300
 
-    class Config:
-        env_file = "../../.env"  # Use root .env file
-        case_sensitive = False
+    model_config = ConfigDict(
+        env_file="../../.env",  # Use root .env file
+        case_sensitive=False,
+        extra="ignore"  # Ignore extra fields from .env
+    )
 
 
 # Global settings instance

@@ -28,24 +28,20 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Service definitions
-declare -A SERVICES=(
-    ["auth-service"]="8000"
-    ["api-gateway"]="8080"
-    ["config-service"]="8001"
-    ["nin-service"]="8005"
-    ["bvn-service"]="8006"
-    ["sms-service"]="8003"
-    ["ai-service"]="8002"
-)
+# Service definitions (compatible with older bash)
+SERVICE_NAMES=("auth-service" "api-gateway" "config-service" "nin-service" "bvn-service" "sms-service" "ai-service")
+SERVICE_PORTS=("8000" "8080" "8001" "8005" "8006" "8003" "8002")
 
 # Function to stop services
 stop_services() {
     log_info "Stopping application services..."
     
     # Stop services by PID files
-    for service_name in "${!SERVICES[@]}"; do
+    for i in "${!SERVICE_NAMES[@]}"; do
+        local service_name="${SERVICE_NAMES[$i]}"
+        local port="${SERVICE_PORTS[$i]}"
         local pid_file="logs/${service_name}.pid"
+        
         if [ -f "$pid_file" ]; then
             local pid=$(cat "$pid_file")
             if kill -0 $pid 2>/dev/null; then
@@ -59,7 +55,6 @@ stop_services() {
             fi
         else
             # Try to kill by port
-            local port=${SERVICES[$service_name]}
             local pid=$(lsof -ti:$port 2>/dev/null || true)
             if [ -n "$pid" ]; then
                 log_info "Stopping $service_name on port $port (PID: $pid)..."
