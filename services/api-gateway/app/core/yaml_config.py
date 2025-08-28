@@ -10,19 +10,10 @@ from dotenv import load_dotenv
 
 # Load environment variables from root .env file
 load_dotenv("../../../.env")
-import sys
-from pathlib import Path
 
-# Add config directory to path
-config_path = Path(__file__).parent.parent.parent.parent / "config"
-sys.path.insert(0, str(config_path))
-
-try:
-    from config_loader import get_service_config
-except ImportError:
-    # Fallback if config loader not available
-    def get_service_config(_service, _env):
-        return None
+# Fallback config loader
+def get_service_config(_service, _env):
+    return None
 
 
 class Settings(BaseSettings):

@@ -6,8 +6,20 @@ import os
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 import sys
-sys.path.append("../../../..")
-from config.config_loader import get_service_config, get_provider_config
+from pathlib import Path
+
+# Add config directory to path
+config_path = Path(__file__).parent.parent.parent.parent / "config"
+sys.path.insert(0, str(config_path))
+
+try:
+    from config_loader import get_service_config, get_provider_config
+except ImportError:
+    # Fallback if config loader not available
+    def get_service_config(_service, _env):
+        return None
+    def get_provider_config(_provider, _env):
+        return None
 
 
 class Settings(BaseSettings):
