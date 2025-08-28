@@ -25,6 +25,9 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app/ ./app/
 COPY alembic.ini ./
 
+# Copy root .env file for centralized configuration
+COPY ../../.env ./.env
+
 # Create empty migrations directory for runtime and non-root user for auth service
 RUN mkdir -p ./migrations \
     && adduser --disabled-password --gecos '' authuser \
