@@ -41,6 +41,12 @@ class Settings(BaseSettings):
     # Redis URL for config storage
     redis_url: str = ""
 
+    # CORS settings
+    cors_origins: list = ["*"]
+    cors_allow_credentials: bool = True
+    cors_allow_methods: list = ["*"]
+    cors_allow_headers: list = ["*"]
+
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -66,6 +72,12 @@ class Settings(BaseSettings):
                 "CONFIG_ENCRYPTION_KEY"
             ) or service_config.get("encryption_key", "")
             self.versioning_enabled = service_config.get("versioning_enabled", True)
+            # Load CORS config if present
+            cors = service_config.get("cors", {})
+            self.cors_origins = cors.get("origins", ["*"])
+            self.cors_allow_credentials = cors.get("allow_credentials", True)
+            self.cors_allow_methods = cors.get("allow_methods", ["*"])
+            self.cors_allow_headers = cors.get("allow_headers", ["*"])
 
     model_config = ConfigDict(
         env_file="../../../.env",  # Use root .env file
