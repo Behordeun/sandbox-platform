@@ -30,14 +30,6 @@ class UserCreate(UserBase):
             )
         return format_nigerian_phone(v) if v else v
 
-    @field_validator("phone_number")
-    def validate_phone(cls, v):
-        if v and not validate_nigerian_phone(v):
-            raise ValueError(
-                "Invalid Nigerian phone number format. Use +234XXXXXXXXXX or 0XXXXXXXXXX"
-            )
-        return format_nigerian_phone(v) if v else v
-
 
 class UserUpdate(BaseModel):
     email: Optional[EmailStr] = None
