@@ -187,7 +187,7 @@ class ProxyService:
             # Log exception with stack trace internally
             structured_logger.log_error(
                 f"Error checking health for service '{service_name}' at {health_url}: {str(e)}",
-                exc_info=True
+                exc_info=True,
             )
             # Return only a generic error message to callers
             return {

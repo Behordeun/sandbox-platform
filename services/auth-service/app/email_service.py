@@ -124,8 +124,9 @@ class EmailService:
 
         return self.send_email(to_email, subject, html_content)
 
-
-    def send_account_created_notification(self, to_email: str, first_name: str, username: str, temporary_password: str) -> bool:
+    def send_account_created_notification(
+        self, to_email: str, first_name: str, username: str, temporary_password: str
+    ) -> bool:
         """Send account created notification with credentials"""
         subject = "Your DPI Sandbox Account Has Been Created! 🇳🇬"
 
@@ -177,7 +178,9 @@ class EmailService:
 
         return self.send_email(to_email, subject, html_content)
 
-    def send_password_reset_notification(self, to_email: str, first_name: str, new_password: str) -> bool:
+    def send_password_reset_notification(
+        self, to_email: str, first_name: str, new_password: str
+    ) -> bool:
         """Send password reset notification"""
         subject = "Your DPI Sandbox Password Has Been Reset"
 

@@ -1,5 +1,5 @@
-from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     model_config = ConfigDict(
         env_file="../../../../.env",  # Use root .env file
         case_sensitive=False,
-        extra="ignore"  # Ignore extra fields from .env
+        extra="ignore",  # Ignore extra fields from .env
     )
 
 

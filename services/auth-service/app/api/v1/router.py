@@ -1,4 +1,4 @@
-from app.api.v1 import auth, oauth, admin
+from app.api.v1 import admin, auth, oauth
 from fastapi import APIRouter
 
 api_router = APIRouter()

@@ -25,7 +25,7 @@ class User(Base):
 
     # Account status
     is_active = Column(Boolean, default=True)
-    is_verified = Column(Boolean, default=False)
+    is_verified = Column(Boolean, default=True)
 
     # Metadata
     created_at = Column(DateTime(timezone=True), server_default=func.now())

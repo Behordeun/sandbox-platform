@@ -133,6 +133,15 @@ main() {
     
     # Run migrations
     if run_migrations; then
+        # Create service tables
+        log_info "Creating service tables..."
+        if [ -f "scripts/create-service-tables.py" ]; then
+            python3 scripts/create-service-tables.py
+            log_success "Service tables created successfully"
+        else
+            log_warning "create-service-tables.py not found, skipping service table creation"
+        fi
+        
         log_success "Database setup completed successfully!"
         echo ""
         log_info "📋 Database Information:"

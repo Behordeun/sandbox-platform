@@ -1,5 +1,5 @@
 from typing import Any, Optional
-from urllib.parse import urlencode, urlparse, unquote
+from urllib.parse import urlencode, urlparse
 
 from app.crud.oauth_client import oauth_client_crud
 from app.crud.oauth_token import oauth_token_crud
@@ -83,7 +83,7 @@ def authorize(
         # Helper to robustly normalize URIs for safe comparison
         def normalize_uri(uri: str) -> str:
             # Remove backslashes, strip whitespace
-            uri = uri.replace('\\', '').strip()
+            uri = uri.replace("\\", "").strip()
             # Lowercase scheme and netloc for case-insensitive matching
             parsed = urlparse(uri)
             scheme = parsed.scheme.lower()
@@ -91,12 +91,13 @@ def authorize(
             path = parsed.path
             # Remove any percent-encoding from path
             from urllib.parse import unquote
+
             path = unquote(path)
             # Construct normalized URI
             normalized = f"{scheme}://{netloc}{path}"
             if parsed.query:
                 normalized += f"?{parsed.query}"
-            return normalized.rstrip('/')
+            return normalized.rstrip("/")
 
         normalized_safe_redirect_uri = normalize_uri(redirect_uri)
         registered_uris = [normalize_uri(uri) for uri in client.redirect_uris]
@@ -108,7 +109,9 @@ def authorize(
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise HTTPException(status_code=400, detail="Unsafe redirect URI")
         # Use original redirect_uri (with only the safe normalization) for redirection
-        redirect_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}?{urlencode(params)}"
+        redirect_url = (
+            f"{parsed.scheme}://{parsed.netloc}{parsed.path}?{urlencode(params)}"
+        )
         return RedirectResponse(url=redirect_url)
 
     else:

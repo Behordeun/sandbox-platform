@@ -1,8 +1,8 @@
 import os
-from typing import Optional, List, Union
+from typing import List, Optional, Union
 
-from pydantic_settings import BaseSettings
 from pydantic import ConfigDict, field_validator
+from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
@@ -12,10 +12,15 @@ class Settings(BaseSettings):
     debug: bool = False
 
     # Database settings
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://sandbox_user:password@localhost:5432/sandbox_platform")
+    database_url: str = os.getenv(
+        "DATABASE_URL",
+        "postgresql://sandbox_user:password@localhost:5432/sandbox_platform",
+    )
 
     # JWT settings
-    jwt_secret_key: str = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
+    jwt_secret_key: str = os.getenv(
+        "JWT_SECRET_KEY", "change-this-secret-key-in-production"
+    )
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
@@ -33,7 +38,7 @@ class Settings(BaseSettings):
     cors_allow_credentials: bool = True
     cors_allow_methods: Union[str, List[str]] = ["*"]
     cors_allow_headers: Union[str, List[str]] = ["*"]
-    
+
     @staticmethod
     def _parse_cors_value(v):
         if v is None or v == "":
@@ -44,16 +49,16 @@ class Settings(BaseSettings):
             v = v.strip()
             if not v or v == "*":
                 return ["*"]
-            return [item.strip() for item in v.split(',') if item.strip()]
+            return [item.strip() for item in v.split(",") if item.strip()]
         return ["*"]
 
-    @field_validator('cors_origins', mode='before')
+    @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v):
         # Use helper for parsing CORS origins
         return cls._parse_cors_value(v)
-    
-    @field_validator('cors_allow_methods', mode='before')
+
+    @field_validator("cors_allow_methods", mode="before")
     @classmethod
     def parse_cors_methods(cls, v):
         # Use helper for parsing CORS methods, but ensure only valid HTTP methods are returned if not wildcard
@@ -61,11 +66,19 @@ class Settings(BaseSettings):
         if "*" in parsed:
             return ["*"]
         valid_methods = [
-            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT"
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "OPTIONS",
+            "HEAD",
+            "TRACE",
+            "CONNECT",
         ]
         return [method for method in parsed if method.upper() in valid_methods]
-    
-    @field_validator('cors_allow_headers', mode='before')
+
+    @field_validator("cors_allow_headers", mode="before")
     @classmethod
     def parse_cors_headers(cls, v):
         # Use helper for parsing CORS headers
@@ -99,7 +112,7 @@ class Settings(BaseSettings):
     model_config = ConfigDict(
         env_file="../../.env",  # Use root .env file
         case_sensitive=False,
-        extra="ignore"  # Ignore extra fields from .env
+        extra="ignore",  # Ignore extra fields from .env
     )
 
 

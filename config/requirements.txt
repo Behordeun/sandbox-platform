@@ -11,3 +11,6 @@ httpx>=0.25.2,<0.26.0
 pytest>=7.4.3,<8.0.0
 pytest-asyncio>=0.21.1,<0.22.0
 aiofiles>=24.1.0,<25.0.0
+autoflake
+black
+isort
