@@ -183,13 +183,23 @@ class ProxyService:
                     "url": service_config.url,
                 }
 
+        except (httpx.ConnectError, httpx.TimeoutException) as e:
+            # Log connection errors at debug level to reduce noise during startup
+            structured_logger.logger.debug(
+                f"Health check failed for service '{service_name}' at {health_url}: {str(e)}"
+            )
+            return {
+                "service": service_name,
+                "status": "unhealthy",
+                "error": "Service unavailable",
+                "url": service_config.url,
+            }
         except Exception as e:
-            # Log exception with stack trace internally
+            # Log other exceptions with stack trace
             structured_logger.log_error(
                 f"Error checking health for service '{service_name}' at {health_url}: {str(e)}",
                 exc_info=True,
             )
-            # Return only a generic error message to callers
             return {
                 "service": service_name,
                 "status": "unhealthy",

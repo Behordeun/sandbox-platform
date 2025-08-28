@@ -204,7 +204,7 @@ class ConfigManager:
 
     def _create_storage(self, suffix: str = "") -> ConfigStorage:
         """Create storage instance based on configuration."""
-        storage_type = settings.config_storage_type
+        storage_type = settings.storage_type
 
         if storage_type == "redis":
             return RedisStorage(settings.redis_url)

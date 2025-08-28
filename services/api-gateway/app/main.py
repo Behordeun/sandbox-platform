@@ -38,6 +38,9 @@ async def lifespan(app: FastAPI):
 
 async def periodic_health_checks():
     """Periodic health checks for services."""
+    # Wait before starting health checks to allow services to start
+    await asyncio.sleep(5)
+    
     while True:
         try:
             await service_discovery.health_check_all_services()

@@ -10,6 +10,8 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8001
 
+    cors_origins: list[str] = ["*"]
+
     # Storage settings
     storage_type: str = "redis"
     redis_url: str = "redis://localhost:6379/1"
