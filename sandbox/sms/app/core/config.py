@@ -3,20 +3,17 @@ from pydantic import ConfigDict
 
 
 class Settings(BaseSettings):
-    app_name: str = "BVN Verification Service"
+    app_name: str = "SMS Service"
     app_version: str = "1.0.0"
     debug: bool = False
 
     host: str = "0.0.0.0"
-    port: int = 8006
+    port: int = 8003
 
-    # Dojah API settings
-    dojah_api_key: str = ""
-    dojah_app_id: str = ""
-    dojah_base_url: str = "https://api.dojah.io"
-
-    # Auth service URL for user updates
-    auth_service_url: str = "http://auth-service:8000"
+    # SMS API settings
+    sms_api_key: str = ""
+    sms_sender_id: str = "DPISandbox"
+    sms_base_url: str = "https://api.ng.termii.com"
 
     model_config = ConfigDict(
         env_file="../../../../.env",  # Use root .env file

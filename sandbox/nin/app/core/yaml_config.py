@@ -6,8 +6,20 @@ import os
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
 import sys
-sys.path.append("../../../..")
-from config.config_loader import get_service_config, get_provider_config
+from pathlib import Path
+
+# Add config directory to path
+config_path = Path(__file__).parent.parent.parent.parent / "config"
+sys.path.insert(0, str(config_path))
+
+try:
+    from config_loader import get_service_config, get_provider_config
+except ImportError:
+    # Fallback if config loader not available
+    def get_service_config(_service, _env):
+        return None
+    def get_provider_config(_provider, _env):
+        return None
 
 
 class Settings(BaseSettings):
@@ -32,8 +44,8 @@ class Settings(BaseSettings):
         
         # Doja API Configuration
         if doja_config:
-            self.dojah_api_key = doja_config.get("api_key", os.getenv("DOJAH_API_KEY"))
-            self.dojah_app_id = doja_config.get("app_id", os.getenv("DOJAH_APP_ID"))
+            self.dojah_api_key = os.getenv("DOJAH_API_KEY") or doja_config.get("api_key", "")
+            self.dojah_app_id = os.getenv("DOJAH_APP_ID") or doja_config.get("app_id", "")
             self.dojah_base_url = doja_config.get("base_url", "https://api.dojah.io")
             self.dojah_timeout = doja_config.get("timeout", 30)
     

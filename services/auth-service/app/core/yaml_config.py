@@ -4,9 +4,13 @@ Replaces the traditional config.py with YAML-based configuration
 """
 
 import os
-from typing import List, Optional
+from typing import List, Optional, Union
 from pydantic_settings import BaseSettings
 from pydantic import ConfigDict
+from dotenv import load_dotenv
+
+# Load environment variables from root .env file
+load_dotenv("../../.env")
 import sys
 from pathlib import Path
 
@@ -74,13 +78,13 @@ class Settings(BaseSettings):
         config = get_config(environment)
         db_config = config.get("database", {})
         if db_config:
-            self.database_url = db_config.get("url", os.getenv("DATABASE_URL", "postgresql://sandbox_user:password@localhost:5432/sandbox_platform"))
+            self.database_url = os.getenv("DATABASE_URL") or db_config.get("url", "postgresql://postgres:MUhammad__1234@localhost:5432/sandbox_platform")
             # Get table prefix for auth service
             table_prefixes = db_config.get("table_prefixes", {})
             self.table_prefix = table_prefixes.get("auth_service", "auth_")
         else:
-            # Fallback to environment variables
-            self.database_url = os.getenv("DATABASE_URL", "postgresql://sandbox_user:password@localhost:5432/sandbox_platform")
+            # Use centralized environment variables
+            self.database_url = os.getenv("DATABASE_URL", "postgresql://postgres:MUhammad__1234@localhost:5432/sandbox_platform")
             self.table_prefix = "auth_"
     
     # Default values (fallback if YAML config is not available)
@@ -105,10 +109,10 @@ class Settings(BaseSettings):
     oauth2_jwks_uri: str = "http://localhost:8000/.well-known/jwks.json"
     
     # CORS
-    cors_origins: List[str] = ["*"]
+    cors_origins: Union[str, List[str]] = ["*"]
     cors_allow_credentials: bool = True
-    cors_allow_methods: List[str] = ["*"]
-    cors_allow_headers: List[str] = ["*"]
+    cors_allow_methods: Union[str, List[str]] = ["*"]
+    cors_allow_headers: Union[str, List[str]] = ["*"]
     
     # Email
     smtp_host: Optional[str] = None

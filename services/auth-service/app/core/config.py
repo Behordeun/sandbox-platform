@@ -34,9 +34,8 @@ class Settings(BaseSettings):
     cors_allow_methods: Union[str, List[str]] = ["*"]
     cors_allow_headers: Union[str, List[str]] = ["*"]
     
-    @field_validator('cors_origins', mode='before')
-    @classmethod
-    def parse_cors_origins(cls, v):
+    @staticmethod
+    def _parse_cors_value(v):
         if v is None or v == "":
             return ["*"]
         if isinstance(v, list):
@@ -47,34 +46,30 @@ class Settings(BaseSettings):
                 return ["*"]
             return [item.strip() for item in v.split(',') if item.strip()]
         return ["*"]
+
+    @field_validator('cors_origins', mode='before')
+    @classmethod
+    def parse_cors_origins(cls, v):
+        # Use helper for parsing CORS origins
+        return cls._parse_cors_value(v)
     
     @field_validator('cors_allow_methods', mode='before')
     @classmethod
     def parse_cors_methods(cls, v):
-        if v is None or v == "":
+        # Use helper for parsing CORS methods, but ensure only valid HTTP methods are returned if not wildcard
+        parsed = cls._parse_cors_value(v)
+        if "*" in parsed:
             return ["*"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            v = v.strip()
-            if not v or v == "*":
-                return ["*"]
-            return [item.strip() for item in v.split(',') if item.strip()]
-        return ["*"]
+        valid_methods = [
+            "GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS", "HEAD", "TRACE", "CONNECT"
+        ]
+        return [method for method in parsed if method.upper() in valid_methods]
     
     @field_validator('cors_allow_headers', mode='before')
     @classmethod
     def parse_cors_headers(cls, v):
-        if v is None or v == "":
-            return ["*"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            v = v.strip()
-            if not v or v == "*":
-                return ["*"]
-            return [item.strip() for item in v.split(',') if item.strip()]
-        return ["*"]
+        # Use helper for parsing CORS headers
+        return cls._parse_cors_value(v)
 
     # App settings
     host: str = "0.0.0.0"
