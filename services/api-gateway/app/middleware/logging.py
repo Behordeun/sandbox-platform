@@ -153,6 +153,10 @@ class StructuredLogger:
 
         self.logger.warning(f"Circuit breaker: {json.dumps(log_data)}")
 
+    def log_error(self, message: str, exc_info: bool = False):
+        """Log error message."""
+        self.logger.error(message, exc_info=exc_info)
+
 
 # Global structured logger
 structured_logger = StructuredLogger()
