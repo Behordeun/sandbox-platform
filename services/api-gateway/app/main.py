@@ -7,6 +7,7 @@ from app.core.config import settings
 from app.middleware.auth import AuthMiddleware
 from app.middleware.correlation import CorrelationIdMiddleware
 from app.middleware.logging import LoggingMiddleware
+from app.core.system_logger import system_logger
 from app.middleware.metrics import MetricsMiddleware, get_metrics
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.services.discovery import service_discovery
@@ -157,6 +158,15 @@ app.include_router(api_router, prefix="/api/v1")
 async def global_exception_handler(request: Request, exc: Exception):
     """Global exception handler."""
     logger.error(f"Unhandled exception: {exc}")
+    system_logger.error(
+        exc,
+        {
+            "path": str(request.url.path),
+            "method": request.method,
+            "client": getattr(request.client, "host", None),
+        },
+        exc_info=True,
+    )
     return JSONResponse(
         status_code=500,
         content={

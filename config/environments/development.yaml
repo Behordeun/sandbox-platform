@@ -41,3 +41,8 @@ logging:
   files:
     user_activity: "logs/dev_user_activity.log"
     api_access: "logs/dev_api_access.log"
+  system_logger:
+    enabled: true
+    log_dir: "logs"
+    preserve_logs: true
+    debug_mode: false

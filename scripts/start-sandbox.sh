@@ -30,6 +30,7 @@ log_error() {
 
 # Configuration
 ENVIRONMENT=${ENVIRONMENT:-development}
+export ENVIRONMENT
 SETUP_DB=${SETUP_DB:-true}
 START_INFRASTRUCTURE=${START_INFRASTRUCTURE:-true}
 
