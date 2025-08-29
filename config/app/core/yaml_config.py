@@ -64,63 +64,10 @@ class Settings(BaseSettings):
                 return [i.strip() for i in v.split(",") if i.strip()]
         return ["*"]
 
-    @classmethod
-    def _validate_cors_origins(cls, value: Any):
-        import json
-        if value is None or value == "":
-            return ["*"]
-        if isinstance(value, list):
-            return value
-        if isinstance(value, str):
-            try:
-                parsed = json.loads(value)
-                if isinstance(parsed, list):
-                    return parsed
-                return [parsed]
-            except Exception:
-                # Fallback: comma-separated string
-                return [v.strip() for v in value.split(",") if v.strip()]
-        return ["*"]
 
     cors_allow_credentials: bool = True
     cors_allow_methods: Union[str, List[str]] = ["*"]
     cors_allow_headers: Union[str, List[str]] = ["*"]
-
-    @field_validator("cors_allow_methods", mode="before")
-    @classmethod
-    def validate_cors_methods(cls, v: Any) -> list:
-        import json
-        if v is None or v == "" or v == []:
-            return ["*"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            try:
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    return parsed
-                return [parsed]
-            except Exception:
-                return [i.strip() for i in v.split(",") if i.strip()]
-        return ["*"]
-
-    @field_validator("cors_allow_headers", mode="before")
-    @classmethod
-    def validate_cors_headers(cls, v: Any) -> list:
-        import json
-        if v is None or v == "" or v == []:
-            return ["*"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            try:
-                parsed = json.loads(v)
-                if isinstance(parsed, list):
-                    return parsed
-                return [parsed]
-            except Exception:
-                return [i.strip() for i in v.split(",") if i.strip()]
-        return ["*"]
 
     @property
     def config_storage_type(self):
