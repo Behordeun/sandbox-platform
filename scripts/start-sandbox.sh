@@ -158,22 +158,16 @@ ensure_auth_schema() {
         return
     fi
 
-    # Check for auth_users table
-    if psql "$DATABASE_URL" -Atc "SELECT to_regclass('public.auth_users');" 2>/dev/null | grep -q "auth_users"; then
-        log_success "Auth tables present"
-    else
-        log_warning "Auth tables missing; running migrations..."
-        python3 ./scripts/migrate-db.py || {
-            log_error "Migrations failed; auth tables may still be missing"
-            return
-        }
-        # Re-check
-        if psql "$DATABASE_URL" -Atc "SELECT to_regclass('public.auth_users');" 2>/dev/null | grep -q "auth_users"; then
-            log_success "Auth tables created successfully"
-        else
-            log_warning "Auth tables still not found; proceeding, but admin creation may fail"
-        fi
-    fi
+    # Always run Alembic migrations for auth-service to ensure schema is up-to-date
+    log_info "Running Alembic migrations for auth-service..."
+    pushd services/auth-service >/dev/null
+    alembic upgrade head || {
+        log_error "Alembic migrations failed; auth tables may be missing or outdated"
+        popd >/dev/null
+        return
+    }
+    popd >/dev/null
+    log_success "Auth-service database schema ensured via Alembic"
 }
 
 # Function to ensure non-auth core tables exist (idempotent)

@@ -17,7 +17,7 @@ services:
   auth_service:
     debug: false
     jwt:
-      access_token_expire_minutes: 15
+      access_token_expire_minutes: 120
     cors:
       origins: ["https://yourdomain.com"]
   api_gateway:
