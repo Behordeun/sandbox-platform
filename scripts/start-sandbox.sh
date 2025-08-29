@@ -176,6 +176,16 @@ ensure_auth_schema() {
     fi
 }
 
+# Function to ensure non-auth core tables exist (idempotent)
+ensure_core_tables() {
+    log_info "Ensuring core service tables (NIN, BVN, SMS, AI, Config, Gateway)..."
+    if ! python3 ./scripts/create-service-tables.py; then
+        log_warning "Core table creation script encountered issues; continuing"
+    else
+        log_success "Core service tables ensured"
+    fi
+}
+
 # Function to start a service
 start_service() {
     local service_name=$1
@@ -359,6 +369,9 @@ main() {
     
     # Ensure auth-service schema exists (idempotent)
     ensure_auth_schema
+    
+    # Ensure non-auth service tables exist (idempotent)
+    ensure_core_tables
     
     # Create logs directory
     mkdir -p logs
