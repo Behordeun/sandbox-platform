@@ -115,6 +115,13 @@ class ProxyService:
             headers["X-Forwarded-For"] = request.client.host
         headers["X-Forwarded-Proto"] = request.url.scheme
         headers["X-Forwarded-Host"] = request.headers.get("host", "")
+        # Correlation and user context
+        request_id = getattr(request.state, "request_id", None)
+        if request_id:
+            headers["X-Request-ID"] = request_id
+        user_id = getattr(request.state, "user_id", None)
+        if user_id:
+            headers["X-User-Id"] = str(user_id)
 
         # Get request body
         body = None

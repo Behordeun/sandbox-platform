@@ -5,6 +5,7 @@ from contextlib import asynccontextmanager
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.middleware.auth import AuthMiddleware
+from app.middleware.correlation import CorrelationIdMiddleware
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.metrics import MetricsMiddleware, get_metrics
 from app.middleware.rate_limit import RateLimitMiddleware
@@ -89,6 +90,9 @@ app.add_middleware(
     allow_methods=settings.cors_allow_methods,
     allow_headers=settings.cors_allow_headers,
 )
+
+# Correlation ID middleware should run early
+app.add_middleware(CorrelationIdMiddleware)
 
 # Add custom middleware (order matters!)
 if settings.metrics_enabled:

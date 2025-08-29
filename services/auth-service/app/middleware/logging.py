@@ -1,9 +1,12 @@
 import json
 import logging
 import time
+import asyncio
 from typing import Optional
 
 from fastapi import Request
+from sqlalchemy import text
+from app.core.database import engine
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Configure structured logging for user activities
@@ -50,9 +53,11 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
         activity_type = self._get_activity_type(request.method, request.url.path)
 
         # Create structured log entry
+        request_id = getattr(request.state, "request_id", None)
         log_data = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
             "user_id": user_id,
+            "request_id": request_id,
             "activity_type": activity_type,
             "method": request.method,
             "path": request.url.path,
@@ -91,6 +96,47 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
                 logger.info(f"SECURITY_EVENT: {json.dumps(log_data)}")
             else:
                 logger.info(f"USER_ACTIVITY: {json.dumps(log_data)}")
+
+        # Persist audit to DB asynchronously (best-effort)
+        try:
+            asyncio.create_task(self._write_audit(log_data))
+        except Exception:
+            pass
+
+    async def _write_audit(self, log: dict):
+        if engine is None:
+            return
+        def _insert():
+            try:
+                with engine.begin() as conn:
+                    conn.execute(
+                        text(
+                            """
+                            INSERT INTO auth_audit_logs (
+                                request_id, user_id, activity_type, success,
+                                method, path, status_code, client_ip, user_agent
+                            ) VALUES (
+                                :request_id, :user_id, :activity_type, :success,
+                                :method, :path, :status_code, :client_ip, :user_agent
+                            )
+                            """
+                        ),
+                        {
+                            "request_id": str(log.get("request_id") or ""),
+                            "user_id": log.get("user_id"),
+                            "activity_type": str(log.get("activity_type") or ""),
+                            "success": bool(log.get("success")),
+                            "method": str(log.get("method") or ""),
+                            "path": str(log.get("path") or ""),
+                            "status_code": int(log.get("status_code") or 0),
+                            "client_ip": str(log.get("client_ip") or ""),
+                            "user_agent": str(log.get("user_agent") or ""),
+                        },
+                    )
+            except Exception:
+                pass
+        loop = asyncio.get_event_loop()
+        await loop.run_in_executor(None, _insert)
 
     def _get_activity_type(self, method: str, path: str) -> str:
         """Determine the type of user activity based on the request."""

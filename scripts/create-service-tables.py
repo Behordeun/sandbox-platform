@@ -113,6 +113,46 @@ def create_service_tables():
         CREATE INDEX IF NOT EXISTS idx_gateway_requests_service_name ON gateway_requests(service_name);
         CREATE INDEX IF NOT EXISTS idx_gateway_requests_status_code ON gateway_requests(status_code);
         """,
+        # API Gateway Access Logs (auditable, structured)
+        """
+        CREATE TABLE IF NOT EXISTS gateway_access_logs (
+            id SERIAL PRIMARY KEY,
+            request_id VARCHAR(64),
+            user_id VARCHAR(64),
+            auth_method VARCHAR(50),
+            service_name VARCHAR(100),
+            method VARCHAR(10) NOT NULL,
+            path VARCHAR(500) NOT NULL,
+            status_code INTEGER NOT NULL,
+            duration_ms INTEGER,
+            client_ip VARCHAR(45),
+            user_agent TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_created_at ON gateway_access_logs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_service ON gateway_access_logs(service_name);
+        CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_status ON gateway_access_logs(status_code);
+        CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_request_id ON gateway_access_logs(request_id);
+        """,
+        # Auth Service Audit Logs (user activities & security events)
+        """
+        CREATE TABLE IF NOT EXISTS auth_audit_logs (
+            id SERIAL PRIMARY KEY,
+            request_id VARCHAR(64),
+            user_id INTEGER,
+            activity_type VARCHAR(100),
+            success BOOLEAN,
+            method VARCHAR(10) NOT NULL,
+            path VARCHAR(500) NOT NULL,
+            status_code INTEGER NOT NULL,
+            client_ip VARCHAR(45),
+            user_agent TEXT,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+        );
+        CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_created_at ON auth_audit_logs(created_at);
+        CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_user_id ON auth_audit_logs(user_id);
+        CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_activity ON auth_audit_logs(activity_type);
+        """,
     ]
 
     print("🗄️  Creating service tables...")
