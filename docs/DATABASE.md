@@ -51,7 +51,7 @@ docker run -d \
 ```yaml
 # config.yaml
 database:
-  url: "postgresql://sandbox_user:${DB_PASSWORD}@localhost:5432/sandbox_platform"
+  url: "postgresql://sandbox_user:${DB_PASSWORD}@127.0.0.1:5432/sandbox_platform"
   pool_size: 20
   max_overflow: 40
   table_prefixes:
@@ -62,7 +62,7 @@ database:
 ### **Environment Variables**
 ```env
 # .env (root file)
-DATABASE_URL=postgresql://sandbox_user:sandbox_password@localhost:5432/sandbox_platform
+DATABASE_URL=postgresql://sandbox_user:sandbox_password@127.0.0.1:5432/sandbox_platform
 DB_PASSWORD=sandbox_password
 ```
 
@@ -154,10 +154,10 @@ export DB_PASSWORD=secure-production-password
 ### **Backup & Recovery**
 ```bash
 # Backup entire platform database
-pg_dump -h localhost -U sandbox_user sandbox_platform > backup.sql
+pg_dump -h 127.0.0.1 -U sandbox_user sandbox_platform > backup.sql
 
 # Restore
-psql -h localhost -U sandbox_user sandbox_platform < backup.sql
+psql -h 127.0.0.1 -U sandbox_user sandbox_platform < backup.sql
 ```
 
 ## 🔍 Monitoring
@@ -165,10 +165,10 @@ psql -h localhost -U sandbox_user sandbox_platform < backup.sql
 ### **Database Health**
 ```bash
 # Check database connection
-psql -h localhost -U sandbox_user -d sandbox_platform -c "SELECT 1;"
+psql -h 127.0.0.1 -U sandbox_user -d sandbox_platform -c "SELECT 1;"
 
 # Check table sizes
-psql -h localhost -U sandbox_user -d sandbox_platform -c "
+psql -h 127.0.0.1 -U sandbox_user -d sandbox_platform -c "
 SELECT 
     schemaname,
     tablename,

@@ -223,10 +223,10 @@ helm upgrade api-gateway ./api-gateway
 ```bash
 # Check if the service is healthy
 kubectl port-forward svc/api-gateway 8080:8080
-curl http://localhost:8080/health
+curl http://127.0.0.1:8080/health
 
 # Check metrics
-curl http://localhost:8080/metrics
+curl http://127.0.0.1:8080/metrics
 ```
 
 ## Values File Examples

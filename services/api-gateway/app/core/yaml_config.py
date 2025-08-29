@@ -35,9 +35,9 @@ class Settings(BaseSettings):
             self.host = service_config.get("host", "0.0.0.0")
             self.port = service_config.get("port", 8080)
             self.auth_service_url = service_config.get(
-                "auth_service_url", "http://localhost:8000"
+                "auth_service_url", "http://127.0.0.1:8000"
             )
-            self.redis_url = service_config.get("redis_url", "redis://localhost:6379/0")
+            self.redis_url = service_config.get("redis_url", "redis://127.0.0.1:6379/0")
 
             # Rate limiting configuration
             rate_config = service_config.get("rate_limiting", {})
@@ -55,13 +55,13 @@ class Settings(BaseSettings):
 
             # Service URLs
             services = service_config.get("services", {})
-            self.nin_service_url = services.get("nin_service", "http://localhost:8005")
-            self.bvn_service_url = services.get("bvn_service", "http://localhost:8006")
-            self.sms_service_url = services.get("sms_service", "http://localhost:8003")
-            self.ai_service_url = services.get("ai_service", "http://localhost:8002")
-            self.ivr_service_url = services.get("ivr_service", "http://localhost:8004")
+            self.nin_service_url = services.get("nin_service", "http://127.0.0.1:8005")
+            self.bvn_service_url = services.get("bvn_service", "http://127.0.0.1:8006")
+            self.sms_service_url = services.get("sms_service", "http://127.0.0.1:8003")
+            self.ai_service_url = services.get("ai_service", "http://127.0.0.1:8002")
+            self.ivr_service_url = services.get("ivr_service", "http://127.0.0.1:8004")
             self.two_way_sms_service_url = services.get(
-                "two_way_sms_service", "http://localhost:8007"
+                "two_way_sms_service", "http://127.0.0.1:8007"
             )
 
     # Default values
@@ -72,14 +72,14 @@ class Settings(BaseSettings):
     port: int = 8080
 
     # Service URLs
-    auth_service_url: str = "http://localhost:8000"
-    redis_url: str = "redis://localhost:6379/0"
-    nin_service_url: str = "http://localhost:8005"
-    bvn_service_url: str = "http://localhost:8006"
-    sms_service_url: str = "http://localhost:8003"
-    ai_service_url: str = "http://localhost:8002"
-    ivr_service_url: str = "http://localhost:8004"
-    two_way_sms_service_url: str = "http://localhost:8007"
+    auth_service_url: str = "http://127.0.0.1:8000"
+    redis_url: str = "redis://127.0.0.1:6379/0"
+    nin_service_url: str = "http://127.0.0.1:8005"
+    bvn_service_url: str = "http://127.0.0.1:8006"
+    sms_service_url: str = "http://127.0.0.1:8003"
+    ai_service_url: str = "http://127.0.0.1:8002"
+    ivr_service_url: str = "http://127.0.0.1:8004"
+    two_way_sms_service_url: str = "http://127.0.0.1:8007"
 
     # Rate Limiting
     rate_limit_requests: int = 100

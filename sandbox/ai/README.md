@@ -58,7 +58,7 @@ uvicorn app.main:app --reload --port 8002
 
 ```bash
 # Check service health
-curl http://localhost:8002/health
+curl http://127.0.0.1:8002/health
 
 # Expected response:
 {
@@ -84,7 +84,7 @@ curl http://localhost:8002/health
 ### Example 1: Generate Nigerian Business Plan
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/ai/generate \
+curl -X POST http://127.0.0.1:8080/api/v1/ai/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -110,7 +110,7 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ### Example 2: Analyze Nigerian Market Data
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/ai/analyze \
+curl -X POST http://127.0.0.1:8080/api/v1/ai/analyze \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -149,7 +149,7 @@ curl -X POST http://localhost:8080/api/v1/ai/analyze \
 ### Example 3: Generate Marketing Content
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/ai/generate \
+curl -X POST http://127.0.0.1:8080/api/v1/ai/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -214,7 +214,7 @@ pytest tests/ -v
 
 ```bash
 # Enable test mode (uses mock responses)
-curl -X POST http://localhost:8002/api/v1/ai/generate \
+curl -X POST http://127.0.0.1:8002/api/v1/ai/generate \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -232,7 +232,7 @@ import requests
 
 def generate_content(prompt: str, content_type: str, token: str):
     response = requests.post(
-        "http://localhost:8080/api/v1/ai/generate",
+        "http://127.0.0.1:8080/api/v1/ai/generate",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"

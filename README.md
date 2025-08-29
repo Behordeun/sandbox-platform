@@ -39,7 +39,7 @@ cp .env.template .env
 ./scripts/test-dpi-apis.sh
 
 # Access API documentation
-open http://localhost:8080/docs
+open http://127.0.0.1:8080/docs
 ```
 
 ### Production Deployment
@@ -296,9 +296,9 @@ sandbox-platform/
 ./scripts/stop-sandbox.sh
 
 # Check service health
-curl http://localhost:8000/health  # Auth service
-curl http://localhost:8080/health  # API Gateway
-curl http://localhost:8001/health  # Config service
+curl http://127.0.0.1:8000/health  # Auth service
+curl http://127.0.0.1:8080/health  # API Gateway
+curl http://127.0.0.1:8001/health  # Config service
 
 # Test configuration loading
 cd services/auth-service && python3 -c "from app.core.config import settings; print('✅ Config OK')"
@@ -392,11 +392,11 @@ make health
 make status
 
 # Or check individual services
-curl http://localhost:8080/api/v1/dpi/health  # DPI services overview
-curl http://localhost:8000/health             # Auth service
-curl http://localhost:8005/health             # NIN service
-curl http://localhost:8006/health             # BVN service
-curl http://localhost:8003/health             # SMS service
+curl http://127.0.0.1:8080/api/v1/dpi/health  # DPI services overview
+curl http://127.0.0.1:8000/health             # Auth service
+curl http://127.0.0.1:8005/health             # NIN service
+curl http://127.0.0.1:8006/health             # BVN service
+curl http://127.0.0.1:8003/health             # SMS service
 ```
 
 ### Log Management & Analytics
@@ -495,9 +495,9 @@ make analyze-logs-performance
 
 ### Metrics
 
-- Prometheus: `http://localhost:9090`
-- Grafana: `http://localhost:3001` (admin/admin123)
-- Service Metrics: `http://localhost:8080/metrics`
+- Prometheus: `http://127.0.0.1:9090`
+- Grafana: `http://127.0.0.1:3001` (admin/admin123)
+- Service Metrics: `http://127.0.0.1:8080/metrics`
 
 ## 🔐 Security & Authentication
 
@@ -541,46 +541,46 @@ make analyze-logs-performance
 
 ```bash
 # Login to get access token
-curl -X POST http://localhost:8000/api/v1/auth/login/json \
+curl -X POST http://127.0.0.1:8000/api/v1/auth/login/json \
   -H "Content-Type: application/json" \
   -d '{"identifier": "startup@company.ng", "password": "your-password"}'
 
 # Get examples and test data
-curl http://localhost:8080/api/v1/examples/nin
-curl http://localhost:8080/api/v1/examples/sms
+curl http://127.0.0.1:8080/api/v1/examples/nin
+curl http://127.0.0.1:8080/api/v1/examples/sms
 
 # Verify NIN with authentication
-curl -X POST http://localhost:8080/api/v1/nin/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/nin/verify \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"nin": "12345678901"}'
 
 # Verify BVN with authentication
-curl -X POST http://localhost:8080/api/v1/bvn/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/bvn/verify \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
 
 # Send SMS to Nigerian number
-curl -X POST http://localhost:8080/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8080/api/v1/sms/send \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"to": "+2348012345678", "message": "Your OTP is 123456"}'
 
 # Logout when done
-curl -X POST http://localhost:8000/api/v1/auth/logout
+curl -X POST http://127.0.0.1:8000/api/v1/auth/logout
 ```
 
 ### Admin User Management
 
 ```bash
 # Admin login
-curl -X POST http://localhost:8000/api/v1/auth/login/json \
+curl -X POST http://127.0.0.1:8000/api/v1/auth/login/json \
   -H "Content-Type: application/json" \
   -d '{"identifier": "admin@dpi-sandbox.ng", "password": "admin-password"}'
 
 # Create startup account
-curl -X POST http://localhost:8000/api/v1/admin/users \
+curl -X POST http://127.0.0.1:8000/api/v1/admin/users \
   -H "Authorization: Bearer ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -593,10 +593,10 @@ curl -X POST http://localhost:8000/api/v1/admin/users \
 
 # List all users
 curl -H "Authorization: Bearer ADMIN_TOKEN" \
-  http://localhost:8000/api/v1/admin/users
+  http://127.0.0.1:8000/api/v1/admin/users
 
 # Reset user password
-curl -X POST http://localhost:8000/api/v1/admin/users/1/reset-password \
+curl -X POST http://127.0.0.1:8000/api/v1/admin/users/1/reset-password \
   -H "Authorization: Bearer ADMIN_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"new_password": "NewPass123"}'
@@ -661,9 +661,9 @@ LOG_LEVEL=INFO
 # DATABASE CONFIGURATION
 # =============================================================================
 # Single PostgreSQL database for all services
-DATABASE_URL=postgresql://postgres:your-password@localhost:5432/sandbox_platform
+DATABASE_URL=postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform
 DB_PASSWORD=your-database-password
-REDIS_URL=redis://localhost:6379/0
+REDIS_URL=redis://127.0.0.1:6379/0
 
 # =============================================================================
 # SECURITY & AUTHENTICATION
@@ -743,9 +743,9 @@ k6 run tests/load/api-gateway.js
 
 ### Interactive Documentation
 
-- Auth Service: `http://localhost:8000/docs`
-- API Gateway: `http://localhost:8080/docs`
-- Config Service: `http://localhost:8001/docs`
+- Auth Service: `http://127.0.0.1:8000/docs`
+- API Gateway: `http://127.0.0.1:8080/docs`
+- Config Service: `http://127.0.0.1:8001/docs`
 
 ### Key Endpoints
 
@@ -928,10 +928,10 @@ psql $DATABASE_URL -c "SELECT 1;"
 
 ```bash
 # Test database connectivity with correct credentials
-psql postgresql://postgres:your-password@localhost:5432/sandbox_platform -c "\dt"
+psql postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform -c "\dt"
 
 # Check if database exists
-psql postgresql://postgres:your-password@localhost:5432/postgres -c "SELECT datname FROM pg_database WHERE datname='sandbox_platform';"
+psql postgresql://postgres:your-password@127.0.0.1:5432/postgres -c "SELECT datname FROM pg_database WHERE datname='sandbox_platform';"
 
 # Run migrations if needed
 cd services/auth-service
@@ -958,8 +958,8 @@ df -h
 free -h
 
 # Check service health
-curl http://localhost:8000/health
-curl http://localhost:8080/health
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8080/health
 ```
 
 ## 📄 License

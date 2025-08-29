@@ -1,11 +1,12 @@
 from app.core.database import Base
+from app.core.yaml_config import settings
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
 class OAuthToken(Base):
-    __tablename__ = "oauth_tokens"
+    __tablename__ = f"{settings.table_prefix}oauth_tokens"
 
     id = Column(Integer, primary_key=True, index=True)
 
@@ -18,10 +19,14 @@ class OAuthToken(Base):
     scope = Column(String(500), nullable=True)
     expires_at = Column(DateTime(timezone=True), nullable=False)
 
-    # Relationships
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    # Relationships (respect service table prefix)
+    user_id = Column(
+        Integer, ForeignKey(f"{settings.table_prefix}users.id"), nullable=False
+    )
     client_id = Column(
-        String(255), ForeignKey("oauth_clients.client_id"), nullable=False
+        String(255),
+        ForeignKey(f"{settings.table_prefix}oauth_clients.client_id"),
+        nullable=False,
     )
 
     # Authorization code (temporary)

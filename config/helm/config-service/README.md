@@ -294,13 +294,13 @@ helm upgrade config-service ./config-service
 ```bash
 # Check if the service is healthy
 kubectl port-forward svc/config-service 8000:8000
-curl http://localhost:8000/health
+curl http://127.0.0.1:8000/health
 
 # Check metrics
-curl http://localhost:8000/metrics
+curl http://127.0.0.1:8000/metrics
 
 # Test configuration API
-curl http://localhost:8000/api/v1/configs
+curl http://127.0.0.1:8000/api/v1/configs
 ```
 
 ## Values File Examples

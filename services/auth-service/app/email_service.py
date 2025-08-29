@@ -65,8 +65,8 @@ class EmailService:
                 
                 <div style="background: #e8f4fd; padding: 15px; border-radius: 5px; margin: 20px 0;">
                     <strong>Get Started:</strong><br>
-                    API Gateway: <a href="http://localhost:8080/docs">http://localhost:8080/docs</a><br>
-                    API Guide: <a href="http://localhost:8080/api/v1/examples/nin">View Examples</a>
+                    API Gateway: <a href="http://127.0.0.1:8080/docs">http://127.0.0.1:8080/docs</a><br>
+                    API Guide: <a href="http://127.0.0.1:8080/api/v1/examples/nin">View Examples</a>
                 </div>
                 
                 <p>Happy coding!</p>
@@ -83,7 +83,7 @@ class EmailService:
         subject = "Reset Your DPI Sandbox Password"
 
         reset_link = (
-            f"http://localhost:3000/reset-password?token={reset_token}&email={to_email}"
+            f"http://127.0.0.1:3000/reset-password?token={reset_token}&email={to_email}"
         )
 
         html_content = f"""
@@ -162,7 +162,7 @@ class EmailService:
                 </ul>
                 
                 <div style="text-align: center; margin: 30px 0;">
-                    <a href="http://localhost:8080/docs" 
+                    <a href="http://127.0.0.1:8080/docs" 
                        style="background: #3498db; color: white; padding: 12px 24px; 
                               text-decoration: none; border-radius: 5px; display: inline-block;">
                         Access API Documentation

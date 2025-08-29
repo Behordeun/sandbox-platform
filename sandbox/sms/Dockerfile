@@ -34,7 +34,7 @@ EXPOSE 8003
 
 # Health check for SMS service
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8003/health || exit 1
+    CMD curl -f http://127.0.0.1:8003/health || exit 1
 
 # Run the SMS service
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8003"]

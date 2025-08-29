@@ -57,7 +57,7 @@ uvicorn app.main:app --reload --port 8004
 
 ```bash
 # Check service health
-curl http://localhost:8004/health
+curl http://127.0.0.1:8004/health
 
 # Expected response:
 {
@@ -83,7 +83,7 @@ curl http://localhost:8004/health
 ### Example 1: Create Banking IVR Flow
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/ivr/create-flow \
+curl -X POST http://127.0.0.1:8080/api/v1/ivr/create-flow \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -110,7 +110,7 @@ curl -X POST http://localhost:8080/api/v1/ivr/create-flow \
 ### Example 2: Handle Incoming Call
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/ivr/handle-call \
+curl -X POST http://127.0.0.1:8080/api/v1/ivr/handle-call \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -173,7 +173,7 @@ import requests
 
 def create_ivr_flow(flow_config: dict, token: str):
     response = requests.post(
-        "http://localhost:8080/api/v1/ivr/create-flow",
+        "http://127.0.0.1:8080/api/v1/ivr/create-flow",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"

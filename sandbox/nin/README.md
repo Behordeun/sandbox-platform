@@ -69,7 +69,7 @@ uvicorn app.main:app --reload --port 8005
 
 ```bash
 # Check service health
-curl http://localhost:8005/health
+curl http://127.0.0.1:8005/health
 
 # Expected response:
 {
@@ -103,7 +103,7 @@ All endpoints require authentication via the API Gateway or direct JWT token.
 
 ```bash
 # Through API Gateway (Recommended)
-curl -X POST http://localhost:8080/api/v1/nin/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/nin/verify \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -111,7 +111,7 @@ curl -X POST http://localhost:8080/api/v1/nin/verify \
   }'
 
 # Direct to service (for testing)
-curl -X POST http://localhost:8005/api/v1/nin/verify \
+curl -X POST http://127.0.0.1:8005/api/v1/nin/verify \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -146,7 +146,7 @@ curl -X POST http://localhost:8005/api/v1/nin/verify \
 ### Example 2: Quick NIN Validation
 
 ```bash
-curl -X POST http://localhost:8005/api/v1/nin/lookup \
+curl -X POST http://127.0.0.1:8005/api/v1/nin/lookup \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -168,7 +168,7 @@ curl -X POST http://localhost:8005/api/v1/nin/lookup \
 ### Example 3: Check Verification Status
 
 ```bash
-curl -X GET http://localhost:8005/api/v1/nin/status/12345678901 \
+curl -X GET http://127.0.0.1:8005/api/v1/nin/status/12345678901 \
   -H "Authorization: Bearer $TOKEN"
 
 # Response:
@@ -197,7 +197,7 @@ All services use the **single root .env file**. No service-specific .env files n
 ```env
 # All variables are in the root .env file
 ENVIRONMENT=development
-DATABASE_URL=postgresql://sandbox_user:password@localhost:5432/sandbox_platform
+DATABASE_URL=postgresql://sandbox_user:password@127.0.0.1:5432/sandbox_platform
 DOJAH_API_KEY=your-dojah-api-key        # Get from Dojah dashboard
 DOJAH_APP_ID=your-dojah-app-id          # Your application ID
 SMS_API_KEY=your-sms-api-key
@@ -275,7 +275,7 @@ pytest tests/test_nin_verification.py -v
 
 ```bash
 # Use test NINs (these won't charge your Dojah account)
-curl -X POST http://localhost:8005/api/v1/nin/verify \
+curl -X POST http://127.0.0.1:8005/api/v1/nin/verify \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -393,7 +393,7 @@ import requests
 
 def verify_nin(nin: str, token: str):
     response = requests.post(
-        "http://localhost:8080/api/v1/nin/verify",
+        "http://127.0.0.1:8080/api/v1/nin/verify",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
@@ -411,7 +411,7 @@ print(f"Verified: {result['data']['first_name']} {result['data']['last_name']}")
 
 ```javascript
 async function verifyNIN(nin, token) {
-    const response = await fetch('http://localhost:8080/api/v1/nin/verify', {
+    const response = await fetch('http://127.0.0.1:8080/api/v1/nin/verify', {
         method: 'POST',
         headers: {
             'Authorization': `Bearer ${token}`,
@@ -434,7 +434,7 @@ console.log(`Verified: ${result.data.first_name} ${result.data.last_name}`);
 
 - **Dojah API Docs**: [https://docs.dojah.io](https://docs.dojah.io)
 - **Service Logs**: `tail -f ../logs/nin.log`
-- **Health Check**: `curl http://localhost:8005/health`
+- **Health Check**: `curl http://127.0.0.1:8005/health`
 
 ### Best Practices
 

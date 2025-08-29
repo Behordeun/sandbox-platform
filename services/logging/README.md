@@ -229,10 +229,10 @@ print(f"Oldest log: {stats['oldest_log']}")
 
 ```bash
 # Check log system health
-curl http://localhost:8080/api/v1/logs/health
+curl http://127.0.0.1:8080/api/v1/logs/health
 
 # Get log statistics
-curl http://localhost:8080/api/v1/logs/stats
+curl http://127.0.0.1:8080/api/v1/logs/stats
 ```
 
 ## 🔐 Security & Compliance

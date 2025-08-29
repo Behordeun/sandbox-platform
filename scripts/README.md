@@ -148,7 +148,7 @@ echo $DATABASE_URL
 
 ```bash
 # Check database connection
-psql postgresql://postgres:your-password@localhost:5432/sandbox_platform -c "SELECT 1;"
+psql postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform -c "SELECT 1;"
 
 # Restart database
 docker ps | grep postgres
@@ -159,8 +159,8 @@ docker restart sandbox-postgres
 
 ```bash
 # Check service health
-curl http://localhost:8000/health
-curl http://localhost:8080/health
+curl http://127.0.0.1:8000/health
+curl http://127.0.0.1:8080/health
 
 # Check logs
 tail -f logs/auth-service.log

@@ -47,9 +47,9 @@ pip install -r requirements.txt
 
 4. **Access the API**:
 
-   - API Documentation: [http://localhost:8000/docs](http://localhost:8000/docs)
-   - Health Check: [http://localhost:8000/health](http://localhost:8000/health)
-   - OpenID Configuration: [http://localhost:8000/.well-known/openid_configuration](http://localhost:8000/.well-known/openid_configuration)
+   - API Documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
+   - Health Check: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
+   - OpenID Configuration: [http://127.0.0.1:8000/.well-known/openid_configuration](http://127.0.0.1:8000/.well-known/openid_configuration)
 
 ### Docker Deployment
 
@@ -119,7 +119,7 @@ The service uses environment variables for configuration. See `.env.example` for
 | `JWT_SECRET_KEY` | Secret key for JWT signing | Required |
 | `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiry | `30` |
 | `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | Refresh token expiry | `7` |
-| `OAUTH2_ISSUER_URL` | OAuth2 issuer URL | `http://localhost:8000` |
+| `OAUTH2_ISSUER_URL` | OAuth2 issuer URL | `http://127.0.0.1:8000` |
 | `CORS_ORIGINS` | Allowed CORS origins | `["*"]` |
 | `DEBUG` | Enable debug mode | `false` |
 

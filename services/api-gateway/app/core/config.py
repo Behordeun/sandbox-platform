@@ -31,8 +31,8 @@ class Settings(BaseSettings):
 
     # CORS settings
     cors_origins: Union[str, List[str]] = [
-        "http://localhost:3000",
-        "http://localhost:8080",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:8080",
     ]
     cors_allow_credentials: bool = False
     cors_allow_methods: Union[str, List[str]] = ["*"]
@@ -63,7 +63,7 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v):
-        return cls._parse_list_like(v, ["http://localhost:3000", "http://localhost:8080"])
+        return cls._parse_list_like(v, ["http://127.0.0.1:3000", "http://127.0.0.1:8080"])
 
     @field_validator("cors_allow_methods", mode="before")
     @classmethod
@@ -81,25 +81,25 @@ class Settings(BaseSettings):
     rate_limit_window: int = 60  # seconds
 
     # Redis settings (for rate limiting and caching)
-    redis_url: str = "redis://localhost:6379/0"
+    redis_url: str = "redis://127.0.0.1:6379/0"
 
     # JWT settings for token validation
     jwt_secret_key: str
     jwt_algorithm: str = "HS256"
 
     # Service URLs
-    auth_service_url: str = "http://localhost:8000"
-    config_service_url: str = "http://localhost:8001"
+    auth_service_url: str = "http://127.0.0.1:8000"
+    config_service_url: str = "http://127.0.0.1:8001"
     auth_service_timeout: int = 30
     services: Dict[str, ServiceConfig] = {
         "auth": ServiceConfig(
-            name="auth-service", url="http://localhost:8000", health_path=HEALTH_PATH
+            name="auth-service", url="http://127.0.0.1:8000", health_path=HEALTH_PATH
         ),
         "sms": ServiceConfig(
-            name="sms-service", url="http://localhost:8003", health_path=HEALTH_PATH
+            name="sms-service", url="http://127.0.0.1:8003", health_path=HEALTH_PATH
         ),
         "ai": ServiceConfig(
-            name="ai-service", url="http://localhost:8002", health_path=HEALTH_PATH
+            name="ai-service", url="http://127.0.0.1:8002", health_path=HEALTH_PATH
         ),
     }
 
