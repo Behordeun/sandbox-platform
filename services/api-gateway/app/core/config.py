@@ -127,12 +127,11 @@ class Settings(BaseSettings):
     max_timeout: int = 300
 
     model_config = ConfigDict(
-        env_file="../../.env",  # Use root .env file
+        env_file="../../../../.env",  # Use root .env file
         case_sensitive=False,
         extra="ignore",  # Ignore extra fields from .env
     )
 
 
 # Global settings instance
-jwt_secret = os.getenv("JWT_SECRET_KEY", "change-this-secret-key-in-production")
-settings = Settings(jwt_secret_key=jwt_secret)
+settings = Settings()
