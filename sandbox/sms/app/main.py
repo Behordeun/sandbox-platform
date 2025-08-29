@@ -1,6 +1,8 @@
 from app.core.config import settings
 from fastapi import FastAPI
 from fastapi.routing import APIRoute
+from app.middleware.correlation import CorrelationIdMiddleware
+from app.middleware.access_log import AccessLogMiddleware
 
 
 def generate_unique_id(route: APIRoute) -> str:
@@ -22,6 +24,9 @@ app = FastAPI(
     version=settings.app_version,
     generate_unique_id_function=generate_unique_id,
 )
+
+app.add_middleware(CorrelationIdMiddleware)
+app.add_middleware(AccessLogMiddleware)
 
 
 @app.get("/health")
