@@ -1,8 +1,8 @@
 from datetime import timedelta
 from typing import Any, Optional, Union
+from urllib.parse import urlparse, urlunparse
 
 from jose import JWTError, jwt
-from urllib.parse import urlparse, urlunparse
 from passlib.context import CryptContext
 
 from .yaml_config import settings
@@ -91,7 +91,18 @@ def _issuer_aliases(primary: str) -> set[str]:
         p = urlparse(primary)
         if p.hostname in {"localhost", "127.0.0.1"}:
             alt_host = "127.0.0.1" if p.hostname == "localhost" else "localhost"
-            aliases.add(urlunparse((p.scheme, f"{alt_host}:{p.port}" if p.port else alt_host, p.path, p.params, p.query, p.fragment)))
+            aliases.add(
+                urlunparse(
+                    (
+                        p.scheme,
+                        f"{alt_host}:{p.port}" if p.port else alt_host,
+                        p.path,
+                        p.params,
+                        p.query,
+                        p.fragment,
+                    )
+                )
+            )
     except Exception:
         pass
     return aliases

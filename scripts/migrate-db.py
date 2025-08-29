@@ -12,6 +12,7 @@ from pathlib import Path
 # Load root .env for DATABASE_URL and other settings
 try:
     from dotenv import load_dotenv  # type: ignore
+
     load_dotenv(Path(__file__).parent.parent / ".env")
 except Exception:
     pass
@@ -51,6 +52,7 @@ def run_migrations():
             success = False
 
     return success
+
 
 def handle_service_migration(service, db_url):
     """Handle migration for a single service."""
@@ -112,7 +114,9 @@ def run_alembic_migration(service, service_path, db_url):
                 continue
 
         if not alembic_cmd:
-            print(f"⚠️  Alembic not found for {service['name']}. Falling back to direct table creation.")
+            print(
+                f"⚠️  Alembic not found for {service['name']}. Falling back to direct table creation."
+            )
             return None
 
         result = subprocess.run(
@@ -143,6 +147,7 @@ def create_tables_directly(service_rel_path: str, db_url: str) -> bool:
     """
     try:
         from importlib import import_module
+
         from sqlalchemy import create_engine
 
         # Make sure service package is importable

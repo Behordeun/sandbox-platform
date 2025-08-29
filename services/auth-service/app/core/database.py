@@ -1,8 +1,8 @@
 import os
+
 from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
-
 
 # Create base class for models (shared across runtime and migrations)
 Base = declarative_base()
@@ -41,7 +41,7 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models import oauth_client, oauth_token, user, token_blacklist  # noqa
+from app.models import oauth_client, oauth_token, token_blacklist, user  # noqa
 
 
 def get_db():

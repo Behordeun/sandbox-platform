@@ -1,4 +1,5 @@
 import uuid
+
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
@@ -9,4 +10,3 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
         response.headers["X-Request-ID"] = request_id
         return response
-

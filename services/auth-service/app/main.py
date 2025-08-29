@@ -1,15 +1,14 @@
 import logging
-from typing import Any
 from contextlib import asynccontextmanager
+from typing import Any
 
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import engine
 from app.core.system_logger import system_logger
-from app.middleware.logging import UserActivityLoggingMiddleware
 from app.middleware.correlation import CorrelationIdMiddleware
+from app.middleware.logging import UserActivityLoggingMiddleware
 from app.models import oauth_token  # Import to register models
-from app.models import oauth_client, password_reset, token_blacklist, user
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -71,6 +70,7 @@ def generate_unique_id(route: APIRoute) -> str:
     ) or "root"
     name = (route.name or "handler").replace(" ", "_")
     return f"{tag}_{method}_{path}_{name}"
+
 
 # Create FastAPI application
 app = FastAPI(

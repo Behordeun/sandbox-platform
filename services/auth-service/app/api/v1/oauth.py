@@ -41,7 +41,7 @@ def get_oauth_client(
 
 
 def normalize_and_validate_redirect_uri(redirect_uri: str, client) -> str:
-    from urllib.parse import urlparse, unquote
+    from urllib.parse import unquote, urlparse
 
     def normalize_uri(uri: str) -> str:
         uri = uri.replace("\\", "").strip()
@@ -62,6 +62,7 @@ def normalize_and_validate_redirect_uri(redirect_uri: str, client) -> str:
     if parsed.scheme not in ("http", "https") or not parsed.netloc:
         raise HTTPException(status_code=400, detail="Unsafe redirect URI")
     return normalized_safe_redirect_uri
+
 
 @router.get("/authorize")
 def authorize(
@@ -99,11 +100,11 @@ def authorize(
     if state:
         params["state"] = state
 
-    normalized_safe_redirect_uri = normalize_and_validate_redirect_uri(redirect_uri, client)
-    parsed = urlparse(normalized_safe_redirect_uri)
-    redirect_url = (
-        f"{parsed.scheme}://{parsed.netloc}{parsed.path}?{urlencode(params)}"
+    normalized_safe_redirect_uri = normalize_and_validate_redirect_uri(
+        redirect_uri, client
     )
+    parsed = urlparse(normalized_safe_redirect_uri)
+    redirect_url = f"{parsed.scheme}://{parsed.netloc}{parsed.path}?{urlencode(params)}"
     return RedirectResponse(url=redirect_url)
 
 
@@ -129,12 +130,11 @@ def handle_authorization_code_grant(db, client_id, code, redirect_uri):
         "scope": token_obj.scope,
     }
 
+
 def handle_refresh_token_grant(db, refresh_token):
     if not refresh_token:
         raise HTTPException(status_code=400, detail="Missing refresh_token")
-    token_obj = oauth_token_crud.refresh_access_token(
-        db, refresh_token=refresh_token
-    )
+    token_obj = oauth_token_crud.refresh_access_token(db, refresh_token=refresh_token)
     if not token_obj:
         raise HTTPException(status_code=400, detail="Invalid refresh token")
     return {
@@ -146,6 +146,7 @@ def handle_refresh_token_grant(db, refresh_token):
         ),
         "scope": token_obj.scope,
     }
+
 
 def handle_client_credentials_grant(db, client_id, client):
     token_obj = oauth_token_crud.create_client_credentials_token(
@@ -159,6 +160,7 @@ def handle_client_credentials_grant(db, client_id, client):
         ),
         "scope": token_obj.scope,
     }
+
 
 @router.post("/token", response_model=TokenResponse)
 def get_token(

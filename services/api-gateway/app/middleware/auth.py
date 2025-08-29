@@ -1,14 +1,14 @@
-import logging
 import asyncio
+import logging
 import re
 import time
 from typing import List, Optional
 
 from app.core.security import validate_api_key, verify_token
+from app.db import insert_gateway_access_log
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
-from app.db import insert_gateway_access_log
 
 # Configure structured logging
 logging.basicConfig(

@@ -194,7 +194,7 @@ def reset_user_password(
 ) -> Any:
     """Reset user password (Admin only)."""
     from app.core.security import get_password_hash
-    
+
     user = user_crud.get(db, id=user_id)
     if not user:
         raise HTTPException(status_code=404, detail=USER_NOT_FOUND_MSG)

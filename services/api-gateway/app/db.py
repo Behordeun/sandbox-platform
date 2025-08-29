@@ -1,9 +1,8 @@
-import os
 import asyncio
+import os
 from typing import Any, Dict
 
 from sqlalchemy import create_engine, text
-
 
 _engine = None
 

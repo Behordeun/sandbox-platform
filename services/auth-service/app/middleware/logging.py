@@ -1,13 +1,13 @@
+import asyncio
 import json
 import logging
 import time
-import asyncio
 from typing import Optional
 
-from fastapi import Request
-from app.core.security import verify_token
-from sqlalchemy import text
 from app.core.database import engine
+from app.core.security import verify_token
+from fastapi import Request
+from sqlalchemy import text
 from starlette.middleware.base import BaseHTTPMiddleware
 
 # Configure structured logging for user activities
@@ -125,6 +125,7 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
     async def _write_audit(self, log: dict):
         if engine is None:
             return
+
         def _insert():
             try:
                 with engine.begin() as conn:
@@ -142,7 +143,11 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
                         ),
                         {
                             "request_id": str(log.get("request_id") or ""),
-                            "user_id": int(log.get("user_id")) if str(log.get("user_id") or "").isdigit() else None,
+                            "user_id": (
+                                int(log.get("user_id"))
+                                if str(log.get("user_id") or "").isdigit()
+                                else None
+                            ),
                             "activity_type": str(log.get("activity_type") or ""),
                             "success": bool(log.get("success")),
                             "method": str(log.get("method") or ""),
@@ -154,6 +159,7 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
                     )
             except Exception:
                 pass
+
         loop = asyncio.get_event_loop()
         await loop.run_in_executor(None, _insert)
 

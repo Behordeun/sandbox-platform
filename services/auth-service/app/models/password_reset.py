@@ -1,6 +1,6 @@
 from app.core.database import Base
 from app.core.yaml_config import settings
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, ForeignKey
+from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
@@ -11,7 +11,9 @@ class PasswordResetToken(Base):
     id = Column(Integer, primary_key=True, index=True)
     email = Column(String(255), nullable=False, index=True)
     # Optional direct link to users table for referential integrity
-    user_id = Column(Integer, ForeignKey(f"{settings.table_prefix}users.id"), nullable=True)
+    user_id = Column(
+        Integer, ForeignKey(f"{settings.table_prefix}users.id"), nullable=True
+    )
     token = Column(String(255), unique=True, index=True, nullable=False)
     expires_at = Column(DateTime(timezone=True), nullable=False)
     is_used = Column(Boolean, default=False)

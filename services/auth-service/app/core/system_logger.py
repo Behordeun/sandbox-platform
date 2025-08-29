@@ -195,7 +195,9 @@ class Logger:
         default_context = {
             "ai_engineer": "Muhammad",
             # Prefer ENVIRONMENT var if present; fallback to 'development'
-            "environment": str(__import__("os").environ.get("ENVIRONMENT", "development")),
+            "environment": str(
+                __import__("os").environ.get("ENVIRONMENT", "development")
+            ),
         }
         if additional_info:
             default_context.update(additional_info)
@@ -368,4 +370,3 @@ system_logger = Logger(preserve_logs=True, debug_mode=False)
 
 # Add session separator silently on import
 system_logger._add_session_separator()
-

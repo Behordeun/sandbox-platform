@@ -49,6 +49,7 @@ class Settings(BaseSettings):
     @classmethod
     def validate_cors_origins(cls, v: Any) -> list:
         import json
+
         if v is None or v == "" or v == []:
             return ["*"]
         if isinstance(v, list):
@@ -63,7 +64,6 @@ class Settings(BaseSettings):
                 # Fallback: comma-separated string
                 return [i.strip() for i in v.split(",") if i.strip()]
         return ["*"]
-
 
     cors_allow_credentials: bool = True
     cors_allow_methods: Union[str, List[str]] = ["*"]
@@ -87,13 +87,18 @@ class Settings(BaseSettings):
         cors_origins_env = os.getenv("CORS_ORIGINS", None)
         if cors_origins_env:
             import json
+
             try:
                 self.cors_origins = json.loads(cors_origins_env)
                 if not isinstance(self.cors_origins, list):
                     self.cors_origins = [self.cors_origins]
             except Exception:
                 # Fallback: comma-separated string
-                self.cors_origins = [origin.strip() for origin in cors_origins_env.split(",") if origin.strip()]
+                self.cors_origins = [
+                    origin.strip()
+                    for origin in cors_origins_env.split(",")
+                    if origin.strip()
+                ]
 
         # Load configuration from YAML
         environment = os.getenv("ENVIRONMENT", "development")

@@ -1,10 +1,10 @@
 from app.core.config import settings
+from app.core.system_logger import system_logger
+from app.middleware.access_log import AccessLogMiddleware
+from app.middleware.correlation import CorrelationIdMiddleware
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.core.system_logger import system_logger
 from fastapi.routing import APIRoute
-from app.middleware.correlation import CorrelationIdMiddleware
-from app.middleware.access_log import AccessLogMiddleware
 
 
 def generate_unique_id(route: APIRoute) -> str:
@@ -50,7 +50,10 @@ if __name__ == "__main__":
 else:
     # Startup log when imported by uvicorn
     try:
-        system_logger.info("Service startup", {"service": settings.app_name, "version": settings.app_version})
+        system_logger.info(
+            "Service startup",
+            {"service": settings.app_name, "version": settings.app_version},
+        )
     except Exception:
         pass
 
@@ -70,5 +73,8 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal server error", "message": "An unexpected error occurred"},
+        content={
+            "error": "Internal server error",
+            "message": "An unexpected error occurred",
+        },
     )

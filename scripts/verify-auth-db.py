@@ -12,6 +12,7 @@ Reads DATABASE_URL from .env/env and prints:
 import os
 import sys
 from pathlib import Path
+
 from sqlalchemy.sql import text
 
 
@@ -39,16 +40,23 @@ def print_table_row_counts(engine, insp, tables):
                 print(f"  • {tbl}: MISSING")
     return existing
 
+
 def list_fks(insp, tname, existing):
     if tname not in existing:
         return []
     return insp.get_foreign_keys(tname)
 
+
 def has_fk(fks, col, ref_table, ref_col):
     for fk in fks:
-        if fk.get("constrained_columns") == [col] and fk.get("referred_table") == ref_table and fk.get("referred_columns") == [ref_col]:
+        if (
+            fk.get("constrained_columns") == [col]
+            and fk.get("referred_table") == ref_table
+            and fk.get("referred_columns") == [ref_col]
+        ):
             return True
     return False
+
 
 def print_foreign_key_status(insp, existing):
     print("\n🔗 Foreign keys:")
@@ -56,8 +64,13 @@ def print_foreign_key_status(insp, existing):
     pr_fks = list_fks(insp, "auth_password_reset_tokens", existing)
     tblacklist_ok = has_fk(tb_fks, "user_id", "auth_users", "id") if tb_fks else False
     preset_ok = has_fk(pr_fks, "user_id", "auth_users", "id") if pr_fks else False
-    print(f"  • auth_token_blacklist.user_id → auth_users.id: {'OK' if tblacklist_ok else 'MISSING'}")
-    print(f"  • auth_password_reset_tokens.user_id → auth_users.id: {'OK' if preset_ok else 'MISSING or N/A'}")
+    print(
+        f"  • auth_token_blacklist.user_id → auth_users.id: {'OK' if tblacklist_ok else 'MISSING'}"
+    )
+    print(
+        f"  • auth_password_reset_tokens.user_id → auth_users.id: {'OK' if preset_ok else 'MISSING or N/A'}"
+    )
+
 
 def check_admin_user(engine, existing):
     admin_email = os.getenv("ADMIN_EMAIL", "admin@dpi-sandbox.ng")
@@ -65,12 +78,17 @@ def check_admin_user(engine, existing):
         with engine.connect() as conn:
             res = conn.execute(
                 text('SELECT id, email, username FROM "auth_users" WHERE email = :e'),
-                {"e": admin_email}
+                {"e": admin_email},
             ).fetchone()
             if res:
-                print(f"\n✅ Admin user found: id={res.id}, email={res.email}, username={res.username}")
+                print(
+                    f"\n✅ Admin user found: id={res.id}, email={res.email}, username={res.username}"
+                )
             else:
-                print(f"\nℹ️  Admin user not found for email {admin_email}. You can run ./scripts/create-admin-user.py")
+                print(
+                    f"\nℹ️  Admin user not found for email {admin_email}. You can run ./scripts/create-admin-user.py"
+                )
+
 
 def main():
     load_env()
@@ -79,7 +97,7 @@ def main():
         print("❌ DATABASE_URL is not set. Add it to .env or export it.")
         sys.exit(1)
 
-    from sqlalchemy import create_engine, text
+    from sqlalchemy import create_engine
     from sqlalchemy.engine import reflection
 
     engine = create_engine(db_url)
@@ -118,7 +136,9 @@ def main():
     check_admin_user(engine, existing)
     # Non-zero exit if critical auth table missing
     if "auth_users" not in existing:
-        print("\n❌ Critical: auth_users table is missing. Run ./scripts/migrate-db.py and retry.")
+        print(
+            "\n❌ Critical: auth_users table is missing. Run ./scripts/migrate-db.py and retry."
+        )
         sys.exit(2)
     else:
         print("\n✅ Auth schema looks present.")

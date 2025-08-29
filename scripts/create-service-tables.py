@@ -418,16 +418,35 @@ def create_service_tables():
         with engine.connect() as conn:
             try:
                 # Create role if not exists
-                exists = conn.execute(text("SELECT 1 FROM pg_roles WHERE rolname=:u"), {"u": ro_user}).scalar()
+                exists = conn.execute(
+                    text("SELECT 1 FROM pg_roles WHERE rolname=:u"), {"u": ro_user}
+                ).scalar()
                 if not exists:
-                    conn.execute(text(f"CREATE ROLE \"{ro_user}\" LOGIN PASSWORD :p"), {"p": ro_pass})
+                    conn.execute(
+                        text(f'CREATE ROLE "{ro_user}" LOGIN PASSWORD :p'),
+                        {"p": ro_pass},
+                    )
                 # Grant permissions
-                conn.execute(text(f"GRANT USAGE ON SCHEMA public TO \"{ro_user}\""))
-                conn.execute(text(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{ro_user}\""))
-                conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO \"{ro_user}\""))
+                conn.execute(text(f'GRANT USAGE ON SCHEMA public TO "{ro_user}"'))
+                conn.execute(
+                    text(f'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "{ro_user}"')
+                )
+                conn.execute(
+                    text(
+                        f'GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO "{ro_user}"'
+                    )
+                )
                 # Ensure future tables/sequences are granted
-                conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO \"{ro_user}\""))
-                conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO \"{ro_user}\""))
+                conn.execute(
+                    text(
+                        f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "{ro_user}"'
+                    )
+                )
+                conn.execute(
+                    text(
+                        f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO "{ro_user}"'
+                    )
+                )
                 conn.commit()
                 print(f"✅ Read-only role ensured: {ro_user}")
             except Exception as e:

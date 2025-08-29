@@ -146,10 +146,13 @@ class DPILoggingMiddleware(BaseHTTPMiddleware):
 
         # Suspicious paths
         suspicious_paths = ["/admin", "/.env", "/config", "/debug"]
-        if any(
-            suspicious in str(request.url.path).lower()
-            for suspicious in suspicious_paths
-        ) and not user_id:  # Unauthenticated access to sensitive paths
+        if (
+            any(
+                suspicious in str(request.url.path).lower()
+                for suspicious in suspicious_paths
+            )
+            and not user_id
+        ):  # Unauthenticated access to sensitive paths
             self.logger.log_security_event(
                 event_type="SUSPICIOUS_PATH_ACCESS",
                 severity="HIGH",
