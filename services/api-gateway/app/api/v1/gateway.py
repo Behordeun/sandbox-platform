@@ -9,63 +9,174 @@ from fastapi.responses import Response
 router = APIRouter()
 
 
-@router.api_route(
-    "/auth/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_auth_service_{method}",
-)
-async def proxy_auth_service(request: Request, path: str) -> Response:
-    """Proxy requests to auth service.
-
-    Ensures upstream path includes the service prefix under /api/v1.
-    """
-    upstream_path = f"/api/v1/auth/{path}" if path else "/api/v1/auth"
-    return await proxy_service.proxy_request(request, "auth", upstream_path)
+def _auth_upstream(path: str) -> str:
+    return f"/api/v1/auth/{path}" if path else "/api/v1/auth"
 
 
-@router.api_route(
-    "/sms/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_sms_service_{method}",
-)
-async def proxy_sms_service(request: Request, path: str) -> Response:
-    """Proxy requests to SMS service."""
-    upstream_path = f"/api/v1/sms/{path}" if path else "/api/v1/sms"
-    return await proxy_service.proxy_request(request, "sms", upstream_path)
+@router.get("/auth/{path:path}", operation_id="proxy_auth_service_get")
+async def proxy_auth_get(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
 
 
-@router.api_route(
-    "/llm/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_llm_service_{method}",
-)
-async def proxy_llm_service(request: Request, path: str) -> Response:
-    """Proxy requests to LLM service (maps to AI service)."""
-    upstream_path = f"/api/v1/ai/{path}" if path else "/api/v1/ai"
-    # Map 'llm' gateway path to 'ai' backend service key
-    return await proxy_service.proxy_request(request, "ai", upstream_path)
+@router.post("/auth/{path:path}", operation_id="proxy_auth_service_post")
+async def proxy_auth_post(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
 
 
-@router.api_route(
-    "/nin/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_nin_service_{method}",
-)
-async def proxy_nin_service(request: Request, path: str) -> Response:
-    """Proxy requests to NIN service."""
-    upstream_path = f"/api/v1/nin/{path}" if path else "/api/v1/nin"
-    return await proxy_service.proxy_request(request, "nin", upstream_path)
+@router.put("/auth/{path:path}", operation_id="proxy_auth_service_put")
+async def proxy_auth_put(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
 
 
-@router.api_route(
-    "/bvn/{path:path}",
-    methods=["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
-    operation_id="proxy_bvn_service_{method}",
-)
-async def proxy_bvn_service(request: Request, path: str) -> Response:
-    """Proxy requests to BVN service."""
-    upstream_path = f"/api/v1/bvn/{path}" if path else "/api/v1/bvn"
-    return await proxy_service.proxy_request(request, "bvn", upstream_path)
+@router.delete("/auth/{path:path}", operation_id="proxy_auth_service_delete")
+async def proxy_auth_delete(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
+
+
+@router.patch("/auth/{path:path}", operation_id="proxy_auth_service_patch")
+async def proxy_auth_patch(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
+
+
+@router.options("/auth/{path:path}", operation_id="proxy_auth_service_options")
+async def proxy_auth_options(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
+
+
+def _sms_upstream(path: str) -> str:
+    return f"/api/v1/sms/{path}" if path else "/api/v1/sms"
+
+
+@router.get("/sms/{path:path}", operation_id="proxy_sms_service_get")
+async def proxy_sms_get(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
+
+
+@router.post("/sms/{path:path}", operation_id="proxy_sms_service_post")
+async def proxy_sms_post(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
+
+
+@router.put("/sms/{path:path}", operation_id="proxy_sms_service_put")
+async def proxy_sms_put(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
+
+
+@router.delete("/sms/{path:path}", operation_id="proxy_sms_service_delete")
+async def proxy_sms_delete(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
+
+
+@router.patch("/sms/{path:path}", operation_id="proxy_sms_service_patch")
+async def proxy_sms_patch(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
+
+
+@router.options("/sms/{path:path}", operation_id="proxy_sms_service_options")
+async def proxy_sms_options(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
+
+
+def _llm_upstream(path: str) -> str:
+    return f"/api/v1/ai/{path}" if path else "/api/v1/ai"
+
+
+@router.get("/llm/{path:path}", operation_id="proxy_llm_service_get")
+async def proxy_llm_get(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "ai", _llm_upstream(path))
+
+
+@router.post("/llm/{path:path}", operation_id="proxy_llm_service_post")
+async def proxy_llm_post(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "ai", _llm_upstream(path))
+
+
+@router.put("/llm/{path:path}", operation_id="proxy_llm_service_put")
+async def proxy_llm_put(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "ai", _llm_upstream(path))
+
+
+@router.delete("/llm/{path:path}", operation_id="proxy_llm_service_delete")
+async def proxy_llm_delete(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "ai", _llm_upstream(path))
+
+
+@router.patch("/llm/{path:path}", operation_id="proxy_llm_service_patch")
+async def proxy_llm_patch(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "ai", _llm_upstream(path))
+
+
+@router.options("/llm/{path:path}", operation_id="proxy_llm_service_options")
+async def proxy_llm_options(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "ai", _llm_upstream(path))
+
+
+def _nin_upstream(path: str) -> str:
+    return f"/api/v1/nin/{path}" if path else "/api/v1/nin"
+
+
+@router.get("/nin/{path:path}", operation_id="proxy_nin_service_get")
+async def proxy_nin_get(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
+
+
+@router.post("/nin/{path:path}", operation_id="proxy_nin_service_post")
+async def proxy_nin_post(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
+
+
+@router.put("/nin/{path:path}", operation_id="proxy_nin_service_put")
+async def proxy_nin_put(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
+
+
+@router.delete("/nin/{path:path}", operation_id="proxy_nin_service_delete")
+async def proxy_nin_delete(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
+
+
+@router.patch("/nin/{path:path}", operation_id="proxy_nin_service_patch")
+async def proxy_nin_patch(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
+
+
+@router.options("/nin/{path:path}", operation_id="proxy_nin_service_options")
+async def proxy_nin_options(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
+
+
+def _bvn_upstream(path: str) -> str:
+    return f"/api/v1/bvn/{path}" if path else "/api/v1/bvn"
+
+
+@router.get("/bvn/{path:path}", operation_id="proxy_bvn_service_get")
+async def proxy_bvn_get(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
+
+
+@router.post("/bvn/{path:path}", operation_id="proxy_bvn_service_post")
+async def proxy_bvn_post(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
+
+
+@router.put("/bvn/{path:path}", operation_id="proxy_bvn_service_put")
+async def proxy_bvn_put(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
+
+
+@router.delete("/bvn/{path:path}", operation_id="proxy_bvn_service_delete")
+async def proxy_bvn_delete(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
+
+
+@router.patch("/bvn/{path:path}", operation_id="proxy_bvn_service_patch")
+async def proxy_bvn_patch(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
+
+
+@router.options("/bvn/{path:path}", operation_id="proxy_bvn_service_options")
+async def proxy_bvn_options(request: Request, path: str) -> Response:
+    return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
 
 
 @router.get("/services/health")
