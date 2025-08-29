@@ -209,9 +209,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         else:
             logger.info(f"ACCESS_GRANTED: {log_data}")
 
-        # Persist to DB asynchronously (best-effort)
+        # Persist to DB asynchronously (best-effort), but skip health endpoints
         try:
-            asyncio.create_task(insert_gateway_access_log(log_data))
+            if not str(request.url.path).endswith("/health"):
+                asyncio.create_task(insert_gateway_access_log(log_data))
         except Exception:
             pass
 
