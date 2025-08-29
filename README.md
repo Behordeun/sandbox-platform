@@ -883,14 +883,19 @@ GET /api/v1/services/health
 
 ### Recent Updates
 
-- ✅ Centralized secrets: All services read from the root `.env`; no hard‑coded secrets in code
-- ✅ Robust CORS parsing: CORS env vars accept JSON arrays or comma‑separated strings
-- ✅ DB bootstrap: `start-sandbox.sh` ensures schemas exist (runs migrations + creates core tables)
-- ✅ Admin bootstrap: `scripts/create-admin-user.py` requires `DATABASE_URL` and `JWT_SECRET_KEY`
-- ✅ System login: Gateway `POST /api/v1/auth/login` accepts JSON or form and proxies to auth JSON login
-- ✅ Correlation IDs: `X-Request-ID` added to all requests/responses for traceability
-- ✅ Persistent audits: Gateway and Auth write structured audit logs to PostgreSQL tables
-- ✅ Verification script: `scripts/verify-auth-db.py` validates critical tables and FKs
+- ✅ **Token Blacklist System**: Implemented `auth_token_blacklist` table for secure token revocation
+- ✅ **Database Schema Fixes**: All auth tables properly created with foreign key constraints
+- ✅ **Configuration Fixes**: Fixed CORS_ORIGINS JSON parsing and missing config fields
+- ✅ **Health Check Improvements**: Reduced startup noise with graceful health check delays
+- ✅ **Model Registration**: All SQLAlchemy models properly imported and registered
+- ✅ **Centralized secrets**: All services read from the root `.env`; no hard‑coded secrets in code
+- ✅ **Robust CORS parsing**: CORS env vars accept JSON arrays or comma‑separated strings
+- ✅ **DB bootstrap**: `start-sandbox.sh` ensures schemas exist (runs migrations + creates core tables)
+- ✅ **Admin bootstrap**: `scripts/create-admin-user.py` requires `DATABASE_URL` and `JWT_SECRET_KEY`
+- ✅ **System login**: Gateway `POST /api/v1/auth/login` accepts JSON or form and proxies to auth JSON login
+- ✅ **Correlation IDs**: `X-Request-ID` added to all requests/responses for traceability
+- ✅ **Persistent audits**: Gateway and Auth write structured audit logs to PostgreSQL tables
+- ✅ **Verification script**: `scripts/verify-auth-db.py` validates critical tables and FKs
 
 ## 🐛 Troubleshooting
 
@@ -949,6 +954,24 @@ python3 scripts/verify-auth-db.py
 
 # Create default admin users (uses ADMIN_PASSWORD, MUHAMMAD_PASSWORD from .env)
 ./scripts/create-admin-user.py
+
+# Run auth service migrations to ensure token blacklist table exists
+cd services/auth-service
+export MIGRATIONS=1 && export DATABASE_URL="postgresql://postgres:password@localhost:5432/sandbox_platform"
+python3 -m alembic upgrade head
+```
+
+#### Token Authentication Issues
+
+```bash
+# Check if token blacklist table exists
+psql $DATABASE_URL -c "\dt auth_token_blacklist"
+
+# Verify JWT token is valid (decode without verification)
+python3 -c "from jose import jwt; print(jwt.get_unverified_claims('YOUR_TOKEN'))"
+
+# Test authentication endpoint
+curl -H "Authorization: Bearer YOUR_TOKEN" http://127.0.0.1:8000/api/v1/auth/me
 ```
 
 #### Import/Module Issues

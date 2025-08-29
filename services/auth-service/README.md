@@ -111,19 +111,21 @@ The service uses environment variables for configuration. The authoritative file
 
 ## Database Schema
 
-The service uses SQLite for development (PostgreSQL for production) with the following main tables:
+The service uses PostgreSQL with the following main tables:
 
-- **users**: User accounts and profile information
-- **oauth_clients**: OAuth2 client applications
-- **oauth_tokens**: OAuth2 tokens and authorization codes
-- **token_blacklist**: Revoked/blacklisted tokens for security
+- **auth_users**: User accounts and profile information
+- **auth_oauth_clients**: OAuth2 client applications
+- **auth_oauth_tokens**: OAuth2 tokens and authorization codes
+- **auth_token_blacklist**: Revoked/blacklisted tokens for security
+- **auth_audit_logs**: Audit trail for security and compliance
 
 Tables are created via Alembic migrations or the sandbox migration script.
 
 ### Table Naming
 
-- Auth tables are prefixed: `auth_users`, `auth_oauth_clients`, `auth_oauth_tokens`.
-- Related tables: `auth_token_blacklist`, `auth_password_reset_tokens`.
+- All auth tables are prefixed with `auth_` for service isolation
+- Token blacklist includes foreign key relationship to users
+- Audit logs capture all authentication events for compliance
 
 ### Migrations
 
