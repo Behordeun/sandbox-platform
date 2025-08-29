@@ -38,47 +38,42 @@ class Settings(BaseSettings):
     cors_allow_methods: Union[str, List[str]] = ["*"]
     cors_allow_headers: Union[str, List[str]] = ["*"]
 
+    @staticmethod
+    def _parse_list_like(v, default: List[str]):
+        import json
+
+        if v is None or v == "":
+            return default
+        if isinstance(v, list):
+            return [str(i).strip() for i in v if str(i).strip()]
+        if isinstance(v, str):
+            s = v.strip()
+            if s == "*":
+                return ["*"]
+            # Try JSON first
+            try:
+                parsed = json.loads(s)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if str(i).strip()]
+                return [str(parsed).strip()]
+            except Exception:
+                return [item.strip() for item in s.split(",") if item.strip()]
+        return default
+
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v):
-        if v is None or v == "":
-            return ["http://localhost:3000", "http://localhost:8080"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            v = v.strip()
-            if v == "*":
-                return ["*"]
-            return [item.strip() for item in v.split(",") if item.strip()]
-        return ["http://localhost:3000", "http://localhost:8080"]
+        return cls._parse_list_like(v, ["http://localhost:3000", "http://localhost:8080"])
 
     @field_validator("cors_allow_methods", mode="before")
     @classmethod
     def parse_cors_methods(cls, v):
-        if v is None or v == "":
-            return ["*"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            v = v.strip()
-            if v == "*":
-                return ["*"]
-            return [item.strip() for item in v.split(",") if item.strip()]
-        return ["*"]
+        return cls._parse_list_like(v, ["*"])
 
     @field_validator("cors_allow_headers", mode="before")
     @classmethod
     def parse_cors_headers(cls, v):
-        if v is None or v == "":
-            return ["*"]
-        if isinstance(v, list):
-            return v
-        if isinstance(v, str):
-            v = v.strip()
-            if v == "*":
-                return ["*"]
-            return [item.strip() for item in v.split(",") if item.strip()]
-        return ["*"]
+        return cls._parse_list_like(v, ["*"])
 
     # Rate limiting
     rate_limit_enabled: bool = True

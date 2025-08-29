@@ -7,7 +7,7 @@ import os
 from typing import List, Optional, Union
 
 from dotenv import load_dotenv
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 # Load environment variables from root .env file
@@ -139,6 +139,46 @@ class Settings(BaseSettings):
     cors_allow_credentials: bool = True
     cors_allow_methods: Union[str, List[str]] = ["*"]
     cors_allow_headers: Union[str, List[str]] = ["*"]
+
+    @staticmethod
+    def _parse_list_like(v):
+        import json
+        if v is None or v == "":
+            return ["*"]
+        if isinstance(v, list):
+            return [str(i).strip() for i in v if str(i).strip()]
+        if isinstance(v, str):
+            s = v.strip()
+            if s == "*" or s == "":
+                return ["*"]
+            try:
+                parsed = json.loads(s)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if str(i).strip()]
+                return [str(parsed).strip()]
+            except Exception:
+                return [i.strip() for i in s.split(",") if i.strip()]
+        return ["*"]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def _val_cors_origins(cls, v):
+        return cls._parse_list_like(v)
+
+    @field_validator("cors_allow_methods", mode="before")
+    @classmethod
+    def _val_cors_methods(cls, v):
+        # Filter to valid methods unless wildcard
+        parsed = cls._parse_list_like(v)
+        if "*" in parsed:
+            return ["*"]
+        valid = {"GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD","TRACE","CONNECT"}
+        return [m for m in parsed if m.upper() in valid]
+
+    @field_validator("cors_allow_headers", mode="before")
+    @classmethod
+    def _val_cors_headers(cls, v):
+        return cls._parse_list_like(v)
 
     # Email
     smtp_host: Optional[str] = None
