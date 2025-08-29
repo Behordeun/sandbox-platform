@@ -79,7 +79,7 @@ config:
   # NIN/BVN Integration settings
   dojaBaseUrl: "https://api.dojah.io"
   # CORS settings
-  corsOrigins: ["http://localhost:3000", "http://localhost:8080"]
+  corsOrigins: ["http://127.0.0.1:3000", "http://127.0.0.1:8080"]
   corsAllowCredentials: true
   corsAllowMethods: ["*"]
   corsAllowHeaders: ["*"]

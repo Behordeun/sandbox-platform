@@ -36,7 +36,7 @@ cd sandbox/ai && uvicorn app.main:app --reload --port 8002
 
 ## 🔗 Access via API Gateway
 
-All services are accessible through the API Gateway at `http://localhost:8080`:
+All services are accessible through the API Gateway at `http://127.0.0.1:8080`:
 
 ```bash
 # NIN verification

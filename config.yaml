@@ -23,7 +23,7 @@ database:
     two_way_sms_service: "twoway_sms_"
   # Redis for caching and sessions
   redis:
-    url: "redis://localhost:6379/0"
+    url: "redis://127.0.0.1:6379/0"
     sessions_db: 1
     cache_db: 2
 # External API Providers
@@ -55,8 +55,8 @@ services:
       access_token_expire_minutes: 30
       refresh_token_expire_days: 7
     oauth2:
-      issuer_url: "http://localhost:8000"
-      jwks_uri: "http://localhost:8000/.well-known/jwks.json"
+      issuer_url: "http://127.0.0.1:8000"
+      jwks_uri: "http://127.0.0.1:8000/.well-known/jwks.json"
     email:
       smtp_host: "${SMTP_HOST}"
       smtp_port: 587
@@ -73,8 +73,8 @@ services:
     host: "0.0.0.0"
     port: 8080
     debug: false
-    auth_service_url: "http://localhost:8000"
-    redis_url: "redis://localhost:6379/0"
+    auth_service_url: "http://127.0.0.1:8000"
+    redis_url: "redis://127.0.0.1:6379/0"
     rate_limiting:
       requests_per_minute: 100
       window_seconds: 60
@@ -82,12 +82,12 @@ services:
       failure_threshold: 5
       recovery_timeout: 30
     services:
-      nin_service: "http://localhost:8005"
-      bvn_service: "http://localhost:8006"
-      sms_service: "http://localhost:8003"
-      ai_service: "http://localhost:8002"
-      ivr_service: "http://localhost:8004"
-      two_way_sms_service: "http://localhost:8007"
+      nin_service: "http://127.0.0.1:8005"
+      bvn_service: "http://127.0.0.1:8006"
+      sms_service: "http://127.0.0.1:8003"
+      ai_service: "http://127.0.0.1:8002"
+      ivr_service: "http://127.0.0.1:8004"
+      two_way_sms_service: "http://127.0.0.1:8007"
   config_service:
     host: "0.0.0.0"
     port: 8001

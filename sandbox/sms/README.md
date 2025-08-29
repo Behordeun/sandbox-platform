@@ -75,7 +75,7 @@ uvicorn app.main:app --reload --port 8003
 
 ```bash
 # Check service health
-curl http://localhost:8003/health
+curl http://127.0.0.1:8003/health
 
 # Expected response:
 {
@@ -106,7 +106,7 @@ All endpoints require authentication via the API Gateway or direct JWT token.
 
 ```bash
 # Through API Gateway (Recommended)
-curl -X POST http://localhost:8080/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8080/api/v1/sms/send \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -116,7 +116,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
   }'
 
 # Direct to service (for testing)
-curl -X POST http://localhost:8003/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8003/api/v1/sms/send \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -145,7 +145,7 @@ curl -X POST http://localhost:8003/api/v1/sms/send \
 ### Example 2: Send Payment Confirmation
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8080/api/v1/sms/send \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -168,7 +168,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
 ### Example 3: Send Bulk Marketing SMS
 
 ```bash
-curl -X POST http://localhost:8080/api/v1/sms/send-bulk \
+curl -X POST http://127.0.0.1:8080/api/v1/sms/send-bulk \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -212,7 +212,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send-bulk \
 ### Example 4: Check Message Delivery Status
 
 ```bash
-curl -X GET http://localhost:8080/api/v1/sms/status/msg_sms_789012345 \
+curl -X GET http://127.0.0.1:8080/api/v1/sms/status/msg_sms_789012345 \
   -H "Authorization: Bearer $TOKEN"
 
 # Response:
@@ -335,7 +335,7 @@ pytest tests/test_sms_sending.py -v
 
 ```bash
 # Enable test mode (won't send real SMS)
-curl -X POST http://localhost:8003/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8003/api/v1/sms/send \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -413,11 +413,11 @@ SMS_DAILY_LIMIT=100000   # Production daily limits
 
 ```bash
 # Check SMS provider balance
-curl -X GET http://localhost:8003/api/v1/sms/balance \
+curl -X GET http://127.0.0.1:8003/api/v1/sms/balance \
   -H "Authorization: Bearer $TOKEN"
 
 # Check message status
-curl -X GET http://localhost:8003/api/v1/sms/status/msg_id \
+curl -X GET http://127.0.0.1:8003/api/v1/sms/status/msg_id \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -448,7 +448,7 @@ import requests
 
 def send_otp(phone: str, otp: str, token: str):
     response = requests.post(
-        "http://localhost:8080/api/v1/sms/send",
+        "http://127.0.0.1:8080/api/v1/sms/send",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"
@@ -472,7 +472,7 @@ if result['status'] == 'sent':
 ```javascript
 async function sendSMS(to, message, token, type = 'notification') {
     try {
-        const response = await fetch('http://localhost:8080/api/v1/sms/send', {
+        const response = await fetch('http://127.0.0.1:8080/api/v1/sms/send', {
             method: 'POST',
             headers: {
                 'Authorization': `Bearer ${token}`,
@@ -506,7 +506,7 @@ if (result.success) {
 
 - **Provider Docs**: Check your SMS provider documentation
 - **Service Logs**: `tail -f ../logs/sms.log`
-- **Health Check**: `curl http://localhost:8003/health`
+- **Health Check**: `curl http://127.0.0.1:8003/health`
 - **Balance Check**: Use `/api/v1/sms/balance` endpoint
 
 ### Best Practices

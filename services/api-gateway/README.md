@@ -53,7 +53,7 @@ docker run -p 8080:8080 \
 
 ```bash
 # Check gateway health
-curl http://localhost:8080/health
+curl http://127.0.0.1:8080/health
 
 # Expected response:
 {
@@ -65,7 +65,7 @@ curl http://localhost:8080/health
 
 ### Step 3: Explore the API Documentation
 
-Open your browser and go to: [http://localhost:8080/docs](http://localhost:8080/docs)
+Open your browser and go to: [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs)
 
 This interactive documentation shows all available endpoints and lets you test them directly!
 
@@ -84,9 +84,9 @@ helm install api-gateway . \
 
 ### Resources
 
-- **Interactive API Docs**: [http://localhost:8080/docs](http://localhost:8080/docs)
-- **Health Dashboard**: [http://localhost:8080/api/v1/services/health](http://localhost:8080/api/v1/services/health)
-- **Metrics**: [http://localhost:8080/metrics](http://localhost:8080/metrics)
+- **Interactive API Docs**: [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs)
+- **Health Dashboard**: [http://127.0.0.1:8080/api/v1/services/health](http://127.0.0.1:8080/api/v1/services/health)
+- **Metrics**: [http://127.0.0.1:8080/metrics](http://127.0.0.1:8080/metrics)
 
 ### Common Questions
 
@@ -148,7 +148,7 @@ app/
 
 ```bash
 # Check your current rate limit status
-curl -I http://localhost:8080/api/v1/auth/me \
+curl -I http://127.0.0.1:8080/api/v1/auth/me \
   -H "Authorization: Bearer $TOKEN"
 
 # Look for these headers:
@@ -183,7 +183,7 @@ sudo apt install hey  # Ubuntu
 
 # Test gateway performance
 hey -n 1000 -c 10 -H "Authorization: Bearer $TOKEN" \
-  http://localhost:8080/api/v1/auth/me
+  http://127.0.0.1:8080/api/v1/auth/me
 ```
 
 ### Debugging Common Issues
@@ -192,18 +192,18 @@ hey -n 1000 -c 10 -H "Authorization: Bearer $TOKEN" \
 
 ```bash
 # Check if backend services are running
-curl http://localhost:8000/health  # Auth service
-curl http://localhost:8005/health  # NIN service
+curl http://127.0.0.1:8000/health  # Auth service
+curl http://127.0.0.1:8005/health  # NIN service
 
 # Check service health through gateway
-curl http://localhost:8080/api/v1/services/health
+curl http://127.0.0.1:8080/api/v1/services/health
 ```
 
 #### 2. **Authentication Fails (401 Unauthorized)**
 
 ```bash
 # Verify your token is valid
-curl -X GET http://localhost:8080/api/v1/auth/me \
+curl -X GET http://127.0.0.1:8080/api/v1/auth/me \
   -H "Authorization: Bearer $TOKEN" -v
 
 # Check token expiration
@@ -217,7 +217,7 @@ curl -X GET http://localhost:8080/api/v1/auth/me \
 # Or contact admin to increase your rate limit
 
 # Check when your rate limit resets
-curl -I http://localhost:8080/api/v1/auth/me \
+curl -I http://127.0.0.1:8080/api/v1/auth/me \
   -H "Authorization: Bearer $TOKEN"
 ```
 
@@ -265,7 +265,7 @@ docker run -p 8080:8080 \
 |----------|-------------|---------|
 | `HOST` | Server host | `0.0.0.0` |
 | `PORT` | Server port | `8080` |
-| `REDIS_URL` | Redis connection URL | `redis://localhost:6379/0` |
+| `REDIS_URL` | Redis connection URL | `redis://127.0.0.1:6379/0` |
 | `JWT_SECRET_KEY` | JWT secret for token validation | Required |
 | `RATE_LIMIT_REQUESTS` | Requests per window | `100` |
 | `RATE_LIMIT_WINDOW` | Rate limit window (seconds) | `60` |
@@ -352,9 +352,9 @@ helm install api-gateway . \
 
 ### Resources
 
-- **Interactive API Docs**: [http://localhost:8080/docs](http://localhost:8080/docs)
-- **Health Dashboard**: [http://localhost:8080/api/v1/services/health](http://localhost:8080/api/v1/services/health)
-- **Metrics**: [http://localhost:8080/metrics](http://localhost:8080/metrics)
+- **Interactive API Docs**: [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/docs)
+- **Health Dashboard**: [http://127.0.0.1:8080/api/v1/services/health](http://127.0.0.1:8080/api/v1/services/health)
+- **Metrics**: [http://127.0.0.1:8080/metrics](http://127.0.0.1:8080/metrics)
 
 ### Common Questions
 

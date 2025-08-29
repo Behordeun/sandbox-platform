@@ -79,7 +79,7 @@ class Settings(BaseSettings):
 
         # Load from centralized environment variables
         if not self.redis_url:
-            self.redis_url = os.getenv("REDIS_URL", "redis://localhost:6379/1")
+            self.redis_url = os.getenv("REDIS_URL", "redis://127.0.0.1:6379/1")
         if not self.encryption_key:
             self.encryption_key = os.getenv("CONFIG_ENCRYPTION_KEY", "")
 

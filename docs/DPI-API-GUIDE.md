@@ -5,7 +5,7 @@
 ### 1. Authentication
 ```bash
 # Register
-curl -X POST http://localhost:8080/api/v1/auth/register \
+curl -X POST http://127.0.0.1:8080/api/v1/auth/register \
   -H "Content-Type: application/json" \
   -d '{
     "email": "adebayo@fintech.ng",
@@ -17,14 +17,14 @@ curl -X POST http://localhost:8080/api/v1/auth/register \
   }'
 
 # Login
-curl -X POST http://localhost:8080/api/v1/auth/login \
+curl -X POST http://127.0.0.1:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"identifier": "adebayo@fintech.ng", "password": "SecurePass123"}'
 ```
 
 ### 2. NIN Verification
 ```bash
-curl -X POST http://localhost:8080/api/v1/nin/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/nin/verify \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"nin": "12345678901"}'
@@ -32,7 +32,7 @@ curl -X POST http://localhost:8080/api/v1/nin/verify \
 
 ### 3. BVN Verification  
 ```bash
-curl -X POST http://localhost:8080/api/v1/bvn/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/bvn/verify \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
@@ -40,7 +40,7 @@ curl -X POST http://localhost:8080/api/v1/bvn/verify \
 
 ### 4. SMS Messaging
 ```bash
-curl -X POST http://localhost:8080/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8080/api/v1/sms/send \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -100,7 +100,7 @@ All APIs return standardized error responses:
 
 ### Health Check
 ```bash
-curl http://localhost:8080/api/v1/dpi/health
+curl http://127.0.0.1:8080/api/v1/dpi/health
 ```
 
 ### Generate Test Data

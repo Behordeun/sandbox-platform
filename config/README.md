@@ -24,7 +24,7 @@ config/
 
 ```bash
 # Root .env file (PRIMARY configuration)
-DATABASE_URL=postgresql://postgres:password@localhost:5432/sandbox_platform
+DATABASE_URL=postgresql://postgres:password@127.0.0.1:5432/sandbox_platform
 JWT_SECRET_KEY=your-secret-key
 DOJAH_API_KEY=your-dojah-key
 SMS_API_KEY=your-sms-key

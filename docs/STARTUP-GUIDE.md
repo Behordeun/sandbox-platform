@@ -22,7 +22,7 @@ You'll receive an email with:
 ### **Step 3: First Login**
 ```bash
 # Login to get access token
-curl -X POST http://localhost:8000/api/v1/auth/login/json \
+curl -X POST http://127.0.0.1:8000/api/v1/auth/login/json \
   -H "Content-Type: application/json" \
   -d '{
     "identifier": "your-email@startup.ng",
@@ -43,7 +43,7 @@ curl -X POST http://localhost:8000/api/v1/auth/login/json \
 ### **🆔 NIN Verification**
 ```bash
 # Verify Nigerian National Identity Number
-curl -X POST http://localhost:8080/api/v1/nin/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/nin/verify \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"nin": "12345678901"}'
@@ -52,7 +52,7 @@ curl -X POST http://localhost:8080/api/v1/nin/verify \
 ### **🏦 BVN Verification**
 ```bash
 # Verify Bank Verification Number
-curl -X POST http://localhost:8080/api/v1/bvn/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/bvn/verify \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
@@ -61,7 +61,7 @@ curl -X POST http://localhost:8080/api/v1/bvn/verify \
 ### **📱 SMS Services**
 ```bash
 # Send SMS to Nigerian numbers
-curl -X POST http://localhost:8080/api/v1/sms/send \
+curl -X POST http://127.0.0.1:8080/api/v1/sms/send \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -73,7 +73,7 @@ curl -X POST http://localhost:8080/api/v1/sms/send \
 ### **🤖 AI Services**
 ```bash
 # Generate Nigerian-context content
-curl -X POST http://localhost:8080/api/v1/ai/generate \
+curl -X POST http://127.0.0.1:8080/api/v1/ai/generate \
   -H "Authorization: Bearer YOUR_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -85,8 +85,8 @@ curl -X POST http://localhost:8080/api/v1/ai/generate \
 ## 📚 API Documentation
 
 ### **Interactive Documentation**
-- **API Gateway**: http://localhost:8080/docs
-- **Auth Service**: http://localhost:8000/docs
+- **API Gateway**: http://127.0.0.1:8080/docs
+- **Auth Service**: http://127.0.0.1:8000/docs
 
 ### **Key Endpoints**
 ```bash
@@ -109,7 +109,7 @@ POST /api/v1/ai/generate       # AI content generation
 ### **1. Authentication**
 ```javascript
 // Login and store token
-const response = await fetch('http://localhost:8000/api/v1/auth/login/json', {
+const response = await fetch('http://127.0.0.1:8000/api/v1/auth/login/json', {
   method: 'POST',
   headers: { 'Content-Type': 'application/json' },
   body: JSON.stringify({
@@ -128,7 +128,7 @@ localStorage.setItem('token', access_token);
 const apiCall = async (endpoint, data) => {
   const token = localStorage.getItem('token');
   
-  const response = await fetch(`http://localhost:8080${endpoint}`, {
+  const response = await fetch(`http://127.0.0.1:8080${endpoint}`, {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${token}`,
@@ -149,7 +149,7 @@ const ninResult = await apiCall('/api/v1/nin/verify', {
 ### **3. Logout**
 ```javascript
 // Logout and clear token
-await fetch('http://localhost:8000/api/v1/auth/logout', {
+await fetch('http://127.0.0.1:8000/api/v1/auth/logout', {
   method: 'POST'
 });
 localStorage.removeItem('token');
@@ -160,9 +160,9 @@ localStorage.removeItem('token');
 ### **Test Data**
 ```bash
 # Get test examples
-curl http://localhost:8080/api/v1/examples/nin
-curl http://localhost:8080/api/v1/examples/sms
-curl http://localhost:8080/api/v1/examples/bvn
+curl http://127.0.0.1:8080/api/v1/examples/nin
+curl http://127.0.0.1:8080/api/v1/examples/sms
+curl http://127.0.0.1:8080/api/v1/examples/bvn
 ```
 
 ### **Mock Nigerian Data**
@@ -194,14 +194,14 @@ curl http://localhost:8080/api/v1/examples/bvn
 ```bash
 # Get your user info
 curl -H "Authorization: Bearer YOUR_TOKEN" \
-  http://localhost:8000/api/v1/auth/me
+  http://127.0.0.1:8000/api/v1/auth/me
 ```
 
 ### **Service Health**
 ```bash
 # Check if services are running
-curl http://localhost:8080/health
-curl http://localhost:8000/health
+curl http://127.0.0.1:8080/health
+curl http://127.0.0.1:8000/health
 ```
 
 ## 🎉 Success Checklist

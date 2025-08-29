@@ -51,7 +51,7 @@ uvicorn app.main:app --reload --port 8007
 ### Step 3: Test It Works
 ```bash
 # Check service health
-curl http://localhost:8007/health
+curl http://127.0.0.1:8007/health
 
 # Expected response:
 {
@@ -77,7 +77,7 @@ curl http://localhost:8007/health
 ### Example 1: Handle Incoming Customer SMS
 ```bash
 # Webhook endpoint receives incoming SMS
-curl -X POST http://localhost:8007/api/v1/two-way-sms/webhook \
+curl -X POST http://127.0.0.1:8007/api/v1/two-way-sms/webhook \
   -H "Content-Type: application/json" \
   -d '{
     "from": "+2348012345678",
@@ -104,7 +104,7 @@ curl -X POST http://localhost:8007/api/v1/two-way-sms/webhook \
 
 ### Example 2: Create Interactive Survey Workflow
 ```bash
-curl -X POST http://localhost:8080/api/v1/two-way-sms/create-workflow \
+curl -X POST http://127.0.0.1:8080/api/v1/two-way-sms/create-workflow \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -134,7 +134,7 @@ curl -X POST http://localhost:8080/api/v1/two-way-sms/create-workflow \
 
 ### Example 3: Send Manual Reply
 ```bash
-curl -X POST http://localhost:8080/api/v1/two-way-sms/send-reply \
+curl -X POST http://127.0.0.1:8080/api/v1/two-way-sms/send-reply \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{
@@ -201,7 +201,7 @@ ngrok http 8007
 ### Testing Workflows
 ```bash
 # Test keyword response
-curl -X POST http://localhost:8007/api/v1/two-way-sms/webhook \
+curl -X POST http://127.0.0.1:8007/api/v1/two-way-sms/webhook \
   -H "Content-Type: application/json" \
   -d '{
     "from": "+2348012345678",
@@ -231,7 +231,7 @@ def create_support_workflow(token: str):
     }
     
     response = requests.post(
-        "http://localhost:8080/api/v1/two-way-sms/create-workflow",
+        "http://127.0.0.1:8080/api/v1/two-way-sms/create-workflow",
         headers={
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json"

@@ -69,7 +69,7 @@ class Settings(BaseSettings):
     # Storage settings
     storage_type: str = "redis"
     config_storage_type: str = "redis"  # Alias for compatibility
-    redis_url: str = "redis://localhost:6379/1"
+    redis_url: str = "redis://127.0.0.1:6379/1"
     encryption_key: str = ""
     versioning_enabled: bool = True
     config_file_path: str = "./config_data"

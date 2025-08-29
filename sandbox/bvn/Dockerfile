@@ -34,7 +34,7 @@ EXPOSE 8006
 
 # Health check for BVN service
 HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 \
-    CMD curl -f http://localhost:8006/health || exit 1
+    CMD curl -f http://127.0.0.1:8006/health || exit 1
 
 # Run the BVN verification service
 CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8006"]

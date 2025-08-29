@@ -27,7 +27,7 @@ class Settings(BaseSettings):
     ai_max_tokens: int = 2000
 
     # Auth Service
-    auth_service_url: str = "http://localhost:8000"
+    auth_service_url: str = "http://127.0.0.1:8000"
 
     model_config = ConfigDict(
         env_file="../../../../.env",  # Use root .env file

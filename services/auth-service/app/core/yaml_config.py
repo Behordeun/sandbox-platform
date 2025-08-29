@@ -64,10 +64,10 @@ class Settings(BaseSettings):
             # OAuth2 Configuration
             oauth2_config = service_config.get("oauth2", {})
             self.oauth2_issuer_url = oauth2_config.get(
-                "issuer_url", "http://localhost:8000"
+                "issuer_url", "http://127.0.0.1:8000"
             )
             self.oauth2_jwks_uri = oauth2_config.get(
-                "jwks_uri", "http://localhost:8000/.well-known/jwks.json"
+                "jwks_uri", "http://127.0.0.1:8000/.well-known/jwks.json"
             )
 
             # CORS Configuration
@@ -123,8 +123,8 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = 7
 
     # OAuth2
-    oauth2_issuer_url: str = "http://localhost:8000"
-    oauth2_jwks_uri: str = "http://localhost:8000/.well-known/jwks.json"
+    oauth2_issuer_url: str = "http://127.0.0.1:8000"
+    oauth2_jwks_uri: str = "http://127.0.0.1:8000/.well-known/jwks.json"
 
     # CORS
     cors_origins: Union[str, List[str]] = ["*"]

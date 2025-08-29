@@ -33,10 +33,10 @@ uvicorn app.main:app --reload --port 8006
 
 ```bash
 # Health check
-curl http://localhost:8006/health
+curl http://127.0.0.1:8006/health
 
 # API documentation
-open http://localhost:8006/docs
+open http://127.0.0.1:8006/docs
 ```
 
 ## 📋 Service Overview
@@ -168,33 +168,33 @@ AUTH_SERVICE_URL=http://auth-service:8000
 
 ```bash
 # Test BVN verification
-curl -X POST http://localhost:8006/api/v1/verify \
+curl -X POST http://127.0.0.1:8006/api/v1/verify \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
 
 # Test basic lookup
-curl -X POST http://localhost:8006/api/v1/lookup \
+curl -X POST http://127.0.0.1:8006/api/v1/lookup \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
 
 # Check status
-curl http://localhost:8006/api/v1/status/12345678901
+curl http://127.0.0.1:8006/api/v1/status/12345678901
 
 # Health check
-curl http://localhost:8006/health
+curl http://127.0.0.1:8006/health
 ```
 
 ### Via API Gateway
 
 ```bash
 # Get auth token first
-TOKEN=$(curl -X POST http://localhost:8080/api/v1/auth/login \
+TOKEN=$(curl -X POST http://127.0.0.1:8080/api/v1/auth/login \
   -H "Content-Type: application/json" \
   -d '{"email": "user@example.com", "password": "password"}' \
   | jq -r '.access_token')
 
 # Use token for BVN verification
-curl -X POST http://localhost:8080/api/v1/bvn/verify \
+curl -X POST http://127.0.0.1:8080/api/v1/bvn/verify \
   -H "Authorization: Bearer $TOKEN" \
   -H "Content-Type: application/json" \
   -d '{"bvn": "12345678901"}'
@@ -208,7 +208,7 @@ import httpx
 async def test_bvn_verification():
     async with httpx.AsyncClient() as client:
         response = await client.post(
-            "http://localhost:8006/api/v1/verify",
+            "http://127.0.0.1:8006/api/v1/verify",
             json={"bvn": "12345678901"}
         )
         print(response.json())
@@ -250,7 +250,7 @@ services:
       - DOJAH_APP_ID=${DOJAH_APP_ID}
       - DEBUG=false
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8006/health"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8006/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -319,10 +319,10 @@ bvn/
 
 ```bash
 # Service health
-curl http://localhost:8006/health
+curl http://127.0.0.1:8006/health
 
 # Detailed status via API Gateway
-curl http://localhost:8080/api/v1/services/bvn/health
+curl http://127.0.0.1:8080/api/v1/services/bvn/health
 ```
 
 ### Logging

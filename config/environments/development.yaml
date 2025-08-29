@@ -3,7 +3,7 @@ environment: "development"
 # Development Database Settings
 database:
   # Use PostgreSQL for development (consistent with production)
-  url: "postgresql://sandbox_user:${DB_PASSWORD:sandbox_password}@localhost:5432/sandbox_platform"
+  url: "postgresql://sandbox_user:${DB_PASSWORD:sandbox_password}@127.0.0.1:5432/sandbox_platform"
 # Development API Settings (use sandbox endpoints)
 providers:
   dojah:
@@ -18,7 +18,7 @@ services:
     jwt:
       access_token_expire_minutes: 60
     cors:
-      origins: ["http://localhost:3000", "http://localhost:8080"]
+      origins: ["http://127.0.0.1:3000", "http://127.0.0.1:8080"]
   api_gateway:
     debug: true
     rate_limiting:

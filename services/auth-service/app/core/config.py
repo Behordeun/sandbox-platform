@@ -21,8 +21,8 @@ class Settings(BaseSettings):
     jwt_refresh_token_expire_days: int = 7
 
     # OAuth2 settings
-    oauth2_issuer_url: str = "http://localhost:8000"
-    oauth2_jwks_uri: str = "http://localhost:8000/.well-known/jwks.json"
+    oauth2_issuer_url: str = "http://127.0.0.1:8000"
+    oauth2_jwks_uri: str = "http://127.0.0.1:8000/.well-known/jwks.json"
 
     # NIN/BVN Integration settings
     doja_api_key: Optional[str] = None
