@@ -296,6 +296,21 @@ def create_service_tables():
             """,
         ),
         (
+            "Gateway Latency Percentiles",
+            """
+            CREATE OR REPLACE VIEW v_gateway_latency_pcts AS
+            SELECT
+              date_trunc('hour', created_at) AS bucket,
+              service_name,
+              percentile_cont(0.50) WITHIN GROUP (ORDER BY duration_ms) AS p50_ms,
+              percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) AS p95_ms,
+              percentile_cont(0.99) WITHIN GROUP (ORDER BY duration_ms) AS p99_ms
+            FROM gateway_access_logs
+            GROUP BY 1,2
+            ORDER BY 1 DESC, 2;
+            """,
+        ),
+        (
             "Gateway Top Endpoints",
             """
             CREATE OR REPLACE VIEW v_gateway_top_endpoints AS
@@ -370,6 +385,21 @@ def create_service_tables():
             ORDER BY 1 DESC, 2;
             """,
         ),
+        (
+            "Service Latency Percentiles",
+            """
+            CREATE OR REPLACE VIEW v_service_latency_pcts AS
+            SELECT
+              date_trunc('hour', created_at) AS bucket,
+              service,
+              percentile_cont(0.50) WITHIN GROUP (ORDER BY duration_ms) AS p50_ms,
+              percentile_cont(0.95) WITHIN GROUP (ORDER BY duration_ms) AS p95_ms,
+              percentile_cont(0.99) WITHIN GROUP (ORDER BY duration_ms) AS p99_ms
+            FROM v_service_access_summary
+            GROUP BY 1,2
+            ORDER BY 1 DESC, 2;
+            """,
+        ),
     ]
 
     with engine.connect() as conn:
@@ -380,6 +410,28 @@ def create_service_tables():
                 print(f"✅ View created/updated: {label}")
             except Exception as e:
                 print(f"❌ Error creating view {label}: {e}")
+
+    # Optionally seed a read-only role for analytics/Grafana
+    ro_user = os.getenv("GRAFANA_RO_USER") or os.getenv("READONLY_DB_USER")
+    ro_pass = os.getenv("GRAFANA_RO_PASSWORD") or os.getenv("READONLY_DB_PASSWORD")
+    if ro_user and ro_pass:
+        with engine.connect() as conn:
+            try:
+                # Create role if not exists
+                exists = conn.execute(text("SELECT 1 FROM pg_roles WHERE rolname=:u"), {"u": ro_user}).scalar()
+                if not exists:
+                    conn.execute(text(f"CREATE ROLE \"{ro_user}\" LOGIN PASSWORD :p"), {"p": ro_pass})
+                # Grant permissions
+                conn.execute(text(f"GRANT USAGE ON SCHEMA public TO \"{ro_user}\""))
+                conn.execute(text(f"GRANT SELECT ON ALL TABLES IN SCHEMA public TO \"{ro_user}\""))
+                conn.execute(text(f"GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO \"{ro_user}\""))
+                # Ensure future tables/sequences are granted
+                conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO \"{ro_user}\""))
+                conn.execute(text(f"ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO \"{ro_user}\""))
+                conn.commit()
+                print(f"✅ Read-only role ensured: {ro_user}")
+            except Exception as e:
+                print(f"⚠️  Could not ensure read-only role '{ro_user}': {e}")
 
     # Verify tables were created
     with engine.connect() as conn:
