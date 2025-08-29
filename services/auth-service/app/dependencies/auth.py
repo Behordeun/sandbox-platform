@@ -1,4 +1,5 @@
 from app.core.security import verify_token
+from fastapi import Request
 from app.core.system_logger import system_logger
 from app.crud.user import user_crud
 from app.dependencies.database import get_db
@@ -14,6 +15,7 @@ oauth2_scheme = HTTPBearer()
 def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
+    request: Request | None = None,
 ) -> User:
     """Get current authenticated user from JWT token."""
     from app.crud.token_blacklist import token_blacklist_crud
@@ -51,6 +53,13 @@ def get_current_user(
     except Exception as e:
         system_logger.error(e, {"stage": "token_validation"}, exc_info=True)
         raise credentials_exception
+
+    # Persist user context on the request for downstream middlewares/handlers
+    try:
+        if request is not None:
+            request.state.user_id = int(user_id)
+    except Exception:
+        pass
 
     user = user_crud.get(db, id=int(user_id))
     if user is None:

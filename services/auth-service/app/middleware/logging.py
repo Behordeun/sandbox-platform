@@ -27,6 +27,7 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
         user_agent = request.headers.get("User-Agent", "unknown")
 
         # Extract user info if available (state, forwarded header, or token)
+        # First attempt before processing the request
         user_id = getattr(request.state, "user_id", None)
         if not user_id:
             user_id = request.headers.get("X-User-Id")
@@ -40,9 +41,16 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
 
         response = await call_next(request)
 
+        # Resolve user_id again after endpoint runs (e.g., login sets request.state)
+        final_user_id = (
+            user_id
+            or getattr(request.state, "user_id", None)
+            or request.headers.get("X-User-Id")
+        )
+
         # Log the activity
         self._log_user_activity(
-            request, response, user_id, start_time, client_ip, user_agent
+            request, response, final_user_id, start_time, client_ip, user_agent
         )
 
         return response
@@ -134,7 +142,7 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
                         ),
                         {
                             "request_id": str(log.get("request_id") or ""),
-                            "user_id": log.get("user_id"),
+                            "user_id": int(log.get("user_id")) if str(log.get("user_id") or "").isdigit() else None,
                             "activity_type": str(log.get("activity_type") or ""),
                             "success": bool(log.get("success")),
                             "method": str(log.get("method") or ""),
