@@ -133,6 +133,26 @@ class Settings(BaseSettings):
         extra="ignore",  # Ignore extra fields from .env
     )
 
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        # Allow container / env overrides for service URLs
+        try:
+            import os
+
+            auth_url = os.getenv("AUTH_SERVICE_URL") or self.auth_service_url
+            sms_url = os.getenv("SMS_SERVICE_URL") or "http://127.0.0.1:8003"
+            ai_url = os.getenv("AI_SERVICE_URL") or "http://127.0.0.1:8002"
+
+            if "auth" in self.services:
+                self.services["auth"].url = auth_url
+            if "sms" in self.services:
+                self.services["sms"].url = sms_url
+            if "ai" in self.services:
+                self.services["ai"].url = ai_url
+        except Exception:
+            # Keep defaults if any issue occurs
+            pass
+
 
 # Global settings instance
 settings = Settings()

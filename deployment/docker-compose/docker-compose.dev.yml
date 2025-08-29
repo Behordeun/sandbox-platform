@@ -56,7 +56,19 @@ services:
     volumes:
       - ../../services/auth-service:/app
       - ../../logs:/app/logs
-    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+    environment:
+      # App/Env
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DEBUG: ${DEBUG:-true}
+      # Database & Cache
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      # Auth/JWT (must match API Gateway)
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES:-120}
+    command: sh -c "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
@@ -108,6 +120,19 @@ services:
     volumes:
       - ../../services/api-gateway:/app
       - ../../logs:/app/logs
+    environment:
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      DEBUG: ${DEBUG:-true}
+      DATABASE_URL: ${DATABASE_URL}
+      REDIS_URL: ${REDIS_URL}
+      # Ensure gateway validates the same JWTs issued by auth-service
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY}
+      JWT_ALGORITHM: ${JWT_ALGORITHM:-HS256}
+      # Service discovery URLs (inside docker network)
+      AUTH_SERVICE_URL: http://auth-service:8000
+      SMS_SERVICE_URL: http://sms-service:8003
+      AI_SERVICE_URL: http://ai-service:8002
     command: uvicorn app.main:app --host 0.0.0.0 --port 8080 --reload
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8080/health"]
