@@ -140,29 +140,33 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
 
     def _get_activity_type(self, method: str, path: str) -> str:
         """Determine the type of user activity based on the request."""
-        if path == "/api/v1/auth/register" and method == "POST":
-            return "user_registration"
-        elif (
-            path in ["/api/v1/auth/login", "/api/v1/auth/login/json"]
-            and method == "POST"
-        ):
-            return "user_login"
-        elif path == "/api/v1/auth/logout" and method == "POST":
-            return "user_logout"
-        elif path in ["/api/v1/auth/userinfo", "/api/v1/auth/me"] and method == "GET":
-            return "profile_access"
-        elif path == "/api/v1/auth/password-reset/request" and method == "POST":
-            return "password_reset_request"
-        elif path == "/api/v1/auth/password-reset/verify" and method == "POST":
-            return "password_reset_verify"
-        elif path.startswith("/api/v1/oauth2/"):
+        post_paths = {
+            "/api/v1/auth/register": "user_registration",
+            "/api/v1/auth/logout": "user_logout",
+            "/api/v1/auth/password-reset/request": "password_reset_request",
+            "/api/v1/auth/password-reset/verify": "password_reset_verify",
+        }
+        get_paths = {
+            "/api/v1/auth/userinfo": "profile_access",
+            "/api/v1/auth/me": "profile_access",
+        }
+        login_paths = {"/api/v1/auth/login", "/api/v1/auth/login/json"}
+
+        if method == "POST":
+            if path in post_paths:
+                return post_paths[path]
+            if path in login_paths:
+                return "user_login"
+        elif method == "GET" and path in get_paths:
+            return get_paths[path]
+
+        if path.startswith("/api/v1/oauth2/"):
             return "oauth2_flow"
-        elif "nin" in path or "bvn" in path:
+        if "nin" in path or "bvn" in path:
             return "identity_verification"
-        elif path == "/health":
+        if path == "/health":
             return "health_check"
-        else:
-            return "api_access"
+        return "api_access"
 
     def _get_verification_type(self, path: str) -> str:
         """Get the type of identity verification."""
