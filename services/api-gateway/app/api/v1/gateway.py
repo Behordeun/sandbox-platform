@@ -5,6 +5,7 @@ from app.services.health import health_service
 from app.services.proxy import proxy_service
 from fastapi import APIRouter, HTTPException, Request
 from fastapi.responses import Response
+from pydantic import BaseModel
 
 router = APIRouter()
 
@@ -231,8 +232,13 @@ async def get_service_metrics(service_name: str) -> Any:
     return health_service.get_service_metrics(service_name)
 
 
+class LoginRequest(BaseModel):
+    identifier: str
+    password: str
+
+
 @router.post("/auth/login")
-async def system_login(request: Request) -> Response:
+async def system_login(credentials: LoginRequest, request: Request) -> Response:
     """System-wide authentication endpoint.
 
     Example for Nigerian developers:
@@ -241,7 +247,12 @@ async def system_login(request: Request) -> Response:
         "password": "SecurePass123"
     }
     """
-    return await proxy_service.proxy_request(request, "auth", "/api/v1/auth/login/json")
+    return await proxy_service.proxy_request(
+        request,
+        "auth",
+        "/api/v1/auth/login/json",
+        json_payload=credentials.model_dump(),
+    )
 
 
 @router.get("/examples/nin")
