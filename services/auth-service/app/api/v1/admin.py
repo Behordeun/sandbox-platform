@@ -20,14 +20,16 @@ router = APIRouter()
 
 
 def get_admin_user(current_user: User = Depends(get_current_active_user)) -> User:
-    """Verify current user is an admin."""
-    # For now, check if user email contains 'admin' or is in admin list
-    # In production, implement proper role-based access control
+    """Verify current user is an admin (role-based, fallback to email for legacy admins)."""
+    # Role-based check (preferred)
+    if getattr(current_user, "role", None) == "admin":
+        return current_user
+
+    # Fallback: check if user email contains 'admin' or is in admin list
     admin_emails = [
         "admin@dpi-sandbox.ng",
         "muhammad@datasciencenigeria.ai",
     ]
-
     if (
         current_user.email not in admin_emails
         and "admin" not in current_user.email.lower()
@@ -71,7 +73,7 @@ def create_user(
                 status_code=400, detail="User with this username already exists"
             )
 
-    # Create user
+    # Create user (role can be specified in payload)
     user = user_crud.create(db, obj_in=user_in)
 
     # Send welcome email with credentials

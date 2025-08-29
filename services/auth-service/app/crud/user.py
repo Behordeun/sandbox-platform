@@ -24,6 +24,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
             first_name=obj_in.first_name,
             last_name=obj_in.last_name,
             phone_number=obj_in.phone_number,
+            role=getattr(obj_in, "role", "user"),  # Set role if provided
         )
         db.add(db_obj)
         db.commit()
