@@ -4,7 +4,7 @@ from app.core.system_logger import system_logger
 from app.crud.user import user_crud
 from app.dependencies.database import get_db
 from app.models.user import User
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, status, Request
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 
@@ -13,9 +13,9 @@ oauth2_scheme = HTTPBearer()
 
 
 def get_current_user(
+    request: Request,
     credentials: HTTPAuthorizationCredentials = Depends(oauth2_scheme),
     db: Session = Depends(get_db),
-    request: Request | None = None,
 ) -> User:
     """Get current authenticated user from JWT token."""
     from app.crud.token_blacklist import token_blacklist_crud
@@ -56,8 +56,7 @@ def get_current_user(
 
     # Persist user context on the request for downstream middlewares/handlers
     try:
-        if request is not None:
-            request.state.user_id = int(user_id)
+        request.state.user_id = int(user_id)
     except Exception:
         pass
 
@@ -93,10 +92,12 @@ def get_optional_current_user(
 
     try:
         token = credentials.credentials
-        user_id = verify_token(token, token_type="access")
-        if user_id is None:
+        payload = verify_token(token, token_type="access")
+        if payload is None:
             return None
-
+        user_id = payload.get("sub")
+        if not user_id:
+            return None
         user = user_crud.get(db, id=int(user_id))
         return user
     except Exception:

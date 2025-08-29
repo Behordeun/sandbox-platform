@@ -41,7 +41,7 @@ else:
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 # Import all models to ensure they are registered with Base.metadata
-from app.models import oauth_client, oauth_token, user  # noqa
+from app.models import oauth_client, oauth_token, user, token_blacklist  # noqa
 
 
 def get_db():
