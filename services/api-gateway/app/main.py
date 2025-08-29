@@ -13,6 +13,7 @@ from app.services.proxy import proxy_service
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
+from fastapi.routing import APIRoute
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -53,6 +54,21 @@ async def periodic_health_checks():
             await asyncio.sleep(30)
 
 
+# Custom unique operation id generator
+def generate_unique_id(route: APIRoute) -> str:
+    method = next(iter(route.methods)).lower() if route.methods else "get"
+    tag = (route.tags[0] if route.tags else "api").replace(" ", "_")
+    # Sanitize path: remove { } and replace / - with _
+    path = (
+        route.path_format.lstrip("/")
+        .replace("/", "_")
+        .replace("-", "_")
+        .replace("{", "")
+        .replace("}", "")
+    ) or "root"
+    name = (route.name or "handler").replace(" ", "_")
+    return f"{tag}_{method}_{path}_{name}"
+
 # Create FastAPI application
 app = FastAPI(
     title=settings.app_name,
@@ -62,6 +78,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
+    generate_unique_id_function=generate_unique_id,
 )
 
 # Add CORS middleware

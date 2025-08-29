@@ -10,6 +10,7 @@ from app.models import oauth_client, password_reset, token_blacklist, user
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.routing import APIRoute
 from sqlalchemy import text
 
 # Configure logging
@@ -42,6 +43,20 @@ async def lifespan(app: FastAPI):
     logger.info("Shutting down Sandbox Auth Service...")
 
 
+# Custom unique operation id generator
+def generate_unique_id(route: APIRoute) -> str:
+    method = next(iter(route.methods)).lower() if route.methods else "get"
+    tag = (route.tags[0] if route.tags else "api").replace(" ", "_")
+    path = (
+        route.path_format.lstrip("/")
+        .replace("/", "_")
+        .replace("-", "_")
+        .replace("{", "")
+        .replace("}", "")
+    ) or "root"
+    name = (route.name or "handler").replace(" ", "_")
+    return f"{tag}_{method}_{path}_{name}"
+
 # Create FastAPI application
 app = FastAPI(
     title=settings.app_name,
@@ -51,6 +66,7 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc",
     lifespan=lifespan,
+    generate_unique_id_function=generate_unique_id,
 )
 
 # Add CORS middleware
