@@ -81,6 +81,20 @@ database_url = os.getenv("DATABASE_URL") or yaml_config.get("database_url") or "
 - **Environment Variable Priority**: .env values always override YAML configuration
 - **Robust Error Handling**: Graceful fallbacks when config_loader is unavailable
 
+## 📝 Tips & Conventions
+
+- CORS variables must be serializable as lists. Prefer JSON arrays in `.env`:
+
+  ```env
+  CORS_ORIGINS=["*"]
+  CORS_ALLOW_METHODS=["GET","POST","PUT","DELETE","OPTIONS"]
+  CORS_ALLOW_HEADERS=["*"]
+  ```
+
+  Comma‑separated strings are also accepted and will be parsed accordingly.
+
+- Secrets are never hard‑coded in code. Provide them via the root `.env` or your deployment secret manager.
+
 ---
 
 **Single .env file, dual configuration support, environment variable priority** ⚙️

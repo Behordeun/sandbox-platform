@@ -23,29 +23,15 @@ A FastAPI-based authentication and authorization service for the Sandbox Platfor
 
 ## Quick Start
 
-### Local Development
+### Local Development (via sandbox root recommended)
 
-1. **Clone and setup**:
-
-```bash
-cd auth-service
-cp .env.example .env
-# Edit .env with your configuration
-```
-
-2. **Install dependencies**:
+From the repository root, the sandbox scripts will set up the database, ensure tables exist, and start all services:
 
 ```bash
-pip install -r requirements.txt
+./scripts/start-sandbox.sh
 ```
 
-3. **Run the service**:
-
-   ```bash
-   uvicorn app.main:app --reload --host 0.0.0.0 --port 8000
-   ```
-
-4. **Access the API**:
+Access the API:
 
    - API Documentation: [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
    - Health Check: [http://127.0.0.1:8000/health](http://127.0.0.1:8000/health)
@@ -109,19 +95,19 @@ helm install auth-service . \
 
 ## Configuration
 
-The service uses environment variables for configuration. See `.env.example` for all available options.
+The service uses environment variables for configuration. The authoritative file is the repository root `.env`.
 
 ### Key Configuration Options
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `DATABASE_URL` | Database connection string | `sqlite:///./sandbox_auth.db` |
+| Variable | Description | Notes |
+|----------|-------------|-------|
+| `DATABASE_URL` | Database connection string | Required (PostgreSQL) |
 | `JWT_SECRET_KEY` | Secret key for JWT signing | Required |
-| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiry | `30` |
-| `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | Refresh token expiry | `7` |
-| `OAUTH2_ISSUER_URL` | OAuth2 issuer URL | `http://127.0.0.1:8000` |
-| `CORS_ORIGINS` | Allowed CORS origins | `["*"]` |
-| `DEBUG` | Enable debug mode | `false` |
+| `JWT_ACCESS_TOKEN_EXPIRE_MINUTES` | Access token expiry | Default `30` if unset |
+| `JWT_REFRESH_TOKEN_EXPIRE_DAYS` | Refresh token expiry | Default `7` if unset |
+| `OAUTH2_ISSUER_URL` | OAuth2 issuer URL | Default `http://127.0.0.1:8000` |
+| `CORS_ORIGINS` | Allowed CORS origins | JSON array or comma‑separated |
+| `DEBUG` | Enable debug mode | Default `false` |
 
 ## Database Schema
 
@@ -132,7 +118,28 @@ The service uses SQLite for development (PostgreSQL for production) with the fol
 - **oauth_tokens**: OAuth2 tokens and authorization codes
 - **token_blacklist**: Revoked/blacklisted tokens for security
 
-Database tables are automatically created on startup for development.
+Tables are created via Alembic migrations or the sandbox migration script.
+
+### Table Naming
+
+- Auth tables are prefixed: `auth_users`, `auth_oauth_clients`, `auth_oauth_tokens`.
+- Related tables: `auth_token_blacklist`, `auth_password_reset_tokens`.
+
+### Migrations
+
+Run from repository root:
+
+```bash
+./scripts/migrate-db.py
+```
+
+This script loads `.env`, exports `MIGRATIONS=1`, and runs Alembic for auth-service. It also includes safe rename/data copy/cleanup for legacy unprefixed tables.
+
+Verify schema:
+
+```bash
+python3 scripts/verify-auth-db.py
+```
 
 ## Security Features
 
@@ -219,12 +226,17 @@ tail -f ../logs/user_activity.log
 tail -f ../logs/security_events.log
 ```
 
-### Log Categories
+### Log Categories & Audits
 
 - **User Activities**: Registration, login, profile access, password resets
 - **Security Events**: Failed logins, suspicious activities, token violations
 - **OAuth2 Flows**: Authorization codes, token exchanges, client interactions
 - **Identity Verification**: NIN/BVN verification attempts and results
+
+Database persistence:
+
+- Correlation header: `X-Request-ID` present in responses and logs
+- Audit table: `auth_audit_logs` stores structured activity/security events
 
 ### Analytics Capabilities
 

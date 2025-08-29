@@ -883,12 +883,14 @@ GET /api/v1/services/health
 
 ### Recent Updates
 
-- **✅ Fixed Configuration Issues**: All services now use centralized .env file
-- **✅ Resolved Import Errors**: Fixed module import paths across all services
-- **✅ Database Connectivity**: Updated to use correct PostgreSQL credentials
-- **✅ CORS Configuration**: Fixed CORS field parsing with Union types and field validators
-- **✅ Service Health**: All services now start successfully with proper health checks
-- **✅ Centralized Logging**: Structured logging with automatic rotation and retention
+- ✅ Centralized secrets: All services read from the root `.env`; no hard‑coded secrets in code
+- ✅ Robust CORS parsing: CORS env vars accept JSON arrays or comma‑separated strings
+- ✅ DB bootstrap: `start-sandbox.sh` ensures schemas exist (runs migrations + creates core tables)
+- ✅ Admin bootstrap: `scripts/create-admin-user.py` requires `DATABASE_URL` and `JWT_SECRET_KEY`
+- ✅ System login: Gateway `POST /api/v1/auth/login` accepts JSON or form and proxies to auth JSON login
+- ✅ Correlation IDs: `X-Request-ID` added to all requests/responses for traceability
+- ✅ Persistent audits: Gateway and Auth write structured audit logs to PostgreSQL tables
+- ✅ Verification script: `scripts/verify-auth-db.py` validates critical tables and FKs
 
 ## 🐛 Troubleshooting
 
@@ -904,7 +906,7 @@ python3 -c "from app.core.config import settings; print('Config OK:', settings.d
 # Test YAML configuration (if used)
 python3 -c "from app.core.yaml_config import settings; print('YAML Config OK:', settings.database_url)"
 
-# Check environment variables
+# Check environment variables (root .env is authoritative)
 echo $DATABASE_URL
 grep DATABASE_URL .env
 ```
@@ -933,9 +935,20 @@ psql postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform -c "\dt
 # Check if database exists
 psql postgresql://postgres:your-password@127.0.0.1:5432/postgres -c "SELECT datname FROM pg_database WHERE datname='sandbox_platform';"
 
-# Run migrations if needed
-cd services/auth-service
-python3 -m alembic upgrade head
+# Ensure schemas and migrations
+./scripts/migrate-db.py
+# Or run full startup which ensures tables
+./scripts/start-sandbox.sh
+```
+
+#### Auth DB / Admin Users
+
+```bash
+# Verify presence of auth tables and key FKs
+python3 scripts/verify-auth-db.py
+
+# Create default admin users (uses ADMIN_PASSWORD, MUHAMMAD_PASSWORD from .env)
+./scripts/create-admin-user.py
 ```
 
 #### Import/Module Issues
