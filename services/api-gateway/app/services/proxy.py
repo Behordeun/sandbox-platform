@@ -107,6 +107,9 @@ class ProxyService:
         for header in hop_by_hop_headers:
             headers.pop(header, None)
 
+        # Always remove content-length; httpx will set the correct one
+        headers.pop("content-length", None)
+
         # Add forwarded headers
         if request.client:
             headers["X-Forwarded-For"] = request.client.host
