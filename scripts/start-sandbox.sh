@@ -141,6 +141,41 @@ install_dependencies() {
     fi
 }
 
+# Function to check if auth tables exist; if not, run migrations
+ensure_auth_schema() {
+    log_info "Verifying auth-service database schema..."
+
+    if ! command -v psql >/dev/null 2>&1; then
+        log_warning "psql not available; running migrations to ensure schema"
+        python3 ./scripts/migrate-db.py || log_error "Migrations failed"
+        return
+    fi
+
+    # Use DATABASE_URL from environment (loaded from .env earlier)
+    if [ -z "$DATABASE_URL" ]; then
+        log_warning "DATABASE_URL not set; attempting migrations"
+        python3 ./scripts/migrate-db.py || log_error "Migrations failed"
+        return
+    fi
+
+    # Check for auth_users table
+    if psql "$DATABASE_URL" -Atc "SELECT to_regclass('public.auth_users');" 2>/dev/null | grep -q "auth_users"; then
+        log_success "Auth tables present"
+    else
+        log_warning "Auth tables missing; running migrations..."
+        python3 ./scripts/migrate-db.py || {
+            log_error "Migrations failed; auth tables may still be missing"
+            return
+        }
+        # Re-check
+        if psql "$DATABASE_URL" -Atc "SELECT to_regclass('public.auth_users');" 2>/dev/null | grep -q "auth_users"; then
+            log_success "Auth tables created successfully"
+        else
+            log_warning "Auth tables still not found; proceeding, but admin creation may fail"
+        fi
+    fi
+}
+
 # Function to start a service
 start_service() {
     local service_name=$1
@@ -321,6 +356,9 @@ main() {
     
     # Setup database
     setup_database
+    
+    # Ensure auth-service schema exists (idempotent)
+    ensure_auth_schema
     
     # Create logs directory
     mkdir -p logs
