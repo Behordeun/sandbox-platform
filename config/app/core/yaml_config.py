@@ -42,7 +42,28 @@ class Settings(BaseSettings):
     redis_url: str = ""
 
     # CORS settings
+    from typing import Any
+    from pydantic import field_validator
     cors_origins: list = ["*"]
+
+    @field_validator("cors_origins", mode="before")
+    @classmethod
+    def validate_cors_origins(cls, v: Any) -> list:
+        import json
+        if v is None or v == "" or v == []:
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+                return [parsed]
+            except Exception:
+                # Fallback: comma-separated string
+                return [i.strip() for i in v.split(",") if i.strip()]
+        return ["*"]
 
     @classmethod
     def _validate_cors_origins(cls, value):
