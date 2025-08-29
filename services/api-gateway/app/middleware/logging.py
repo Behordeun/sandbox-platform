@@ -53,6 +53,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         api_key = getattr(request.state, "api_key", None)
 
         # Prepare log data
+        request_id = getattr(request.state, "request_id", None)
         log_data = {
             "event": "request",
             "method": request.method,
@@ -62,6 +63,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "client_ip": client_ip,
             "user_agent": user_agent,
             "user_id": user_id,
+            "request_id": request_id,
             "has_api_key": bool(api_key),
             "headers": dict(request.headers),
             "timestamp": time.time(),
@@ -82,6 +84,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
         user_id = getattr(request.state, "user_id", None)
 
         # Prepare log data
+        request_id = getattr(request.state, "request_id", None)
         log_data = {
             "event": "response",
             "method": request.method,
@@ -90,6 +93,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
             "status_code": response.status_code,
             "client_ip": client_ip,
             "user_id": user_id,
+            "request_id": request_id,
             "process_time": process_time,
             "response_headers": dict(response.headers),
             "timestamp": time.time(),

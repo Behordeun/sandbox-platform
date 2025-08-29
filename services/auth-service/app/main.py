@@ -5,6 +5,7 @@ from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import engine
 from app.middleware.logging import UserActivityLoggingMiddleware
+from app.middleware.correlation import CorrelationIdMiddleware
 from app.models import oauth_token  # Import to register models
 from app.models import oauth_client, password_reset, token_blacklist, user
 from fastapi import FastAPI, HTTPException
@@ -78,7 +79,8 @@ app.add_middleware(
     allow_headers=settings.cors_allow_headers,
 )
 
-# Add user activity logging middleware
+# Add correlation and user activity logging middleware
+app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(UserActivityLoggingMiddleware)
 
 

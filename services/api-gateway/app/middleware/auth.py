@@ -1,4 +1,5 @@
 import logging
+import asyncio
 import re
 import time
 from typing import List, Optional
@@ -7,6 +8,7 @@ from app.core.security import validate_api_key, verify_token
 from fastapi import Request, status
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
+from app.db import insert_gateway_access_log
 
 # Configure structured logging
 logging.basicConfig(
@@ -173,6 +175,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         service_name = self._extract_service_name(request.url.path)
 
         # Create structured log entry
+        request_id = getattr(request.state, "request_id", None)
         log_data = {
             "timestamp": time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime()),
             "user_id": user_id,
@@ -184,6 +187,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "duration_ms": duration,
             "client_ip": client_ip,
             "user_agent": user_agent,
+            "request_id": request_id,
             "query_params": str(request.query_params) if request.query_params else None,
         }
 
@@ -192,6 +196,12 @@ class AuthMiddleware(BaseHTTPMiddleware):
             logger.warning(f"ACCESS_DENIED: {log_data}")
         else:
             logger.info(f"ACCESS_GRANTED: {log_data}")
+
+        # Persist to DB asynchronously (best-effort)
+        try:
+            asyncio.create_task(insert_gateway_access_log(log_data))
+        except Exception:
+            pass
 
     def _extract_service_name(self, path: str) -> str:
         """Extract service name from request path."""

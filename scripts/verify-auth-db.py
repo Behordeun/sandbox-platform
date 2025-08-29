@@ -92,6 +92,8 @@ def main():
         "auth_oauth_tokens",
         "auth_token_blacklist",
         "auth_password_reset_tokens",
+        # Auth audit
+        "auth_audit_logs",
         # NIN
         "nin_verifications",
         # BVN
@@ -104,6 +106,7 @@ def main():
         "config_settings",
         # Gateway
         "gateway_requests",
+        "gateway_access_logs",
     ]
 
     existing = print_table_row_counts(engine, insp, tables)
