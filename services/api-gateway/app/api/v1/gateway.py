@@ -326,43 +326,11 @@ async def system_login(request: Request) -> Response:
     - application/json: {"identifier": "...", "password": "..."}
     - application/x-www-form-urlencoded: username=...&password=...
     """
-    # Parse payload from JSON or form
-    identifier = None
-    password = None
-
     content_type = request.headers.get("content-type", "").lower()
-    data = None
-
-    try:
-        if "application/json" in content_type:
-            data = await request.json()
-        else:
-            form = await request.form()
-            data = dict(form) if form is not None else None
-    except Exception:
-        data = None
-
-    if isinstance(data, dict):
-        identifier = data.get("identifier") or data.get("username")
-        password = data.get("password")
+    data = await parse_login_payload(request, content_type)
+    identifier, password, details = validate_login_payload(data)
 
     if not identifier or not password:
-        # Return a 422 with helpful details
-        details = []
-        if not (data and ("identifier" in data or "username" in data)):
-            details.append({
-                "type": "missing",
-                "loc": ["body", "identifier|username"],
-                "msg": "Field required",
-                "input": None,
-            })
-        if not (data and "password" in data):
-            details.append({
-                "type": "missing",
-                "loc": ["body", "password"],
-                "msg": "Field required",
-                "input": None,
-            })
         return JSONResponse(status_code=422, content={"detail": details})
 
     return await proxy_service.proxy_request(
@@ -371,3 +339,39 @@ async def system_login(request: Request) -> Response:
         "/api/v1/auth/login/json",
         json_payload={"identifier": identifier, "password": password},
     )
+
+
+async def parse_login_payload(request: Request, content_type: str):
+    try:
+        if "application/json" in content_type:
+            data = await request.json()
+        else:
+            form = await request.form()
+            data = dict(form) if form is not None else None
+    except Exception:
+        data = None
+    return data
+
+
+def validate_login_payload(data):
+    identifier = None
+    password = None
+    if isinstance(data, dict):
+        identifier = data.get("identifier") or data.get("username")
+        password = data.get("password")
+    details = []
+    if not (data and ("identifier" in data or "username" in data)):
+        details.append({
+            "type": "missing",
+            "loc": ["body", "identifier|username"],
+            "msg": "Field required",
+            "input": None,
+        })
+    if not (data and "password" in data):
+        details.append({
+            "type": "missing",
+            "loc": ["body", "password"],
+            "msg": "Field required",
+            "input": None,
+        })
+    return identifier, password, details
