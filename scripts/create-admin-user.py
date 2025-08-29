@@ -88,16 +88,16 @@ def main():
         {
             "email": "admin@dpi-sandbox.ng",
             "username": "admin",
-            "password": os.getenv("ADMIN_PASSWORD", "AdminPass123!"),
+            "password": os.getenv("ADMIN_PASSWORD", ""),
             "first_name": "DPI",
             "last_name": "Administrator",
         },
         {
-            "email": "muhammad@dpi-sandbox.ng",
+            "email": "muhammad@datasciencenigeria.ai",
             "username": "muhammad",
-            "password": os.getenv("MUHAMMAD_PASSWORD", "MuhammadPass123!"),
-            "first_name": "Muhammad",
-            "last_name": "Behordeun",
+            "password": os.getenv("MUHAMMAD_PASSWORD", ""),
+            "first_name": "Muhammad Abiodun",
+            "last_name": "SULAIMAN",
         },
     ]
 
@@ -118,8 +118,8 @@ def main():
         print("   • Reset passwords")
         print("   • Activate/deactivate accounts")
 
-        print("\n🔗 API Documentation: http://localhost:8000/docs")
-        print("🔗 Admin Endpoints: http://localhost:8000/docs#/admin")
+        print("\n🔗 API Documentation: http://127.0.0.1:8000/docs")
+        print("🔗 Admin Endpoints: http://127.0.0.1:8000/docs#/admin")
 
 
 if __name__ == "__main__":
