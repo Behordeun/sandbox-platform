@@ -1,0 +1,111 @@
+{
+  "title": "Gateway Overview",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Requests (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "stat",
+      "title": "5xx Errors (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND status_code>=500;"
+        }
+      ],
+      "gridPos": {
+        "x": 6,
+        "y": 0,
+        "w": 6,
+        "h": 4
+      }
+    },
+    {
+      "type": "table",
+      "title": "Errors by Service (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT service_name, COUNT(*) AS errors FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND status_code>=500 GROUP BY service_name ORDER BY errors DESC;"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      }
+    },
+    {
+      "type": "table",
+      "title": "Top Endpoints (7d)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT path, service_name, hits, avg_ms, errors FROM v_gateway_top_endpoints ORDER BY hits DESC LIMIT 20;"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 4,
+        "w": 12,
+        "h": 12
+      }
+    },
+    {
+      "type": "table",
+      "title": "Hourly Summary (48h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT bucket, service_name, total, ok, client_err, server_err, round(avg_ms,1) AS avg_ms FROM v_gateway_access_summary WHERE bucket>now()-interval '48 hours' ORDER BY bucket DESC, service_name;"
+        }
+      ],
+      "gridPos": {
+        "x": 12,
+        "y": 8,
+        "w": 12,
+        "h": 12
+      }
+    }
+  ],
+  "time": {
+    "from": "now-48h",
+    "to": "now"
+  },
+  "schemaVersion": 38,
+  "version": 1
+}

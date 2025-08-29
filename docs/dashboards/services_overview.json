@@ -1,0 +1,51 @@
+{
+  "title": "Services Overview",
+  "panels": [
+    {
+      "type": "table",
+      "title": "Service Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT bucket, service, total, server_err, server_err_pct FROM v_service_error_rate WHERE bucket>now()-interval '24 hours' ORDER BY bucket DESC, service;"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 12
+      }
+    },
+    {
+      "type": "table",
+      "title": "Service Latency (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT bucket, service, round(avg_ms,1) AS avg_ms, p100_ms FROM v_service_latency_summary WHERE bucket>now()-interval '24 hours' ORDER BY bucket DESC, service;"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 12,
+        "w": 24,
+        "h": 12
+      }
+    }
+  ],
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "schemaVersion": 38,
+  "version": 1
+}
