@@ -172,6 +172,86 @@ def create_service_tables():
             CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_activity ON auth_audit_logs(activity_type);
             """,
         ),
+        (
+            "NIN Access Logs",
+            """
+            CREATE TABLE IF NOT EXISTS nin_access_logs (
+                id SERIAL PRIMARY KEY,
+                request_id VARCHAR(64),
+                user_id VARCHAR(64),
+                method VARCHAR(10) NOT NULL,
+                path VARCHAR(500) NOT NULL,
+                status_code INTEGER NOT NULL,
+                duration_ms INTEGER,
+                client_ip VARCHAR(45),
+                user_agent TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+            CREATE INDEX IF NOT EXISTS idx_nin_access_logs_created_at ON nin_access_logs(created_at);
+            CREATE INDEX IF NOT EXISTS idx_nin_access_logs_status ON nin_access_logs(status_code);
+            CREATE INDEX IF NOT EXISTS idx_nin_access_logs_request_id ON nin_access_logs(request_id);
+            """,
+        ),
+        (
+            "BVN Access Logs",
+            """
+            CREATE TABLE IF NOT EXISTS bvn_access_logs (
+                id SERIAL PRIMARY KEY,
+                request_id VARCHAR(64),
+                user_id VARCHAR(64),
+                method VARCHAR(10) NOT NULL,
+                path VARCHAR(500) NOT NULL,
+                status_code INTEGER NOT NULL,
+                duration_ms INTEGER,
+                client_ip VARCHAR(45),
+                user_agent TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+            CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_created_at ON bvn_access_logs(created_at);
+            CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_status ON bvn_access_logs(status_code);
+            CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_request_id ON bvn_access_logs(request_id);
+            """,
+        ),
+        (
+            "SMS Access Logs",
+            """
+            CREATE TABLE IF NOT EXISTS sms_access_logs (
+                id SERIAL PRIMARY KEY,
+                request_id VARCHAR(64),
+                user_id VARCHAR(64),
+                method VARCHAR(10) NOT NULL,
+                path VARCHAR(500) NOT NULL,
+                status_code INTEGER NOT NULL,
+                duration_ms INTEGER,
+                client_ip VARCHAR(45),
+                user_agent TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+            CREATE INDEX IF NOT EXISTS idx_sms_access_logs_created_at ON sms_access_logs(created_at);
+            CREATE INDEX IF NOT EXISTS idx_sms_access_logs_status ON sms_access_logs(status_code);
+            CREATE INDEX IF NOT EXISTS idx_sms_access_logs_request_id ON sms_access_logs(request_id);
+            """,
+        ),
+        (
+            "AI Access Logs",
+            """
+            CREATE TABLE IF NOT EXISTS ai_access_logs (
+                id SERIAL PRIMARY KEY,
+                request_id VARCHAR(64),
+                user_id VARCHAR(64),
+                method VARCHAR(10) NOT NULL,
+                path VARCHAR(500) NOT NULL,
+                status_code INTEGER NOT NULL,
+                duration_ms INTEGER,
+                client_ip VARCHAR(45),
+                user_agent TEXT,
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+            );
+            CREATE INDEX IF NOT EXISTS idx_ai_access_logs_created_at ON ai_access_logs(created_at);
+            CREATE INDEX IF NOT EXISTS idx_ai_access_logs_status ON ai_access_logs(status_code);
+            CREATE INDEX IF NOT EXISTS idx_ai_access_logs_request_id ON ai_access_logs(request_id);
+            """,
+        ),
     ]
 
     print("🗄️  Creating service tables...")

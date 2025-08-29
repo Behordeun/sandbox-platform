@@ -96,12 +96,16 @@ def main():
         "auth_audit_logs",
         # NIN
         "nin_verifications",
+        "nin_access_logs",
         # BVN
         "bvn_verifications",
+        "bvn_access_logs",
         # SMS
         "sms_messages",
+        "sms_access_logs",
         # AI
         "ai_conversations",
+        "ai_access_logs",
         # Config
         "config_settings",
         # Gateway
