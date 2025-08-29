@@ -4,12 +4,12 @@ echo "🔍 DPI Sandbox Service Health Check"
 echo "==================================="
 
 services=(
-    "Auth Service:http://localhost:8000/health"
-    "API Gateway:http://localhost:8080/health"
-    "NIN Service:http://localhost:8005/health"
-    "BVN Service:http://localhost:8006/health"
-    "SMS Service:http://localhost:8003/health"
-    "AI Service:http://localhost:8002/health"
+    "Auth Service:http://127.0.0.1:8000/health"
+    "API Gateway:http://127.0.0.1:8080/health"
+    "NIN Service:http://127.0.0.1:8005/health"
+    "BVN Service:http://127.0.0.1:8006/health"
+    "SMS Service:http://127.0.0.1:8003/health"
+    "AI Service:http://127.0.0.1:8002/health"
 )
 
 all_healthy=true
@@ -36,7 +36,7 @@ done
 echo ""
 if [ "$all_healthy" = true ]; then
     echo "🎉 All DPI services are healthy!"
-    echo "🚀 Ready for development: http://localhost:8080/docs"
+    echo "🚀 Ready for development: http://127.0.0.1:8080/docs"
 else
     echo "⚠️  Some services need attention"
     echo "💡 Run: ./sandbox-start.sh to start missing services"

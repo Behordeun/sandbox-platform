@@ -33,7 +33,7 @@ check_postgres() {
     log_info "Checking PostgreSQL connection..."
     
     if command -v psql >/dev/null 2>&1; then
-        if psql -h localhost -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+        if psql -h 127.0.0.1 -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
             log_success "PostgreSQL is running and accessible"
             return 0
         fi
@@ -65,7 +65,7 @@ start_postgres_docker() {
     # Wait for PostgreSQL to be ready
     log_info "Waiting for PostgreSQL to be ready..."
     for i in {1..30}; do
-        if psql -h localhost -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+        if psql -h 127.0.0.1 -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
             log_success "PostgreSQL is ready!"
             return 0
         fi
@@ -145,7 +145,7 @@ main() {
         log_success "Database setup completed successfully!"
         echo ""
         log_info "📋 Database Information:"
-        log_info "   Host: localhost:5432"
+        log_info "   Host: 127.0.0.1:5432"
         log_info "   Database: sandbox_platform"
         log_info "   User: sandbox_user"
         log_info "   Tables: Prefixed by service (auth_, config_, nin_, etc.)"
