@@ -69,7 +69,21 @@ Open your browser and go to: [http://127.0.0.1:8080/docs](http://127.0.0.1:8080/
 
 This interactive documentation shows all available endpoints and lets you test them directly!
 
-### Step 4: Get Your First Token
+### Step 4: System‑Wide Login (JSON or Form)
+
+The gateway exposes a system login endpoint that accepts either JSON or form data and proxies to the auth service JSON login endpoint.
+
+```bash
+# JSON
+curl -X POST http://127.0.0.1:8080/api/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"identifier":"admin@dpi-sandbox.ng","password":"<your-admin-password>"}'
+
+# Form (username/password)
+curl -X POST http://127.0.0.1:8080/api/v1/auth/login \
+  -H 'Content-Type: application/x-www-form-urlencoded' \
+  -d 'username=admin@dpi-sandbox.ng&password=<your-admin-password>'
+```
 
 ```bash
 # Deploy with Helm
@@ -100,7 +114,10 @@ A: Contact your platform administrator or modify the `RATE_LIMIT_REQUESTS` envir
 A: Yes! Pass your API key in the `X-API-Key` header instead of the Authorization header.
 
 **Q: How do I monitor my API usage?**
-A: Use the built-in analytics: `python ../../analyze-logs.py --user-activity`
+A: Access logs are persisted in PostgreSQL table `gateway_access_logs`. You can also view structured logs in `logs/api-gateway.log`.
+
+**Q: How do I trace requests end‑to‑end?**
+A: Every request has an `X-Request-ID` correlation header. It is logged in gateway/auth logs and forwarded to downstream services.
 
 ### Support
 
@@ -237,6 +254,20 @@ docker run -p 8080:8080 \
 ```
 
 ## API Endpoints
+
+### Auth Proxy
+
+- `POST /api/v1/auth/login` — Accepts JSON `{identifier,password}` or form `username/password`, proxies to auth JSON login.
+
+### Correlation & Observability
+
+- Correlation header: `X-Request-ID` (auto‑generated if not provided).
+- DB tables: `gateway_requests` (core metrics), `gateway_access_logs` (auditable access logs).
+
+### Configuration
+
+- Root `.env` is authoritative for configuration.
+- Required: `DATABASE_URL`, `JWT_SECRET_KEY`. Optional: `REDIS_URL` for rate limiting.
 
 ### Gateway Routes
 
