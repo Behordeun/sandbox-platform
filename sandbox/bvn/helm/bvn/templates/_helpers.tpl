@@ -26,3 +26,12 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{ include "bvn.fullname" . }}-secrets
 {{- end -}}
 
+
+
+{{- define "bvn.image" -}}
+{{- if .Values.global.imageRegistry -}}
+{{- printf "%s/%s" .Values.global.imageRegistry .Values.image.repository -}}
+{{- else -}}
+{{- .Values.image.repository -}}
+{{- end -}}
+{{- end -}}

@@ -1,7 +1,7 @@
 replicaCount: 1
 
 image:
-  repository: ghcr.io/your-org/sandbox-bvn-service
+  repository: docker.io/your-org/sandbox-bvn-service
   pullPolicy: IfNotPresent
   tag: "1.0.0"
 
@@ -41,6 +41,7 @@ healthCheck:
 ingress:
   enabled: false
   className: ""
+  clusterIssuer: ""
   annotations: {}
   hosts:
     - host: bvn.local
@@ -51,5 +52,6 @@ ingress:
 
 networkPolicy:
   enabled: false
+  gatewayOnly: true
   ingress: []
   egress: []
