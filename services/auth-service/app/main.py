@@ -58,31 +58,6 @@ async def lifespan(app: FastAPI):
     system_logger.info("Auth service shutdown", {"service": settings.app_name})
 
 
-# Global exception handler (adds traceback-rich logs)
-from fastapi import Request
-
-
-@app.exception_handler(Exception)
-async def global_exception_handler(request: Request, exc: Exception) -> Any:
-    logger.error(f"Unhandled exception: {exc}")
-    system_logger.error(
-        exc,
-        {
-            "path": str(request.url.path),
-            "method": request.method,
-            "client": getattr(request.client, "host", None),
-        },
-        exc_info=True,
-    )
-    return JSONResponse(
-        status_code=500,
-        content={
-            "error": "Internal server error",
-            "message": "An unexpected error occurred",
-        },
-    )
-
-
 # Custom unique operation id generator
 def generate_unique_id(route: APIRoute) -> str:
     method = next(iter(route.methods)).lower() if route.methods else "get"
@@ -185,7 +160,10 @@ async def jwks():
 app.include_router(api_router, prefix="/api/v1")
 
 
-# Global exception handler
+# Global exception handlers
+from fastapi import Request
+
+
 @app.exception_handler(HTTPException)
 async def http_exception_handler(request, exc):
     """Global HTTP exception handler."""
@@ -196,11 +174,24 @@ async def http_exception_handler(request, exc):
 
 
 @app.exception_handler(Exception)
-async def general_exception_handler(request, exc):
-    """Global exception handler for unhandled exceptions."""
+async def global_exception_handler(request: Request, exc: Exception) -> Any:
+    """Global exception handler for unhandled exceptions with rich logs."""
     logger.error(f"Unhandled exception: {exc}")
+    system_logger.error(
+        exc,
+        {
+            "path": str(request.url.path),
+            "method": request.method,
+            "client": getattr(request.client, "host", None),
+        },
+        exc_info=True,
+    )
     return JSONResponse(
-        status_code=500, content={"error": "Internal server error", "status_code": 500}
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "message": "An unexpected error occurred",
+        },
     )
 
 

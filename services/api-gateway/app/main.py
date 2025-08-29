@@ -120,6 +120,10 @@ if settings.rate_limit_enabled:
 app.add_middleware(AuthMiddleware)
 
 
+# Startup log
+system_logger.info("Service startup", {"service": settings.app_name, "version": settings.app_version})
+
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
