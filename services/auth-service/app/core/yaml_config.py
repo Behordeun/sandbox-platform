@@ -96,10 +96,7 @@ class Settings(BaseSettings):
         config = get_config(environment)
         db_config = config.get("database", {})
         if db_config:
-            self.database_url = os.getenv("DATABASE_URL") or db_config.get(
-                "url",
-                "postgresql://postgres:MUhammad__1234@localhost:5432/sandbox_platform",
-            )
+            self.database_url = os.getenv("DATABASE_URL", "")
             # Get table prefix for auth service
             table_prefixes = db_config.get("table_prefixes", {})
             self.table_prefix = table_prefixes.get("auth_service", "auth_")
@@ -107,7 +104,7 @@ class Settings(BaseSettings):
             # Use centralized environment variables
             self.database_url = os.getenv(
                 "DATABASE_URL",
-                "postgresql://postgres:MUhammad__1234@localhost:5432/sandbox_platform",
+                "",
             )
             self.table_prefix = "auth_"
 

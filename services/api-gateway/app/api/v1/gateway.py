@@ -15,8 +15,12 @@ router = APIRouter()
     operation_id="proxy_auth_service_{method}",
 )
 async def proxy_auth_service(request: Request, path: str) -> Response:
-    """Proxy requests to auth service."""
-    return await proxy_service.proxy_request(request, "auth", f"/{path}")
+    """Proxy requests to auth service.
+
+    Ensures upstream path includes the service prefix under /api/v1.
+    """
+    upstream_path = f"/api/v1/auth/{path}" if path else "/api/v1/auth"
+    return await proxy_service.proxy_request(request, "auth", upstream_path)
 
 
 @router.api_route(
@@ -26,7 +30,8 @@ async def proxy_auth_service(request: Request, path: str) -> Response:
 )
 async def proxy_sms_service(request: Request, path: str) -> Response:
     """Proxy requests to SMS service."""
-    return await proxy_service.proxy_request(request, "sms", f"/{path}")
+    upstream_path = f"/api/v1/sms/{path}" if path else "/api/v1/sms"
+    return await proxy_service.proxy_request(request, "sms", upstream_path)
 
 
 @router.api_route(
@@ -35,8 +40,10 @@ async def proxy_sms_service(request: Request, path: str) -> Response:
     operation_id="proxy_llm_service_{method}",
 )
 async def proxy_llm_service(request: Request, path: str) -> Response:
-    """Proxy requests to LLM service."""
-    return await proxy_service.proxy_request(request, "llm", f"/{path}")
+    """Proxy requests to LLM service (maps to AI service)."""
+    upstream_path = f"/api/v1/ai/{path}" if path else "/api/v1/ai"
+    # Map 'llm' gateway path to 'ai' backend service key
+    return await proxy_service.proxy_request(request, "ai", upstream_path)
 
 
 @router.api_route(
@@ -46,7 +53,8 @@ async def proxy_llm_service(request: Request, path: str) -> Response:
 )
 async def proxy_nin_service(request: Request, path: str) -> Response:
     """Proxy requests to NIN service."""
-    return await proxy_service.proxy_request(request, "nin", f"/{path}")
+    upstream_path = f"/api/v1/nin/{path}" if path else "/api/v1/nin"
+    return await proxy_service.proxy_request(request, "nin", upstream_path)
 
 
 @router.api_route(
@@ -56,7 +64,8 @@ async def proxy_nin_service(request: Request, path: str) -> Response:
 )
 async def proxy_bvn_service(request: Request, path: str) -> Response:
     """Proxy requests to BVN service."""
-    return await proxy_service.proxy_request(request, "bvn", f"/{path}")
+    upstream_path = f"/api/v1/bvn/{path}" if path else "/api/v1/bvn"
+    return await proxy_service.proxy_request(request, "bvn", upstream_path)
 
 
 @router.get("/services/health")
