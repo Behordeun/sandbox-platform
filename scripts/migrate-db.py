@@ -9,6 +9,16 @@ import subprocess
 import sys
 from pathlib import Path
 
+# Load root .env for DATABASE_URL and other settings
+try:
+    from dotenv import load_dotenv  # type: ignore
+    load_dotenv(Path(__file__).parent.parent / ".env")
+except Exception:
+    pass
+
+# Signal migration context so app code avoids requiring non-DB secrets
+os.environ.setdefault("MIGRATIONS", "1")
+
 # Add config to path
 sys.path.append(str(Path(__file__).parent.parent / "config"))
 try:
@@ -21,107 +31,109 @@ except ImportError:
 def run_migrations():
     """Run database migrations for all services."""
 
-    # Set environment
     environment = os.getenv("ENVIRONMENT", "development")
     print(f"Running migrations for environment: {environment}")
 
-    # Get database URL from environment variable first, then config
-    db_url = os.getenv("DATABASE_URL")
-
-    if not db_url:
-        # Fallback to config
-        config = get_config(environment)
-        db_config = config.get("database", {})
-        db_url = db_config.get("url")
-
+    db_url = get_database_url(environment)
     if not db_url:
         print("❌ Database URL not found in environment or configuration")
         return False
 
     print(f"📊 Database: {db_url.split('@')[1] if '@' in db_url else db_url}")
 
-    # Services with migrations
     services_with_migrations = [
         {"name": "auth-service", "path": "services/auth-service", "has_alembic": True}
     ]
 
     success = True
-
     for service in services_with_migrations:
-        print(f"\n🔄 Running migrations for {service['name']}...")
-
-        service_path = Path(__file__).parent.parent / service["path"]
-        if not service_path.exists():
-            print(f"⚠️  Service path not found: {service_path}")
-            continue
-
-        if service["has_alembic"]:
-            # Run Alembic migrations
-            try:
-                # Change to service directory
-                original_cwd = os.getcwd()
-                os.chdir(service_path)
-
-                # Set database URL environment variable
-                env = os.environ.copy()
-                env["DATABASE_URL"] = db_url
-
-                # Run alembic upgrade
-                # Try different alembic paths
-                alembic_cmd = None
-                for cmd in ["python3", "python"]:
-                    try:
-                        subprocess.run(
-                            [cmd, "-m", "alembic", "--version"],
-                            capture_output=True,
-                            check=True,
-                        )
-                        alembic_cmd = [cmd, "-m", "alembic"]
-                        break
-                    except (subprocess.CalledProcessError, FileNotFoundError):
-                        continue
-
-                if not alembic_cmd:
-                    print(f"⚠️  Alembic not found for {service['name']}. Falling back to direct table creation.")
-                    # Fallback: create tables via SQLAlchemy metadata
-                    if create_tables_directly(service["path"], db_url):
-                        print(f"✅ {service['name']} tables ensured via SQLAlchemy")
-                        os.chdir(original_cwd)
-                        continue
-                    else:
-                        success = False
-                        os.chdir(original_cwd)
-                        continue
-
-                # Ensure migration context flags
-                env["MIGRATIONS"] = "1"
-                result = subprocess.run(
-                    alembic_cmd + ["upgrade", "head"],
-                    env=env,
-                    capture_output=True,
-                    text=True,
-                )
-
-                if result.returncode == 0:
-                    print(f"✅ {service['name']} migrations completed successfully")
-                else:
-                    print(f"❌ {service['name']} migrations failed:")
-                    print(result.stderr)
-                    success = False
-
-                # Return to original directory
-                os.chdir(original_cwd)
-
-            except Exception as e:
-                print(f"❌ Error running migrations for {service['name']}: {e}")
-                success = False
-                os.chdir(original_cwd)
-        else:
-            # For services without Alembic, create tables directly
-            print(f"📝 Creating tables for {service['name']} (no Alembic)")
-            # This would be implemented per service as needed
+        if not handle_service_migration(service, db_url):
+            success = False
 
     return success
+
+def handle_service_migration(service, db_url):
+    """Handle migration for a single service."""
+    print(f"\n🔄 Running migrations for {service['name']}...")
+    service_path = Path(__file__).parent.parent / service["path"]
+    if not service_path.exists():
+        print(f"⚠️  Service path not found: {service_path}")
+        return True  # Skip but don't fail all migrations
+
+    if service["has_alembic"]:
+        result = run_alembic_migration(service, service_path, db_url)
+        if result is None:
+            # Fallback: create tables via SQLAlchemy metadata
+            if create_tables_directly(service["path"], db_url):
+                print(f"✅ {service['name']} tables ensured via SQLAlchemy")
+                return True
+            else:
+                return False
+        elif result is False:
+            return False
+        else:
+            return True
+    else:
+        print(f"📝 Creating tables for {service['name']} (no Alembic)")
+        # Implement direct table creation if needed
+        return True
+
+
+def get_database_url(environment):
+    """Get database URL from environment or config."""
+    db_url = os.getenv("DATABASE_URL")
+    if not db_url:
+        config = get_config(environment)
+        db_config = config.get("database", {})
+        db_url = db_config.get("url")
+    return db_url
+
+
+def run_alembic_migration(service, service_path, db_url):
+    """Run Alembic migration for a service. Returns True if successful, False if failed, None if Alembic not found."""
+    original_cwd = os.getcwd()
+    try:
+        os.chdir(service_path)
+        env = os.environ.copy()
+        env["DATABASE_URL"] = db_url
+        env["MIGRATIONS"] = "1"
+
+        alembic_cmd = None
+        for cmd in ["python3", "python"]:
+            try:
+                subprocess.run(
+                    [cmd, "-m", "alembic", "--version"],
+                    capture_output=True,
+                    check=True,
+                )
+                alembic_cmd = [cmd, "-m", "alembic"]
+                break
+            except (subprocess.CalledProcessError, FileNotFoundError):
+                continue
+
+        if not alembic_cmd:
+            print(f"⚠️  Alembic not found for {service['name']}. Falling back to direct table creation.")
+            return None
+
+        result = subprocess.run(
+            alembic_cmd + ["upgrade", "head"],
+            env=env,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode == 0:
+            print(f"✅ {service['name']} migrations completed successfully")
+            return True
+        else:
+            print(f"❌ {service['name']} migrations failed:")
+            print(result.stderr)
+            return False
+    except Exception as e:
+        print(f"❌ Error running migrations for {service['name']}: {e}")
+        return False
+    finally:
+        os.chdir(original_cwd)
 
 
 def create_tables_directly(service_rel_path: str, db_url: str) -> bool:

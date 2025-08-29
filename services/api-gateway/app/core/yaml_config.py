@@ -9,7 +9,7 @@ from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 # Load environment variables from root .env file
-load_dotenv("../../../.env")
+load_dotenv("../../../../.env")
 
 
 # Fallback config loader
@@ -89,19 +89,14 @@ class Settings(BaseSettings):
     circuit_breaker_failure_threshold: int = 5
     circuit_breaker_recovery_timeout: int = 30
 
-    # JWT
-    jwt_secret_key: str = ""
+    # JWT (required; no hard-coded default)
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
 
-    def __post_init__(self):
-        # Ensure JWT secret is loaded from environment
-        if not self.jwt_secret_key:
-            self.jwt_secret_key = os.getenv(
-                "JWT_SECRET_KEY", "change-this-secret-key-in-production"
-            )
+    # No post-init fallback; must be provided via env or YAML
 
     model_config = ConfigDict(
-        env_file="../../../.env",  # Use root .env file
+        env_file="../../../../.env",  # Use root .env file
         case_sensitive=False,
         extra="ignore",  # Ignore extra fields from .env
     )
