@@ -40,14 +40,21 @@ class Logger:
                     f.write("test")
                 test_file.unlink()
             except Exception as perm_error:
-                print(f"Permission error in log directory: {perm_error}", file=sys.stderr)
+                print(
+                    f"Permission error in log directory: {perm_error}", file=sys.stderr
+                )
         except Exception as e:
-            print(f"Failed to create log directory {self.log_dir}: {e}", file=sys.stderr)
+            print(
+                f"Failed to create log directory {self.log_dir}: {e}", file=sys.stderr
+            )
             self.log_dir = Path.cwd() / "logs"
             try:
                 self.log_dir.mkdir(parents=True, exist_ok=True)
             except Exception as fallback_error:
-                print(f"Fallback directory creation failed: {fallback_error}", file=sys.stderr)
+                print(
+                    f"Fallback directory creation failed: {fallback_error}",
+                    file=sys.stderr,
+                )
 
     def _load_existing_log_hashes(self) -> set:
         cache = set()
@@ -118,16 +125,20 @@ class Logger:
             log_msg.extend([f"ERROR MESSAGE: {error}", "-" * 80])
         default_context = {
             "ai_engineer": "Muhammad",
-            "environment": str(__import__("os").environ.get("ENVIRONMENT", "development")),
+            "environment": str(
+                __import__("os").environ.get("ENVIRONMENT", "development")
+            ),
         }
         if additional_info:
             default_context.update(additional_info)
-        log_msg.extend([
-            "-" * 80,
-            "CONTEXT:",
-            "\n".join(f"{k}: {v}" for k, v in default_context.items()),
-            "=" * 80 + "\n",
-        ])
+        log_msg.extend(
+            [
+                "-" * 80,
+                "CONTEXT:",
+                "\n".join(f"{k}: {v}" for k, v in default_context.items()),
+                "=" * 80 + "\n",
+            ]
+        )
         return "\n".join(log_msg)
 
     def _write_log(self, level: LogLevel, message: str) -> None:
@@ -142,14 +153,30 @@ class Logger:
                 f.flush()
             self._log_cache.add(log_hash)
         except Exception as e:
-            print(f"Failed to write log to {self.log_files[level]}: {e}", file=sys.stderr)
+            print(
+                f"Failed to write log to {self.log_files[level]}: {e}", file=sys.stderr
+            )
             print(f"FALLBACK LOG [{level.value}]: {message[:200]}...", file=sys.stderr)
 
-    def info(self, message: str, additional_info: Optional[Dict[str, Any]] = None) -> None:
-        self._write_log(LogLevel.INFO, self._format_message(LogLevel.INFO, message, additional_info=additional_info))
+    def info(
+        self, message: str, additional_info: Optional[Dict[str, Any]] = None
+    ) -> None:
+        self._write_log(
+            LogLevel.INFO,
+            self._format_message(
+                LogLevel.INFO, message, additional_info=additional_info
+            ),
+        )
 
-    def warning(self, message: str, additional_info: Optional[Dict[str, Any]] = None) -> None:
-        self._write_log(LogLevel.WARNING, self._format_message(LogLevel.WARNING, message, additional_info=additional_info))
+    def warning(
+        self, message: str, additional_info: Optional[Dict[str, Any]] = None
+    ) -> None:
+        self._write_log(
+            LogLevel.WARNING,
+            self._format_message(
+                LogLevel.WARNING, message, additional_info=additional_info
+            ),
+        )
 
     def error(
         self,
@@ -157,7 +184,12 @@ class Logger:
         additional_info: Optional[Dict[str, Any]] = None,
         exc_info: bool = False,
     ) -> None:
-        self._write_log(LogLevel.ERROR, self._format_message(LogLevel.ERROR, "An error occurred", error, additional_info, exc_info))
+        self._write_log(
+            LogLevel.ERROR,
+            self._format_message(
+                LogLevel.ERROR, "An error occurred", error, additional_info, exc_info
+            ),
+        )
 
 
 system_logger = Logger(preserve_logs=True, debug_mode=False)

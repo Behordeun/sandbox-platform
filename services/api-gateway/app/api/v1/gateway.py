@@ -4,8 +4,7 @@ from app.services.discovery import service_discovery
 from app.services.health import health_service
 from app.services.proxy import proxy_service
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import Response, JSONResponse
-from pydantic import BaseModel
+from fastapi.responses import JSONResponse, Response
 
 router = APIRouter()
 
@@ -369,4 +368,6 @@ async def sms_examples():
             },
         },
     }
+
+
 ## end system_login helpers

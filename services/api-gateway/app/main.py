@@ -4,10 +4,10 @@ from contextlib import asynccontextmanager
 
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.system_logger import system_logger
 from app.middleware.auth import AuthMiddleware
 from app.middleware.correlation import CorrelationIdMiddleware
 from app.middleware.logging import LoggingMiddleware
-from app.core.system_logger import system_logger
 from app.middleware.metrics import MetricsMiddleware, get_metrics
 from app.middleware.rate_limit import RateLimitMiddleware
 from app.services.discovery import service_discovery
@@ -43,7 +43,7 @@ async def periodic_health_checks():
     """Periodic health checks for services."""
     # Wait before starting health checks to allow services to start
     await asyncio.sleep(5)
-    
+
     while True:
         try:
             await service_discovery.health_check_all_services()
@@ -70,6 +70,7 @@ def generate_unique_id(route: APIRoute) -> str:
     ) or "root"
     name = (route.name or "handler").replace(" ", "_")
     return f"{tag}_{method}_{path}_{name}"
+
 
 # Create FastAPI application
 app = FastAPI(
@@ -121,7 +122,9 @@ app.add_middleware(AuthMiddleware)
 
 
 # Startup log
-system_logger.info("Service startup", {"service": settings.app_name, "version": settings.app_version})
+system_logger.info(
+    "Service startup", {"service": settings.app_name, "version": settings.app_version}
+)
 
 
 # Health check endpoint

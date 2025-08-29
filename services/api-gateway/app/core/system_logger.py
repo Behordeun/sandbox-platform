@@ -158,16 +158,20 @@ class Logger:
             log_msg.extend([f"ERROR MESSAGE: {error}", "-" * 80])
         default_context = {
             "ai_engineer": "Muhammad",
-            "environment": str(__import__("os").environ.get("ENVIRONMENT", "development")),
+            "environment": str(
+                __import__("os").environ.get("ENVIRONMENT", "development")
+            ),
         }
         if additional_info:
             default_context.update(additional_info)
-        log_msg.extend([
-            "-" * 80,
-            "CONTEXT:",
-            "\n".join(f"{k}: {v}" for k, v in default_context.items()),
-            "=" * 80 + "\n",
-        ])
+        log_msg.extend(
+            [
+                "-" * 80,
+                "CONTEXT:",
+                "\n".join(f"{k}: {v}" for k, v in default_context.items()),
+                "=" * 80 + "\n",
+            ]
+        )
         return "\n".join(log_msg)
 
     def _write_log(self, level: LogLevel, message: str) -> None:
@@ -192,12 +196,20 @@ class Logger:
             print(error_msg, file=sys.stderr)
             print(f"FALLBACK LOG [{level.value}]: {message[:200]}...", file=sys.stderr)
 
-    def info(self, message: str, additional_info: Optional[Dict[str, Any]] = None) -> None:
-        log_message = self._format_message(LogLevel.INFO, message, additional_info=additional_info)
+    def info(
+        self, message: str, additional_info: Optional[Dict[str, Any]] = None
+    ) -> None:
+        log_message = self._format_message(
+            LogLevel.INFO, message, additional_info=additional_info
+        )
         self._write_log(LogLevel.INFO, log_message)
 
-    def warning(self, message: str, additional_info: Optional[Dict[str, Any]] = None) -> None:
-        log_message = self._format_message(LogLevel.WARNING, message, additional_info=additional_info)
+    def warning(
+        self, message: str, additional_info: Optional[Dict[str, Any]] = None
+    ) -> None:
+        log_message = self._format_message(
+            LogLevel.WARNING, message, additional_info=additional_info
+        )
         self._write_log(LogLevel.WARNING, log_message)
 
     def error(
@@ -206,13 +218,18 @@ class Logger:
         additional_info: Optional[Dict[str, Any]] = None,
         exc_info: bool = False,
     ) -> None:
-        log_message = self._format_message(LogLevel.ERROR, "An error occurred", error, additional_info, exc_info)
+        log_message = self._format_message(
+            LogLevel.ERROR, "An error occurred", error, additional_info, exc_info
+        )
         self._write_log(LogLevel.ERROR, log_message)
 
     def clear_logs(self, level: Optional[LogLevel] = None, force: bool = False) -> None:
         if self.preserve_logs and not force:
             if self.debug_mode:
-                print("Log clearing is disabled. Use force=True to override.", file=sys.stderr)
+                print(
+                    "Log clearing is disabled. Use force=True to override.",
+                    file=sys.stderr,
+                )
             return
         try:
             targets = [self.log_files[level]] if level else self.log_files.values()
@@ -233,7 +250,9 @@ class Logger:
         max_size_bytes = max_size_mb * 1024 * 1024
         for _, log_file in self.log_files.items():
             if log_file.exists() and log_file.stat().st_size > max_size_bytes:
-                backup_name = f"{log_file.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+                backup_name = (
+                    f"{log_file.stem}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.log"
+                )
                 backup_path = log_file.parent / backup_name
                 try:
                     log_file.rename(backup_path)

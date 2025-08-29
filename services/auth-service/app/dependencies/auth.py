@@ -1,10 +1,9 @@
 from app.core.security import verify_token
-from fastapi import Request
 from app.core.system_logger import system_logger
 from app.crud.user import user_crud
 from app.dependencies.database import get_db
 from app.models.user import User
-from fastapi import Depends, HTTPException, status, Request
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.orm import Session
 

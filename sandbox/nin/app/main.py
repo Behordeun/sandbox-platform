@@ -1,11 +1,11 @@
 from app.api.v1.router import api_router
 from app.core.config import settings
+from app.core.system_logger import system_logger
+from app.middleware.access_log import AccessLogMiddleware
+from app.middleware.correlation import CorrelationIdMiddleware
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-from app.core.system_logger import system_logger
 from fastapi.routing import APIRoute
-from app.middleware.correlation import CorrelationIdMiddleware
-from app.middleware.access_log import AccessLogMiddleware
 
 
 def generate_unique_id(route: APIRoute) -> str:
@@ -22,7 +22,11 @@ def generate_unique_id(route: APIRoute) -> str:
     return f"{tag}_{method}_{path}_{name}"
 
 
-app = FastAPI(title=settings.app_name, version=settings.app_version, generate_unique_id_function=generate_unique_id)
+app = FastAPI(
+    title=settings.app_name,
+    version=settings.app_version,
+    generate_unique_id_function=generate_unique_id,
+)
 
 # Middlewares
 app.add_middleware(CorrelationIdMiddleware)
@@ -32,7 +36,10 @@ app.include_router(api_router, prefix="/api/v1")
 
 
 # Startup log
-system_logger.info("Service startup", {"service": settings.app_name, "version": settings.app_version})
+system_logger.info(
+    "Service startup", {"service": settings.app_name, "version": settings.app_version}
+)
+
 
 @app.exception_handler(Exception)
 async def global_exception_handler(request: Request, exc: Exception):
@@ -47,8 +54,12 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
     return JSONResponse(
         status_code=500,
-        content={"error": "Internal server error", "message": "An unexpected error occurred"},
+        content={
+            "error": "Internal server error",
+            "message": "An unexpected error occurred",
+        },
     )
+
 
 @app.get("/health")
 async def health_check():

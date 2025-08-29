@@ -1,7 +1,9 @@
-import time
 import asyncio
-from starlette.middleware.base import BaseHTTPMiddleware
+import time
+
 from fastapi import Request
+from starlette.middleware.base import BaseHTTPMiddleware
+
 from ..db import insert_access_log
 
 

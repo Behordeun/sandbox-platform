@@ -1,4 +1,3 @@
-import os
 from typing import Dict, List, Union
 
 from pydantic import ConfigDict, field_validator
@@ -63,7 +62,9 @@ class Settings(BaseSettings):
     @field_validator("cors_origins", mode="before")
     @classmethod
     def parse_cors_origins(cls, v):
-        return cls._parse_list_like(v, ["http://127.0.0.1:3000", "http://127.0.0.1:8080"])
+        return cls._parse_list_like(
+            v, ["http://127.0.0.1:3000", "http://127.0.0.1:8080"]
+        )
 
     @field_validator("cors_allow_methods", mode="before")
     @classmethod

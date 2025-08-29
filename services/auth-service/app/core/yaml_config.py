@@ -135,6 +135,7 @@ class Settings(BaseSettings):
     @staticmethod
     def _parse_list_like(v):
         import json
+
         if v is None or v == "":
             return ["*"]
         if isinstance(v, list):
@@ -164,7 +165,17 @@ class Settings(BaseSettings):
         parsed = cls._parse_list_like(v)
         if "*" in parsed:
             return ["*"]
-        valid = {"GET","POST","PUT","DELETE","PATCH","OPTIONS","HEAD","TRACE","CONNECT"}
+        valid = {
+            "GET",
+            "POST",
+            "PUT",
+            "DELETE",
+            "PATCH",
+            "OPTIONS",
+            "HEAD",
+            "TRACE",
+            "CONNECT",
+        }
         return [m for m in parsed if m.upper() in valid]
 
     @field_validator("cors_allow_headers", mode="before")

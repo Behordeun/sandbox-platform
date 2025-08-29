@@ -2,7 +2,6 @@
 Simplified Configuration for AI Service
 """
 
-import os
 from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 

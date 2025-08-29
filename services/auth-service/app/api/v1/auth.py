@@ -8,7 +8,7 @@ from app.dependencies.auth import get_current_active_user
 from app.dependencies.database import get_db
 from app.schemas.oauth import TokenResponse
 from app.schemas.user import UserLogin, UserResponse
-from fastapi import APIRouter, Depends, HTTPException, status, Request
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 

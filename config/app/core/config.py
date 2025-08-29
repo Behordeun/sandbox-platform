@@ -15,7 +15,13 @@ class Settings(BaseSettings):
     # CORS settings
     cors_origins: Union[str, List[str]] = ["*"]
     cors_allow_credentials: bool = True
-    cors_allow_methods: Union[str, List[str]] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    cors_allow_methods: Union[str, List[str]] = [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "OPTIONS",
+    ]
     cors_allow_headers: Union[str, List[str]] = ["*"]
 
     @staticmethod
@@ -84,7 +90,11 @@ class Settings(BaseSettings):
         """
         # If storage_type wasn't explicitly set but config_storage_type was,
         # keep them aligned.
-        if self.storage_type and self.config_storage_type and self.storage_type != self.config_storage_type:
+        if (
+            self.storage_type
+            and self.config_storage_type
+            and self.storage_type != self.config_storage_type
+        ):
             # Prefer explicit storage_type if provided; otherwise mirror.
             # Detect default by checking if storage_type is default 'redis' and
             # config_storage_type differs; in that case mirror from config_storage_type.
