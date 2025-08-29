@@ -20,7 +20,11 @@ class ProxyService:
         self.client = httpx.AsyncClient(timeout=settings.default_timeout)
 
     async def proxy_request(
-        self, request: Request, service_name: str, path: Optional[str] = None
+        self,
+        request: Request,
+        service_name: str,
+        path: Optional[str] = None,
+        json_payload: Optional[Dict[str, Any]] = None,
     ) -> Response:
         """Proxy request to backend service."""
         # Get service configuration
@@ -32,11 +36,15 @@ class ProxyService:
 
         # Build target URL
         target_path = path or request.url.path
-        if target_path.startswith(f"/api/v1/{service_name}"):
-            # Remove service prefix from path
-            target_path = target_path.replace(f"/api/v1/{service_name}", "", 1)
-            if not target_path.startswith("/"):
-                target_path = "/" + target_path
+        # Normalize leading slash
+        if not target_path.startswith("/"):
+            target_path = "/" + target_path
+
+        # If the path isn't already versioned, add '/api/v1/<service>/' prefix
+        if not target_path.startswith("/api/v1/"):
+            # Map service name to its path segment (llm mapped upstream to 'ai')
+            service_segment = service_name
+            target_path = f"/api/v1/{service_segment}{target_path}"
 
         target_url = f"{service_config.url}{target_path}"
         if request.url.query:
@@ -48,7 +56,7 @@ class ProxyService:
         try:
             # Make request through circuit breaker
             response = await circuit_breaker.call(
-                self._make_request, request, target_url, service_config
+                self._make_request, request, target_url, service_config, json_payload
             )
             return response
 
@@ -73,7 +81,11 @@ class ProxyService:
             raise HTTPException(status_code=502, detail=f"Bad gateway: {str(e)}")
 
     async def _make_request(
-        self, request: Request, target_url: str, service_config: ServiceConfig
+        self,
+        request: Request,
+        target_url: str,
+        service_config: ServiceConfig,
+        json_payload: Optional[Dict[str, Any]] = None,
     ) -> Response:
         """Make HTTP request to backend service."""
         start_time = time.time()
@@ -104,7 +116,13 @@ class ProxyService:
         # Get request body
         body = None
         if request.method in ["POST", "PUT", "PATCH"]:
-            body = await request.body()
+            if json_payload is not None:
+                import json
+
+                body = json.dumps(json_payload).encode("utf-8")
+                headers["content-type"] = "application/json"
+            else:
+                body = await request.body()
 
         try:
             # Make request
