@@ -31,11 +31,11 @@ async def insert_access_log(log: Dict[str, Any]) -> None:
                     INSERT INTO sms_access_logs (
                         request_id, user_id,
                         method, path, status_code, duration_ms,
-                        client_ip, user_agent
+                        client_ip, user_agent, req_size, res_size
                     ) VALUES (
                         :request_id, :user_id,
                         :method, :path, :status_code, :duration_ms,
-                        :client_ip, :user_agent
+                        :client_ip, :user_agent, :req_size, :res_size
                     )
                     """
                 ),
@@ -48,6 +48,8 @@ async def insert_access_log(log: Dict[str, Any]) -> None:
                     "duration_ms": int(log.get("duration_ms") or 0),
                     "client_ip": str(log.get("client_ip") or ""),
                     "user_agent": str(log.get("user_agent") or ""),
+                    "req_size": int(log.get("req_size") or 0),
+                    "res_size": int(log.get("res_size") or 0),
                 },
             )
 
@@ -56,4 +58,3 @@ async def insert_access_log(log: Dict[str, Any]) -> None:
         await loop.run_in_executor(None, _insert_sync)
     except Exception:
         pass
-

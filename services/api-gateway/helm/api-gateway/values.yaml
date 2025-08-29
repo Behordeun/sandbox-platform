@@ -125,6 +125,8 @@ env:
 # Secrets
 secrets:
   jwtSecretKey: "your-jwt-secret-key-change-in-production"
+  # Optional: base64-encoded or plain DATABASE_URL value
+  databaseUrl: ""
 
 # Health checks
 healthCheck:
@@ -210,4 +212,3 @@ volumes:
     emptyDir: {}
   - name: var-cache
     emptyDir: {}
-
