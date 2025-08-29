@@ -17,12 +17,12 @@ else
 fi
 
 echo "✅ DPI Sandbox Backend Ready!"
-echo "🔐 API Gateway: http://localhost:8080/docs"
-echo "🆔 NIN Service: http://localhost:8005/docs"
-echo "🏦 BVN Service: http://localhost:8006/docs"
-echo "📱 SMS Service: http://localhost:8003/docs"
-echo "🤖 AI Service: http://localhost:8002/docs"
-echo "🔧 Auth Service: http://localhost:8000/docs"
+echo "🔐 API Gateway: http://127.0.0.1:8080/docs"
+echo "🆔 NIN Service: http://127.0.0.1:8005/docs"
+echo "🏦 BVN Service: http://127.0.0.1:8006/docs"
+echo "📱 SMS Service: http://127.0.0.1:8003/docs"
+echo "🤖 AI Service: http://127.0.0.1:8002/docs"
+echo "🔧 Auth Service: http://127.0.0.1:8000/docs"
 echo ""
 echo "🚀 Quick Commands:"
 echo "  Health Check: ./check-services.sh"

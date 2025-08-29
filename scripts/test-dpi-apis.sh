@@ -3,7 +3,7 @@
 echo "🇳🇬 DPI Sandbox API Testing Script"
 echo "=================================="
 
-API_BASE="http://localhost:8080"
+API_BASE="http://127.0.0.1:8080"
 
 # Test 1: Health Check
 echo "1. Testing DPI Health Status..."

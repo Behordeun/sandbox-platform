@@ -91,7 +91,7 @@ start_infrastructure() {
         # Wait for PostgreSQL to be ready
         log_info "Waiting for PostgreSQL to be ready..."
         for i in {1..30}; do
-            if psql -h localhost -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+            if psql -h 127.0.0.1 -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
                 break
             fi
             sleep 1
@@ -206,7 +206,7 @@ check_services() {
         local service_name="${SERVICE_NAMES[$i]}"
         local service_port="${SERVICE_PORTS[$i]}"
         
-        if curl -s "http://localhost:$service_port/health" >/dev/null 2>&1; then
+        if curl -s "http://127.0.0.1:$service_port/health" >/dev/null 2>&1; then
             log_success "$service_name is healthy"
         else
             log_warning "$service_name health check failed"
@@ -343,13 +343,13 @@ main() {
     echo ""
     log_info "📋 Service URLs:"
     for i in "${!SERVICE_NAMES[@]}"; do
-        log_info "   ${SERVICE_NAMES[$i]}: http://localhost:${SERVICE_PORTS[$i]}"
+        log_info "   ${SERVICE_NAMES[$i]}: http://127.0.0.1:${SERVICE_PORTS[$i]}"
     done
     
     echo ""
     log_info "📊 API Documentation:"
-    log_info "   API Gateway: http://localhost:8080/docs"
-    log_info "   Auth Service: http://localhost:8000/docs"
+    log_info "   API Gateway: http://127.0.0.1:8080/docs"
+    log_info "   Auth Service: http://127.0.0.1:8000/docs"
     
     echo ""
     log_info "📝 Logs: ./logs/"
