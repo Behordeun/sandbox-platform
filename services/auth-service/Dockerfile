@@ -12,9 +12,7 @@ WORKDIR /app
 # Install system dependencies for auth service
 RUN apt-get update \
     && apt-get install -y --no-install-recommends \
-        build-essential \
-         curl \
-        libpq-dev \
+        curl \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements first for better caching
@@ -24,9 +22,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 COPY alembic.ini ./
-
-# Copy root .env file for centralized configuration
-COPY ../../.env ./.env
 
 # Create empty migrations directory for runtime and non-root user for auth service
 RUN mkdir -p ./migrations \

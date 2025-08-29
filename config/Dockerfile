@@ -23,9 +23,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
-# Copy root .env file for centralized configuration
-COPY ../.env ./.env
-
 # Create directories for config storage and non-root user
 RUN mkdir -p /app/configs && adduser --disabled-password --gecos '' configuser && chown -R configuser:configuser /app
 USER configuser
