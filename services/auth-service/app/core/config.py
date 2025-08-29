@@ -41,15 +41,24 @@ class Settings(BaseSettings):
 
     @staticmethod
     def _parse_cors_value(v):
+        import json
+
         if v is None or v == "":
             return ["*"]
         if isinstance(v, list):
-            return v
+            return [str(i).strip() for i in v if str(i).strip()]
         if isinstance(v, str):
-            v = v.strip()
-            if not v or v == "*":
+            s = v.strip()
+            if not s or s == "*":
                 return ["*"]
-            return [item.strip() for item in v.split(",") if item.strip()]
+            # Try JSON first
+            try:
+                parsed = json.loads(s)
+                if isinstance(parsed, list):
+                    return [str(i).strip() for i in parsed if str(i).strip()]
+                return [str(parsed).strip()]
+            except Exception:
+                return [item.strip() for item in s.split(",") if item.strip()]
         return ["*"]
 
     @field_validator("cors_origins", mode="before")

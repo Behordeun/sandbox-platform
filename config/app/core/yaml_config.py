@@ -3,9 +3,10 @@ YAML Configuration for Config Service
 """
 
 import os
+from typing import Any, List, Union
 
 from dotenv import load_dotenv
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 # Load environment variables from root .env file
@@ -41,10 +42,8 @@ class Settings(BaseSettings):
     # Redis URL for config storage
     redis_url: str = ""
 
-    # CORS settings
-    from typing import Any
-    from pydantic import field_validator
-    cors_origins: list = ["*"]
+    # CORS settings (tolerant to JSON or comma-separated strings)
+    cors_origins: Union[str, List[str]] = ["*"]
 
     @field_validator("cors_origins", mode="before")
     @classmethod
@@ -66,7 +65,7 @@ class Settings(BaseSettings):
         return ["*"]
 
     @classmethod
-    def _validate_cors_origins(cls, value):
+    def _validate_cors_origins(cls, value: Any):
         import json
         if value is None or value == "":
             return ["*"]
@@ -83,12 +82,45 @@ class Settings(BaseSettings):
                 return [v.strip() for v in value.split(",") if v.strip()]
         return ["*"]
 
-    @classmethod
-    def __get_validators__(cls):
-        yield cls._validate_cors_origins
     cors_allow_credentials: bool = True
-    cors_allow_methods: list = ["*"]
-    cors_allow_headers: list = ["*"]
+    cors_allow_methods: Union[str, List[str]] = ["*"]
+    cors_allow_headers: Union[str, List[str]] = ["*"]
+
+    @field_validator("cors_allow_methods", mode="before")
+    @classmethod
+    def validate_cors_methods(cls, v: Any) -> list:
+        import json
+        if v is None or v == "" or v == []:
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+                return [parsed]
+            except Exception:
+                return [i.strip() for i in v.split(",") if i.strip()]
+        return ["*"]
+
+    @field_validator("cors_allow_headers", mode="before")
+    @classmethod
+    def validate_cors_headers(cls, v: Any) -> list:
+        import json
+        if v is None or v == "" or v == []:
+            return ["*"]
+        if isinstance(v, list):
+            return v
+        if isinstance(v, str):
+            try:
+                parsed = json.loads(v)
+                if isinstance(parsed, list):
+                    return parsed
+                return [parsed]
+            except Exception:
+                return [i.strip() for i in v.split(",") if i.strip()]
+        return ["*"]
 
     @property
     def config_storage_type(self):

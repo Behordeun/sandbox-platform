@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, List, Union
 
 from pydantic import ConfigDict, field_validator, model_validator
 from pydantic_settings import BaseSettings
@@ -13,10 +13,10 @@ class Settings(BaseSettings):
     port: int = 8001
 
     # CORS settings
-    cors_origins: list[str] = ["*"]
+    cors_origins: Union[str, List[str]] = ["*"]
     cors_allow_credentials: bool = True
-    cors_allow_methods: list[str] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
-    cors_allow_headers: list[str] = ["*"]
+    cors_allow_methods: Union[str, List[str]] = ["GET", "POST", "PUT", "DELETE", "OPTIONS"]
+    cors_allow_headers: Union[str, List[str]] = ["*"]
 
     @staticmethod
     def _parse_list_like(value: Any) -> list[str]:
