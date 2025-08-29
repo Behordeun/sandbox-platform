@@ -15,3 +15,6 @@ autoflake
 black
 isort
 sqlalchemy
+python-dotenv
+redis
+aiofiles

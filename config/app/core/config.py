@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     redis_url: str = "redis://localhost:6379/1"
     encryption_key: str = ""
     versioning_enabled: bool = True
+    config_file_path: str = "./config_data"
+    max_versions: int = 10
 
     model_config = ConfigDict(
         env_file="../../../.env",  # Use root .env file

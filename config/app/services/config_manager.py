@@ -158,7 +158,6 @@ class FileStorage(ConfigStorage):
             return None
         except Exception:
             return None
-            return None
 
     async def set(self, config_id: str, data: Dict[str, Any]) -> bool:
         try:
