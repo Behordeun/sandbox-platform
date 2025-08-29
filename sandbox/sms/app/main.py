@@ -1,5 +1,7 @@
 from app.core.config import settings
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from app.core.system_logger import system_logger
 from fastapi.routing import APIRoute
 from app.middleware.correlation import CorrelationIdMiddleware
 from app.middleware.access_log import AccessLogMiddleware
@@ -44,4 +46,29 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "app.main:app", host=settings.host, port=settings.port, reload=settings.debug
+    )
+else:
+    # Startup log when imported by uvicorn
+    try:
+        system_logger.info("Service startup", {"service": settings.app_name, "version": settings.app_version})
+    except Exception:
+        pass
+
+from fastapi import Request
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    system_logger.error(
+        exc,
+        {
+            "path": str(request.url.path),
+            "method": request.method,
+            "client": getattr(request.client, "host", None),
+        },
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "message": "An unexpected error occurred"},
     )

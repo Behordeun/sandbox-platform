@@ -1,10 +1,31 @@
 from app.api.v1.router import api_router
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
+from fastapi.responses import JSONResponse
+from app.core.system_logger import system_logger
 
 app = FastAPI(title="Two-Way SMS Service", version="1.0.0")
 
 app.include_router(api_router, prefix="/api/v1")
 
+
+# Startup log
+system_logger.info("Service startup", {"service": "two-way-sms-service"})
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    system_logger.error(
+        exc,
+        {
+            "path": str(request.url.path),
+            "method": request.method,
+            "client": getattr(request.client, "host", None),
+        },
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={"error": "Internal server error", "message": "An unexpected error occurred"},
+    )
 
 @app.get("/health")
 async def health_check():
