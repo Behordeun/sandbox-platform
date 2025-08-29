@@ -1,0 +1,35 @@
+{
+  "title": "Gateway Access Logs",
+  "panels": [
+    {
+      "type": "table",
+      "title": "Gateway Access Logs (latest 100)",
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT * FROM gateway_access_logs ORDER BY created_at DESC LIMIT 100;"
+        }
+      ],
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 24,
+        "h": 12
+      }
+    }
+  ],
+  "templating": {
+    "list": []
+  },
+  "time": {
+    "from": "now-24h",
+    "to": "now"
+  },
+  "schemaVersion": 38,
+  "version": 1
+}

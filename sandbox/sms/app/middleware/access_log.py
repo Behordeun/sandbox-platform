@@ -21,8 +21,15 @@ class AccessLogMiddleware(BaseHTTPMiddleware):
             "user_agent": request.headers.get("user-agent", "unknown"),
         }
         try:
+            log["req_size"] = int(request.headers.get("content-length", "0") or 0)
+        except Exception:
+            log["req_size"] = 0
+        try:
+            log["res_size"] = int(response.headers.get("content-length", "0") or 0)
+        except Exception:
+            log["res_size"] = 0
+        try:
             asyncio.create_task(insert_access_log(log))
         except Exception:
             pass
         return response
-

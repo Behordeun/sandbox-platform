@@ -49,6 +49,11 @@ spec:
                 {{- toYaml .valueFrom | nindent 16 }}
               {{- end }}
             {{- end }}
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: {{ include "api-gateway.secretName" . }}
+                  key: database-url
             - name: JWT_SECRET_KEY
               valueFrom:
                 secretKeyRef:
@@ -94,4 +99,3 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
       {{- end }}
-

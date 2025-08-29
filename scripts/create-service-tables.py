@@ -149,6 +149,9 @@ def create_service_tables():
             CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_service ON gateway_access_logs(service_name);
             CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_status ON gateway_access_logs(status_code);
             CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_request_id ON gateway_access_logs(request_id);
+            -- Forensics fields
+            ALTER TABLE gateway_access_logs ADD COLUMN IF NOT EXISTS req_size INTEGER;
+            ALTER TABLE gateway_access_logs ADD COLUMN IF NOT EXISTS res_size INTEGER;
             """,
         ),
         (
@@ -190,6 +193,8 @@ def create_service_tables():
             CREATE INDEX IF NOT EXISTS idx_nin_access_logs_created_at ON nin_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_nin_access_logs_status ON nin_access_logs(status_code);
             CREATE INDEX IF NOT EXISTS idx_nin_access_logs_request_id ON nin_access_logs(request_id);
+            ALTER TABLE nin_access_logs ADD COLUMN IF NOT EXISTS req_size INTEGER;
+            ALTER TABLE nin_access_logs ADD COLUMN IF NOT EXISTS res_size INTEGER;
             """,
         ),
         (
@@ -210,6 +215,8 @@ def create_service_tables():
             CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_created_at ON bvn_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_status ON bvn_access_logs(status_code);
             CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_request_id ON bvn_access_logs(request_id);
+            ALTER TABLE bvn_access_logs ADD COLUMN IF NOT EXISTS req_size INTEGER;
+            ALTER TABLE bvn_access_logs ADD COLUMN IF NOT EXISTS res_size INTEGER;
             """,
         ),
         (
@@ -230,6 +237,8 @@ def create_service_tables():
             CREATE INDEX IF NOT EXISTS idx_sms_access_logs_created_at ON sms_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_sms_access_logs_status ON sms_access_logs(status_code);
             CREATE INDEX IF NOT EXISTS idx_sms_access_logs_request_id ON sms_access_logs(request_id);
+            ALTER TABLE sms_access_logs ADD COLUMN IF NOT EXISTS req_size INTEGER;
+            ALTER TABLE sms_access_logs ADD COLUMN IF NOT EXISTS res_size INTEGER;
             """,
         ),
         (
@@ -250,6 +259,8 @@ def create_service_tables():
             CREATE INDEX IF NOT EXISTS idx_ai_access_logs_created_at ON ai_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_ai_access_logs_status ON ai_access_logs(status_code);
             CREATE INDEX IF NOT EXISTS idx_ai_access_logs_request_id ON ai_access_logs(request_id);
+            ALTER TABLE ai_access_logs ADD COLUMN IF NOT EXISTS req_size INTEGER;
+            ALTER TABLE ai_access_logs ADD COLUMN IF NOT EXISTS res_size INTEGER;
             """,
         ),
     ]

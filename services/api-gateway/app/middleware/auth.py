@@ -191,6 +191,18 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "query_params": str(request.query_params) if request.query_params else None,
         }
 
+        # Augment with sizes
+        try:
+            req_size = int(request.headers.get("content-length", "0") or 0)
+        except Exception:
+            req_size = 0
+        try:
+            res_size = int(response.headers.get("content-length", "0") or 0)
+        except Exception:
+            res_size = 0
+        log_data["req_size"] = req_size
+        log_data["res_size"] = res_size
+
         # Log with appropriate level based on status code
         if response.status_code >= 400:
             logger.warning(f"ACCESS_DENIED: {log_data}")
