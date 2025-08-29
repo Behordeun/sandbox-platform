@@ -276,6 +276,111 @@ def create_service_tables():
             except Exception as e:
                 print(f"❌ Error creating tables for {label}: {e}")
 
+    # Create/replace helpful SQL views for analytics
+    views = [
+        (
+            "Gateway Access Summary",
+            """
+            CREATE OR REPLACE VIEW v_gateway_access_summary AS
+            SELECT
+              date_trunc('hour', created_at) AS bucket,
+              service_name,
+              COUNT(*) AS total,
+              SUM(CASE WHEN status_code BETWEEN 200 AND 299 THEN 1 ELSE 0 END) AS ok,
+              SUM(CASE WHEN status_code BETWEEN 400 AND 499 THEN 1 ELSE 0 END) AS client_err,
+              SUM(CASE WHEN status_code BETWEEN 500 AND 599 THEN 1 ELSE 0 END) AS server_err,
+              AVG(duration_ms) AS avg_ms
+            FROM gateway_access_logs
+            GROUP BY 1,2
+            ORDER BY 1 DESC, 2;
+            """,
+        ),
+        (
+            "Gateway Top Endpoints",
+            """
+            CREATE OR REPLACE VIEW v_gateway_top_endpoints AS
+            SELECT
+              path,
+              service_name,
+              COUNT(*) AS hits,
+              AVG(duration_ms) AS avg_ms,
+              SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS errors
+            FROM gateway_access_logs
+            WHERE created_at > now() - interval '7 days'
+            GROUP BY 1,2
+            ORDER BY hits DESC;
+            """,
+        ),
+        (
+            "Auth Audit Summary",
+            """
+            CREATE OR REPLACE VIEW v_auth_audit_summary AS
+            SELECT
+              date_trunc('hour', created_at) AS bucket,
+              activity_type,
+              COUNT(*) AS total,
+              SUM(CASE WHEN success THEN 1 ELSE 0 END) AS success_count,
+              SUM(CASE WHEN success THEN 0 ELSE 1 END) AS failure_count
+            FROM auth_audit_logs
+            GROUP BY 1,2
+            ORDER BY 1 DESC, 2;
+            """,
+        ),
+        (
+            "Service Access Summary",
+            """
+            CREATE OR REPLACE VIEW v_service_access_summary AS
+            SELECT * FROM (
+              SELECT 'nin' AS service, created_at, status_code, duration_ms FROM nin_access_logs
+              UNION ALL
+              SELECT 'bvn' AS service, created_at, status_code, duration_ms FROM bvn_access_logs
+              UNION ALL
+              SELECT 'sms' AS service, created_at, status_code, duration_ms FROM sms_access_logs
+              UNION ALL
+              SELECT 'ai'  AS service, created_at, status_code, duration_ms FROM ai_access_logs
+            ) t;
+            """,
+        ),
+        (
+            "Service Error Rate",
+            """
+            CREATE OR REPLACE VIEW v_service_error_rate AS
+            SELECT
+              date_trunc('hour', created_at) AS bucket,
+              service,
+              COUNT(*) AS total,
+              SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) AS server_err,
+              ROUND(100.0 * SUM(CASE WHEN status_code >= 500 THEN 1 ELSE 0 END) / NULLIF(COUNT(*),0), 2) AS server_err_pct
+            FROM v_service_access_summary
+            GROUP BY 1,2
+            ORDER BY 1 DESC, 2;
+            """,
+        ),
+        (
+            "Service Latency Summary",
+            """
+            CREATE OR REPLACE VIEW v_service_latency_summary AS
+            SELECT
+              date_trunc('hour', created_at) AS bucket,
+              service,
+              AVG(duration_ms) AS avg_ms,
+              MAX(duration_ms) AS p100_ms
+            FROM v_service_access_summary
+            GROUP BY 1,2
+            ORDER BY 1 DESC, 2;
+            """,
+        ),
+    ]
+
+    with engine.connect() as conn:
+        for label, sql in views:
+            try:
+                conn.execute(text(sql))
+                conn.commit()
+                print(f"✅ View created/updated: {label}")
+            except Exception as e:
+                print(f"❌ Error creating view {label}: {e}")
+
     # Verify tables were created
     with engine.connect() as conn:
         result = conn.execute(
