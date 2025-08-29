@@ -1,4 +1,5 @@
 from app.core.security import verify_token
+from app.core.system_logger import system_logger
 from app.crud.user import user_crud
 from app.dependencies.database import get_db
 from app.models.user import User
@@ -41,13 +42,22 @@ def get_current_user(
         user_id = payload.get("sub")
         if user_id is None:
             raise credentials_exception
-    except HTTPException:
+    except HTTPException as http_exc:
+        system_logger.warning(
+            "Credential validation failed",
+            {"reason": http_exc.detail, "stage": "token_validation"},
+        )
         raise
-    except Exception:
+    except Exception as e:
+        system_logger.error(e, {"stage": "token_validation"}, exc_info=True)
         raise credentials_exception
 
     user = user_crud.get(db, id=int(user_id))
     if user is None:
+        system_logger.warning(
+            "Authenticated user not found",
+            {"stage": "load_user", "user_id": user_id},
+        )
         raise credentials_exception
 
     return user

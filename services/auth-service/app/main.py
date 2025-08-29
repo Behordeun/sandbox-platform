@@ -1,9 +1,11 @@
 import logging
+from typing import Any
 from contextlib import asynccontextmanager
 
 from app.api.v1.router import api_router
 from app.core.config import settings
 from app.core.database import engine
+from app.core.system_logger import system_logger
 from app.middleware.logging import UserActivityLoggingMiddleware
 from app.middleware.correlation import CorrelationIdMiddleware
 from app.models import oauth_token  # Import to register models
@@ -26,6 +28,16 @@ async def lifespan(app: FastAPI):
     logger.info("Starting up Sandbox Auth Service...")
     logger.info(f"Database URL: {settings.database_url}")
 
+    # Also log to system_logger with rich context
+    system_logger.info(
+        "Auth service startup",
+        {
+            "service": settings.app_name,
+            "version": settings.app_version,
+            "database_url": settings.database_url,
+        },
+    )
+
     # Tables are managed by Alembic migrations
     # Base.metadata.create_all(bind=engine)
     logger.info("Database connection verified")
@@ -37,11 +49,38 @@ async def lifespan(app: FastAPI):
         logger.info("Database connection successful")
     except Exception as e:
         logger.error(f"Database connection failed: {e}")
+        system_logger.error(e, {"stage": "startup", "check": "db"}, exc_info=True)
 
     yield
 
     # Shutdown
     logger.info("Shutting down Sandbox Auth Service...")
+    system_logger.info("Auth service shutdown", {"service": settings.app_name})
+
+
+# Global exception handler (adds traceback-rich logs)
+from fastapi import Request
+
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception) -> Any:
+    logger.error(f"Unhandled exception: {exc}")
+    system_logger.error(
+        exc,
+        {
+            "path": str(request.url.path),
+            "method": request.method,
+            "client": getattr(request.client, "host", None),
+        },
+        exc_info=True,
+    )
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal server error",
+            "message": "An unexpected error occurred",
+        },
+    )
 
 
 # Custom unique operation id generator
