@@ -98,9 +98,15 @@ def _issuer_aliases(primary: str) -> set[str]:
 
 
 def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
-    """Verify JWT token and return payload with enhanced validation."""
+    """Verify JWT token and return payload with enhanced validation.
+
+    Performs strict validation including issuer. If that fails, performs a relaxed
+    validation that accepts localhost/127.0.0.1 issuer aliases for development.
+    In both paths, verifies token type and required claims.
+    """
+    payload: Optional[dict] = None
     try:
-        # First attempt strict validation including issuer
+        # Strict validation including issuer
         payload = jwt.decode(
             token,
             settings.jwt_secret_key,
@@ -108,33 +114,32 @@ def verify_token(token: str, token_type: str = "access") -> Optional[dict]:
             audience="sandbox-platform",
             issuer=settings.oauth2_issuer_url,
         )
-
-        # Check token type
-        if payload.get("type") != token_type:
-            return None
-
-        # Validate required claims
-        required_claims = ["sub", "exp", "iat", "jti"]
-        if not all(claim in payload for claim in required_claims):
-            return None
-
-        return payload
-
     except JWTError:
-        # Relaxed path: decode without issuer check, then validate against allowed aliases
+        # Relaxed validation: decode without issuer, then validate acceptable aliases
         try:
-            payload = jwt.decode(
+            tmp_payload = jwt.decode(
                 token,
                 settings.jwt_secret_key,
                 algorithms=[settings.jwt_algorithm],
                 audience="sandbox-platform",
                 options={"verify_iss": False},
             )
-            iss = payload.get("iss")
+            iss = tmp_payload.get("iss")
             if not iss or iss not in _issuer_aliases(settings.oauth2_issuer_url):
                 return None
+            payload = tmp_payload
         except JWTError:
             return None
+
+    # Common checks for both paths
+    if not isinstance(payload, dict):
+        return None
+    if payload.get("type") != token_type:
+        return None
+    required_claims = ["sub", "exp", "iat", "jti"]
+    if not all(claim in payload for claim in required_claims):
+        return None
+    return payload
 
 
 def generate_client_id() -> str:
