@@ -4,7 +4,7 @@ from app.services.discovery import service_discovery
 from app.services.health import health_service
 from app.services.proxy import proxy_service
 from fastapi import APIRouter, HTTPException, Request
-from fastapi.responses import Response
+from fastapi.responses import Response, JSONResponse
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -237,22 +237,7 @@ class LoginRequest(BaseModel):
     password: str
 
 
-@router.post("/auth/login")
-async def system_login(credentials: LoginRequest, request: Request) -> Response:
-    """System-wide authentication endpoint.
-
-    Example for Nigerian developers:
-    {
-        "identifier": "developer@fintech.ng",
-        "password": "SecurePass123"
-    }
-    """
-    return await proxy_service.proxy_request(
-        request,
-        "auth",
-        "/api/v1/auth/login/json",
-        json_payload=credentials.model_dump(),
-    )
+## (moved system_login above catch-all routes for precedence)
 
 
 @router.get("/examples/nin")
@@ -296,3 +281,93 @@ async def sms_examples():
             },
         },
     }
+class LoginRequest(BaseModel):
+    identifier: str
+    password: str
+
+
+@router.post(
+    "/auth/login",
+    tags=["gateway"],
+    operation_id="system_login",
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "title": "LoginRequest",
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "password": {"type": "string"},
+                        },
+                        "required": ["identifier", "password"],
+                    }
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "username": {"type": "string"},
+                            "password": {"type": "string"},
+                        },
+                        "required": ["username", "password"],
+                    }
+                },
+            },
+        }
+    },
+)
+async def system_login(request: Request) -> Response:
+    """System-wide authentication endpoint accepting JSON or form data.
+
+    Accepts:
+    - application/json: {"identifier": "...", "password": "..."}
+    - application/x-www-form-urlencoded: username=...&password=...
+    """
+    # Parse payload from JSON or form
+    identifier = None
+    password = None
+
+    content_type = request.headers.get("content-type", "").lower()
+    data = None
+
+    try:
+        if "application/json" in content_type:
+            data = await request.json()
+        else:
+            form = await request.form()
+            data = dict(form) if form is not None else None
+    except Exception:
+        data = None
+
+    if isinstance(data, dict):
+        identifier = data.get("identifier") or data.get("username")
+        password = data.get("password")
+
+    if not identifier or not password:
+        # Return a 422 with helpful details
+        details = []
+        if not (data and ("identifier" in data or "username" in data)):
+            details.append({
+                "type": "missing",
+                "loc": ["body", "identifier|username"],
+                "msg": "Field required",
+                "input": None,
+            })
+        if not (data and "password" in data):
+            details.append({
+                "type": "missing",
+                "loc": ["body", "password"],
+                "msg": "Field required",
+                "input": None,
+            })
+        return JSONResponse(status_code=422, content={"detail": details})
+
+    return await proxy_service.proxy_request(
+        request,
+        "auth",
+        "/api/v1/auth/login/json",
+        json_payload={"identifier": identifier, "password": password},
+    )

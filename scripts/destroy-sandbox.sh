@@ -58,10 +58,6 @@ echo "[INFO] Cleaning Python cache..."
 find . -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null || echo "No Python cache"
 find . -name "*.pyc" -delete 2>/dev/null || echo "No .pyc files"
 
-# Clean up virtual environment
-echo "[INFO] Removing virtual environment..."
-rm -rf .venv 2>/dev/null || echo "No virtual environment"
-
 # Clean up temporary files
 echo "[INFO] Cleaning temporary files..."
 rm -rf /tmp/auth-test*.log 2>/dev/null || echo "No temp files"
