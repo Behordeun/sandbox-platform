@@ -27,7 +27,7 @@ def load_env():
 
 
 def print_table_row_counts(engine, insp, tables):
-    print("\n📋 Tables present & row counts:")
+    print("\n📋 Tables present & row counts (key ones per service):")
     existing = set(insp.get_table_names())
     with engine.connect() as conn:
         for tbl in tables:
@@ -85,18 +85,36 @@ def main():
     insp = reflection.Inspector.from_engine(engine)
 
     tables = [
+        # Auth (prefixed)
         "auth_users",
         "auth_oauth_clients",
         "auth_oauth_tokens",
         "auth_token_blacklist",
         "auth_password_reset_tokens",
+        # NIN
+        "nin_verifications",
+        # BVN
+        "bvn_verifications",
+        # SMS
+        "sms_messages",
+        # AI
+        "ai_conversations",
+        # Config
+        "config_settings",
+        # Gateway
+        "gateway_requests",
     ]
 
     existing = print_table_row_counts(engine, insp, tables)
     print_foreign_key_status(insp, existing)
     check_admin_user(engine, existing)
+    # Non-zero exit if critical auth table missing
+    if "auth_users" not in existing:
+        print("\n❌ Critical: auth_users table is missing. Run ./scripts/migrate-db.py and retry.")
+        sys.exit(2)
+    else:
+        print("\n✅ Auth schema looks present.")
 
 
 if __name__ == "__main__":
     main()
-
