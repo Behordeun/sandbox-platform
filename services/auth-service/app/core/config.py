@@ -11,16 +11,11 @@ class Settings(BaseSettings):
     app_version: str = "1.0.0"
     debug: bool = False
 
-    # Database settings
-    database_url: str = os.getenv(
-        "DATABASE_URL",
-        "postgresql://sandbox_user:password@localhost:5432/sandbox_platform",
-    )
+    # Database settings (required; no hard-coded default)
+    database_url: str
 
-    # JWT settings
-    jwt_secret_key: str = os.getenv(
-        "JWT_SECRET_KEY", "change-this-secret-key-in-production"
-    )
+    # JWT settings (required; no hard-coded default)
+    jwt_secret_key: str
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
@@ -119,7 +114,7 @@ class Settings(BaseSettings):
 
     # Server settings
     model_config = ConfigDict(
-        env_file="../../.env",  # Use root .env file
+        env_file="../../../../.env",  # Use root .env file
         case_sensitive=False,
         extra="ignore",  # Ignore extra fields from .env
     )

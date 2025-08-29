@@ -8,8 +8,26 @@ import os
 import sys
 from pathlib import Path
 
+# Ensure environment variables are loaded before importing app modules
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
+
+repo_root = Path(__file__).resolve().parent.parent
+env_path = repo_root / ".env"
+if load_dotenv and env_path.exists():
+    load_dotenv(env_path.as_posix())
+
+# Validate required environment
+missing = [v for v in ["DATABASE_URL", "JWT_SECRET_KEY"] if not os.getenv(v)]
+if missing:
+    print("❌ Missing required environment variables: " + ", ".join(missing))
+    print("   Please set them in .env or export them before running.")
+    sys.exit(1)
+
 # Add the auth service to Python path first
-auth_service_path = Path(__file__).parent.parent / "services" / "auth-service"
+auth_service_path = repo_root / "services" / "auth-service"
 sys.path.insert(0, str(auth_service_path))
 
 # Import after path setup

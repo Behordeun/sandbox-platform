@@ -11,7 +11,7 @@ from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 # Load environment variables from root .env file
-load_dotenv("../../.env")
+load_dotenv("../../../../.env")
 import sys
 from pathlib import Path
 
@@ -96,16 +96,13 @@ class Settings(BaseSettings):
         config = get_config(environment)
         db_config = config.get("database", {})
         if db_config:
-            self.database_url = os.getenv("DATABASE_URL", "")
+            self.database_url = os.getenv("DATABASE_URL") or db_config.get("url", "")
             # Get table prefix for auth service
             table_prefixes = db_config.get("table_prefixes", {})
             self.table_prefix = table_prefixes.get("auth_service", "auth_")
         else:
-            # Use centralized environment variables
-            self.database_url = os.getenv(
-                "DATABASE_URL",
-                "",
-            )
+            # Use centralized environment variables only (no hard-coded default)
+            self.database_url = os.getenv("DATABASE_URL", "")
             self.table_prefix = "auth_"
 
     # Default values (fallback if YAML config is not available)
@@ -115,14 +112,12 @@ class Settings(BaseSettings):
     host: str = "0.0.0.0"
     port: int = 8000
 
-    # Database
-    database_url: str = (
-        "postgresql://sandbox_user:password@localhost:5432/sandbox_platform"
-    )
+    # Database (no hard-coded default; must be provided via env or YAML)
+    database_url: str = ""
     table_prefix: str = "auth_"
 
-    # JWT
-    jwt_secret_key: str = "change-this-secret-key-in-production"
+    # JWT (no hard-coded default)
+    jwt_secret_key: str = ""
     jwt_algorithm: str = "HS256"
     jwt_access_token_expire_minutes: int = 30
     jwt_refresh_token_expire_days: int = 7
@@ -186,7 +181,7 @@ class Settings(BaseSettings):
     smtp_from_name: str = "DPI Sandbox Platform"
 
     model_config = ConfigDict(
-        env_file="../../.env",  # Use root .env file
+        env_file="../../../../.env",  # Use root .env file
         case_sensitive=False,
         extra="ignore",  # Ignore extra fields from .env
     )
