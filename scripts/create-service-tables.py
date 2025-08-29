@@ -13,7 +13,7 @@ load_dotenv()
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL",
-    "postgresql://postgres:MUhammad__1234@127.0.0.1:5432/sandbox_platform",
+    "",
 )
 
 

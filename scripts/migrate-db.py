@@ -82,10 +82,19 @@ def run_migrations():
                         continue
 
                 if not alembic_cmd:
-                    print(f"❌ Alembic not found for {service['name']}")
-                    success = False
-                    continue
+                    print(f"⚠️  Alembic not found for {service['name']}. Falling back to direct table creation.")
+                    # Fallback: create tables via SQLAlchemy metadata
+                    if create_tables_directly(service["path"], db_url):
+                        print(f"✅ {service['name']} tables ensured via SQLAlchemy")
+                        os.chdir(original_cwd)
+                        continue
+                    else:
+                        success = False
+                        os.chdir(original_cwd)
+                        continue
 
+                # Ensure migration context flags
+                env["MIGRATIONS"] = "1"
                 result = subprocess.run(
                     alembic_cmd + ["upgrade", "head"],
                     env=env,
@@ -113,6 +122,41 @@ def run_migrations():
             # This would be implemented per service as needed
 
     return success
+
+
+def create_tables_directly(service_rel_path: str, db_url: str) -> bool:
+    """Create service tables directly using SQLAlchemy metadata.
+
+    This is a fallback when Alembic is not available in the runtime environment.
+    """
+    try:
+        from importlib import import_module
+        from sqlalchemy import create_engine
+
+        # Make sure service package is importable
+        service_path = Path(__file__).parent.parent / service_rel_path
+        sys.path.insert(0, str(service_path))
+
+        # Ensure DB URL visible to service settings/engine modules
+        os.environ.setdefault("DATABASE_URL", db_url)
+        os.environ.setdefault("MIGRATIONS", "1")
+
+        # Import database and models to register metadata
+        db_mod = import_module("app.core.database")
+        # Import models to ensure they are attached to Base.metadata
+        import_module("app.models.user")
+        import_module("app.models.oauth_client")
+        import_module("app.models.oauth_token")
+        import_module("app.models.password_reset")
+        import_module("app.models.token_blacklist")
+
+        Base = getattr(db_mod, "Base")
+        engine = create_engine(db_url, pool_pre_ping=True)
+        Base.metadata.create_all(bind=engine)
+        return True
+    except Exception as e:
+        print(f"❌ Direct table creation failed: {e}")
+        return False
 
 
 def create_database():

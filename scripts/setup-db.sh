@@ -91,6 +91,18 @@ install_dependencies() {
         log_info "Installing PyYAML..."
         pip install PyYAML
     fi
+
+    # Ensure Alembic is available for migrations
+    if ! python -c "import alembic" >/dev/null 2>&1; then
+        log_info "Installing Alembic..."
+        pip install alembic
+    fi
+
+    # If service requirements file exists, install to align versions
+    if [ -f "services/auth-service/requirements.txt" ]; then
+        log_info "Installing auth-service requirements (includes Alembic)..."
+        pip install -r services/auth-service/requirements.txt || true
+    fi
     
     log_success "Dependencies installed"
 }
