@@ -5,6 +5,7 @@ import asyncio
 from typing import Optional
 
 from fastapi import Request
+from app.core.security import verify_token
 from sqlalchemy import text
 from app.core.database import engine
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -25,8 +26,17 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
         client_ip = request.client.host if request.client else "unknown"
         user_agent = request.headers.get("User-Agent", "unknown")
 
-        # Extract user info if available
+        # Extract user info if available (state, forwarded header, or token)
         user_id = getattr(request.state, "user_id", None)
+        if not user_id:
+            user_id = request.headers.get("X-User-Id")
+        if not user_id:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ", 1)[1]
+                payload = verify_token(token, token_type="access")
+                if payload and payload.get("sub"):
+                    user_id = payload.get("sub")
 
         response = await call_next(request)
 
@@ -97,11 +107,12 @@ class UserActivityLoggingMiddleware(BaseHTTPMiddleware):
             else:
                 logger.info(f"USER_ACTIVITY: {json.dumps(log_data)}")
 
-        # Persist audit to DB asynchronously (best-effort)
-        try:
-            asyncio.create_task(self._write_audit(log_data))
-        except Exception:
-            pass
+        # Persist audit to DB asynchronously (best-effort), skip /health
+        if not str(request.url.path).endswith("/health"):
+            try:
+                asyncio.create_task(self._write_audit(log_data))
+            except Exception:
+                pass
 
     async def _write_audit(self, log: dict):
         if engine is None:

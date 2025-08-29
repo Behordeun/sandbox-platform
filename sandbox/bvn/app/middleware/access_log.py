@@ -10,9 +10,11 @@ class AccessLogMiddleware(BaseHTTPMiddleware):
         start = time.time()
         response = await call_next(request)
         duration_ms = int((time.time() - start) * 1000)
+        forwarded_user = request.headers.get("X-User-Id")
+        resolved_user_id = getattr(request.state, "user_id", None) or forwarded_user
         log = {
             "request_id": getattr(request.state, "request_id", None),
-            "user_id": getattr(request.state, "user_id", None),
+            "user_id": resolved_user_id,
             "method": request.method,
             "path": request.url.path,
             "status_code": response.status_code,
@@ -28,8 +30,9 @@ class AccessLogMiddleware(BaseHTTPMiddleware):
             log["res_size"] = int(response.headers.get("content-length", "0") or 0)
         except Exception:
             log["res_size"] = 0
-        try:
-            asyncio.create_task(insert_access_log(log))
-        except Exception:
-            pass
+        if not str(request.url.path).endswith("/health"):
+            try:
+                asyncio.create_task(insert_access_log(log))
+            except Exception:
+                pass
         return response
