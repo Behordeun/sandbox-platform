@@ -22,9 +22,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy application code
 COPY app/ ./app/
 
-# Copy root .env file for centralized configuration
-COPY ../../.env ./.env
-
 # Create non-root user for AI service
 RUN adduser --disabled-password --gecos '' aiuser && chown -R aiuser:aiuser /app
 USER aiuser

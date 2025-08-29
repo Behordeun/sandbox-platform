@@ -16,9 +16,8 @@ class Settings(BaseSettings):
     sms_base_url: str = "https://api.ng.termii.com"
 
     model_config = ConfigDict(
-        env_file="../../../../.env",  # Use root .env file
         case_sensitive=False,
-        extra="ignore",  # Ignore extra fields from .env
+        extra="ignore",
     )
 
 

@@ -19,6 +19,6 @@ sqlalchemy
 python-dotenv
 redis
 aiofiles
-psycopg2
+psycopg2-binary
 passlib
 alembic
