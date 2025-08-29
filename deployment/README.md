@@ -38,6 +38,29 @@ cd deployment/helmfile
 helmfile -e dev apply
 ```
 
+### Service Charts Quickstart
+
+Each service has a Helm chart under `sandbox/<service>/helm/<service>` that uses Secrets for DATABASE_URL and service API keys. Example (NIN):
+
+```
+helm install nin ./sandbox/nin/helm/nin   --set secrets.databaseUrl="postgresql://user:pass@postgres:5432/sandbox_platform"   --set secrets.dojahApiKey="YOUR_DOJAH_KEY"   --set global.imageRegistry=docker.io/your-org
+```
+
+- Enable Ingress with TLS (cert‑manager):
+
+```
+--set ingress.enabled=true --set ingress.className=nginx --set ingress.clusterIssuer=letsencrypt-prod --set ingress.hosts[0].host=nin.example.com
+```
+
+- NetworkPolicy (default gatewayOnly):
+
+```
+--set networkPolicy.enabled=true
+```
+
+Repeat for BVN (`secrets.dojahApiKey`), SMS (`secrets.smsApiKey`), and AI (`secrets.aiApiKey`).
+
+
 ## 📊 Monitoring
 
 - **Prometheus**: Metrics collection

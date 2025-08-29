@@ -58,6 +58,7 @@ def create_admin_user(
             first_name=first_name,
             last_name=last_name,
             phone_number=None,
+            role="admin",  # Ensure admin users have admin role
         )
 
         user = user_crud.create(db, obj_in=user_data)
