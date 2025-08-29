@@ -7,6 +7,9 @@ metadata:
     {{- include "bvn.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
+    {{- if .Values.ingress.clusterIssuer }}
+    cert-manager.io/cluster-issuer: {{ .Values.ingress.clusterIssuer | quote }}
+    {{- end }}
     {{- toYaml . | nindent 4 }}
   {{- end }}
 spec:

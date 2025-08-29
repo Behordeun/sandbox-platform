@@ -26,3 +26,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{ include "nin.fullname" . }}-secrets
 {{- end -}}
 
+{{- define "nin.image" -}}
+{{- if .Values.global.imageRegistry -}}
+{{- printf "%s/%s" .Values.global.imageRegistry .Values.image.repository -}}
+{{- else -}}
+{{- .Values.image.repository -}}
+{{- end -}}
+{{- end -}}
