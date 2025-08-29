@@ -26,3 +26,10 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{ include "sms.fullname" . }}-secrets
 {{- end -}}
 
+{{- define "sms.image" -}}
+{{- if .Values.global.imageRegistry -}}
+{{- printf "%s/%s" .Values.global.imageRegistry .Values.image.repository -}}
+{{- else -}}
+{{- .Values.image.repository -}}
+{{- end -}}
+{{- end -}}
