@@ -12,6 +12,7 @@ Reads DATABASE_URL from .env/env and prints:
 import os
 import sys
 from pathlib import Path
+from sqlalchemy.sql import text
 
 
 def load_env():

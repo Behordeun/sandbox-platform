@@ -10,6 +10,99 @@ from pydantic import BaseModel
 router = APIRouter()
 
 
+# Specific system login endpoint MUST be declared before catch-all /auth/{path}
+async def parse_login_payload(request: Request, content_type: str):
+    try:
+        if "application/json" in content_type:
+            data = await request.json()
+        else:
+            form = await request.form()
+            data = dict(form) if form is not None else None
+    except Exception:
+        data = None
+    return data
+
+
+def validate_login_payload(data):
+    identifier = None
+    password = None
+    if isinstance(data, dict):
+        identifier = data.get("identifier") or data.get("username")
+        password = data.get("password")
+    details = []
+    if not (data and ("identifier" in data or "username" in data)):
+        details.append(
+            {
+                "type": "missing",
+                "loc": ["body", "identifier|username"],
+                "msg": "Field required",
+                "input": None,
+            }
+        )
+    if not (data and "password" in data):
+        details.append(
+            {
+                "type": "missing",
+                "loc": ["body", "password"],
+                "msg": "Field required",
+                "input": None,
+            }
+        )
+    return identifier, password, details
+
+
+@router.post(
+    "/auth/login",
+    tags=["gateway"],
+    operation_id="system_login",
+    openapi_extra={
+        "requestBody": {
+            "required": True,
+            "content": {
+                "application/json": {
+                    "schema": {
+                        "title": "LoginRequest",
+                        "type": "object",
+                        "properties": {
+                            "identifier": {"type": "string"},
+                            "password": {"type": "string"},
+                        },
+                        "required": ["identifier", "password"],
+                    }
+                },
+                "application/x-www-form-urlencoded": {
+                    "schema": {
+                        "type": "object",
+                        "properties": {
+                            "username": {"type": "string"},
+                            "password": {"type": "string"},
+                        },
+                        "required": ["username", "password"],
+                    }
+                },
+            },
+        }
+    },
+)
+async def system_login(request: Request) -> Response:
+    """System-wide authentication endpoint accepting JSON or form data.
+
+    Accepts JSON {identifier,password} or form with username/password.
+    Proxies to auth-service JSON login.
+    """
+    content_type = request.headers.get("content-type", "").lower()
+    data = await parse_login_payload(request, content_type)
+    identifier, password, details = validate_login_payload(data)
+    if not identifier or not password:
+        return JSONResponse(status_code=422, content={"detail": details})
+    return await proxy_service.proxy_request(
+        request,
+        "auth",
+        "/api/v1/auth/login/json",
+        json_payload={"identifier": identifier, "password": password},
+    )
+
+
 def _auth_upstream(path: str) -> str:
     return f"/api/v1/auth/{path}" if path else "/api/v1/auth"
 
@@ -232,12 +325,7 @@ async def get_service_metrics(service_name: str) -> Any:
     return health_service.get_service_metrics(service_name)
 
 
-class LoginRequest(BaseModel):
-    identifier: str
-    password: str
-
-
-## (moved system_login above catch-all routes for precedence)
+## (system_login declared above catch-all routes)
 
 
 @router.get("/examples/nin")
@@ -281,97 +369,4 @@ async def sms_examples():
             },
         },
     }
-class LoginRequest(BaseModel):
-    identifier: str
-    password: str
-
-
-@router.post(
-    "/auth/login",
-    tags=["gateway"],
-    operation_id="system_login",
-    openapi_extra={
-        "requestBody": {
-            "required": True,
-            "content": {
-                "application/json": {
-                    "schema": {
-                        "title": "LoginRequest",
-                        "type": "object",
-                        "properties": {
-                            "identifier": {"type": "string"},
-                            "password": {"type": "string"},
-                        },
-                        "required": ["identifier", "password"],
-                    }
-                },
-                "application/x-www-form-urlencoded": {
-                    "schema": {
-                        "type": "object",
-                        "properties": {
-                            "username": {"type": "string"},
-                            "password": {"type": "string"},
-                        },
-                        "required": ["username", "password"],
-                    }
-                },
-            },
-        }
-    },
-)
-async def system_login(request: Request) -> Response:
-    """System-wide authentication endpoint accepting JSON or form data.
-
-    Accepts:
-    - application/json: {"identifier": "...", "password": "..."}
-    - application/x-www-form-urlencoded: username=...&password=...
-    """
-    content_type = request.headers.get("content-type", "").lower()
-    data = await parse_login_payload(request, content_type)
-    identifier, password, details = validate_login_payload(data)
-
-    if not identifier or not password:
-        return JSONResponse(status_code=422, content={"detail": details})
-
-    return await proxy_service.proxy_request(
-        request,
-        "auth",
-        "/api/v1/auth/login/json",
-        json_payload={"identifier": identifier, "password": password},
-    )
-
-
-async def parse_login_payload(request: Request, content_type: str):
-    try:
-        if "application/json" in content_type:
-            data = await request.json()
-        else:
-            form = await request.form()
-            data = dict(form) if form is not None else None
-    except Exception:
-        data = None
-    return data
-
-
-def validate_login_payload(data):
-    identifier = None
-    password = None
-    if isinstance(data, dict):
-        identifier = data.get("identifier") or data.get("username")
-        password = data.get("password")
-    details = []
-    if not (data and ("identifier" in data or "username" in data)):
-        details.append({
-            "type": "missing",
-            "loc": ["body", "identifier|username"],
-            "msg": "Field required",
-            "input": None,
-        })
-    if not (data and "password" in data):
-        details.append({
-            "type": "missing",
-            "loc": ["body", "password"],
-            "msg": "Field required",
-            "input": None,
-        })
-    return identifier, password, details
+## end system_login helpers
