@@ -26,6 +26,51 @@ def load_env():
         pass
 
 
+def print_table_row_counts(engine, insp, tables):
+    print("\n📋 Tables present & row counts:")
+    existing = set(insp.get_table_names())
+    with engine.connect() as conn:
+        for tbl in tables:
+            if tbl in existing:
+                cnt = conn.execute(text(f'SELECT COUNT(*) FROM "{tbl}"')).scalar()
+                print(f"  • {tbl}: {cnt}")
+            else:
+                print(f"  • {tbl}: MISSING")
+    return existing
+
+def list_fks(insp, tname, existing):
+    if tname not in existing:
+        return []
+    return insp.get_foreign_keys(tname)
+
+def has_fk(fks, col, ref_table, ref_col):
+    for fk in fks:
+        if fk.get("constrained_columns") == [col] and fk.get("referred_table") == ref_table and fk.get("referred_columns") == [ref_col]:
+            return True
+    return False
+
+def print_foreign_key_status(insp, existing):
+    print("\n🔗 Foreign keys:")
+    tb_fks = list_fks(insp, "auth_token_blacklist", existing)
+    pr_fks = list_fks(insp, "auth_password_reset_tokens", existing)
+    tblacklist_ok = has_fk(tb_fks, "user_id", "auth_users", "id") if tb_fks else False
+    preset_ok = has_fk(pr_fks, "user_id", "auth_users", "id") if pr_fks else False
+    print(f"  • auth_token_blacklist.user_id → auth_users.id: {'OK' if tblacklist_ok else 'MISSING'}")
+    print(f"  • auth_password_reset_tokens.user_id → auth_users.id: {'OK' if preset_ok else 'MISSING or N/A'}")
+
+def check_admin_user(engine, existing):
+    admin_email = os.getenv("ADMIN_EMAIL", "admin@dpi-sandbox.ng")
+    if "auth_users" in existing:
+        with engine.connect() as conn:
+            res = conn.execute(
+                text('SELECT id, email, username FROM "auth_users" WHERE email = :e'),
+                {"e": admin_email}
+            ).fetchone()
+            if res:
+                print(f"\n✅ Admin user found: id={res.id}, email={res.email}, username={res.username}")
+            else:
+                print(f"\nℹ️  Admin user not found for email {admin_email}. You can run ./scripts/create-admin-user.py")
+
 def main():
     load_env()
     db_url = os.getenv("DATABASE_URL")
@@ -39,55 +84,17 @@ def main():
     engine = create_engine(db_url)
     insp = reflection.Inspector.from_engine(engine)
 
-    # Expected tables (auth_ prefix)
-    tables = {
-        "auth_users": ["id"],
-        "auth_oauth_clients": ["client_id"],
-        "auth_oauth_tokens": ["id"],
-        "auth_token_blacklist": ["id"],
-        "auth_password_reset_tokens": ["id"],
-    }
+    tables = [
+        "auth_users",
+        "auth_oauth_clients",
+        "auth_oauth_tokens",
+        "auth_token_blacklist",
+        "auth_password_reset_tokens",
+    ]
 
-    print("\n📋 Tables present & row counts:")
-    existing = set(insp.get_table_names())
-    with engine.connect() as conn:
-        for tbl, keys in tables.items():
-            if tbl in existing:
-                cnt = conn.execute(text(f'SELECT COUNT(*) FROM "{tbl}"')).scalar()
-                print(f"  • {tbl}: {cnt}")
-            else:
-                print(f"  • {tbl}: MISSING")
-
-        # Check FKs
-        print("\n🔗 Foreign keys:")
-        def list_fks(tname: str):
-            if tname not in existing:
-                return []
-            return insp.get_foreign_keys(tname)
-
-        tb_fks = list_fks("auth_token_blacklist")
-        pr_fks = list_fks("auth_password_reset_tokens")
-
-        def has_fk(fks, col, ref_table, ref_col):
-            for fk in fks:
-                if fk.get("constrained_columns") == [col] and fk.get("referred_table") == ref_table and fk.get("referred_columns") == [ref_col]:
-                    return True
-            return False
-
-        tblacklist_ok = has_fk(tb_fks, "user_id", "auth_users", "id") if tb_fks else False
-        preset_ok = has_fk(pr_fks, "user_id", "auth_users", "id") if pr_fks else False
-
-        print(f"  • auth_token_blacklist.user_id → auth_users.id: {'OK' if tblacklist_ok else 'MISSING'}")
-        print(f"  • auth_password_reset_tokens.user_id → auth_users.id: {'OK' if preset_ok else 'MISSING or N/A'}")
-
-        # Optional: check for admin user by email
-        admin_email = os.getenv("ADMIN_EMAIL", "admin@dpi-sandbox.ng")
-        if "auth_users" in existing:
-            res = conn.execute(text('SELECT id, email, username FROM "auth_users" WHERE email = :e'), {"e": admin_email}).fetchone()
-            if res:
-                print(f"\n✅ Admin user found: id={res.id}, email={res.email}, username={res.username}")
-            else:
-                print(f"\nℹ️  Admin user not found for email {admin_email}. You can run ./scripts/create-admin-user.py")
+    existing = print_table_row_counts(engine, insp, tables)
+    print_foreign_key_status(insp, existing)
+    check_admin_user(engine, existing)
 
 
 if __name__ == "__main__":
