@@ -28,12 +28,19 @@ log_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
+# Resolve DB connection parameters from environment or defaults
+PG_HOST=${PG_HOST:-127.0.0.1}
+PG_PORT=${PG_PORT:-5432}
+PG_USER=${POSTGRES_USER:-sandbox_user}
+PG_PASSWORD=${POSTGRES_PASSWORD:-sandbox_password}
+PG_DB=${POSTGRES_DB:-sandbox_platform}
+
 # Check if PostgreSQL is running
 check_postgres() {
     log_info "Checking PostgreSQL connection..."
     
     if command -v psql >/dev/null 2>&1; then
-        if psql -h 127.0.0.1 -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+        if PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
             log_success "PostgreSQL is running and accessible"
             return 0
         fi
@@ -55,17 +62,17 @@ start_postgres_docker() {
         log_info "Creating new PostgreSQL container..."
         docker run -d \
             --name sandbox-postgres \
-            -e POSTGRES_USER=sandbox_user \
-            -e POSTGRES_PASSWORD=sandbox_password \
-            -e POSTGRES_DB=sandbox_platform \
+            -e POSTGRES_USER="$PG_USER" \
+            -e POSTGRES_PASSWORD="$PG_PASSWORD" \
+            -e POSTGRES_DB="$PG_DB" \
             -p 5432:5432 \
             postgres:16
     fi
     
     # Wait for PostgreSQL to be ready
     log_info "Waiting for PostgreSQL to be ready..."
-    for i in {1..30}; do
-        if psql -h 127.0.0.1 -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+    for i in {1..60}; do
+        if PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -c "SELECT 1;" >/dev/null 2>&1; then
             log_success "PostgreSQL is ready!"
             return 0
         fi
@@ -74,6 +81,40 @@ start_postgres_docker() {
     
     log_error "PostgreSQL failed to start"
     return 1
+}
+
+# Ensure the current DB/Schema privileges allow running migrations as $PG_USER
+ensure_privileges() {
+    log_info "Ensuring database ownership and privileges for $PG_USER..."
+    # Try to elevate role (harmless if already superuser)
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d postgres -v ON_ERROR_STOP=0 -c \
+        "ALTER ROLE \"$PG_USER\" SUPERUSER CREATEDB CREATEROLE;" >/dev/null 2>&1 || true
+
+    # Set DB and schema ownership to $PG_USER where possible
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d postgres -v ON_ERROR_STOP=0 -c \
+        "ALTER DATABASE \"$PG_DB\" OWNER TO \"$PG_USER\";" >/dev/null 2>&1 || true
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "ALTER SCHEMA public OWNER TO \"$PG_USER\";" >/dev/null 2>&1 || true
+
+    # Grant broad privileges to avoid permission issues during dev
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "GRANT ALL PRIVILEGES ON SCHEMA public TO \"$PG_USER\";" >/dev/null 2>&1 || true
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO \"$PG_USER\";" >/dev/null 2>&1 || true
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO \"$PG_USER\";" >/dev/null 2>&1 || true
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON TABLES TO \"$PG_USER\";" >/dev/null 2>&1 || true
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT ALL ON SEQUENCES TO \"$PG_USER\";" >/dev/null 2>&1 || true
+
+    # Fix alembic_version ownership if it already exists
+    PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -tAc \
+        "SELECT to_regclass('public.alembic_version') IS NOT NULL;" | grep -q t && \
+        PGPASSWORD="$PG_PASSWORD" psql -h "$PG_HOST" -p "$PG_PORT" -U "$PG_USER" -d "$PG_DB" -v ON_ERROR_STOP=0 -c \
+        "ALTER TABLE IF EXISTS public.alembic_version OWNER TO \"$PG_USER\"; GRANT ALL ON public.alembic_version TO \"$PG_USER\";" >/dev/null 2>&1 || true
+
+    log_success "Privileges ensured for $PG_USER"
 }
 
 # Install Python dependencies
@@ -142,6 +183,8 @@ main() {
             exit 1
         fi
     fi
+    # Ensure DB privileges before migrations
+    ensure_privileges
     
     # Run migrations
     if run_migrations; then
