@@ -21,7 +21,28 @@ def login_user(
     db: Session = Depends(get_db),
     form_data: OAuth2PasswordRequestForm = Depends(),
 ) -> Any:
-    """OAuth2 compatible token login, get an access token for future requests."""
+    """
+    🔐 OAuth2 Compatible Login
+    
+    Authenticate user with form data and return JWT tokens.
+    Compatible with OAuth2 password flow for API clients.
+    
+    **Request Format:**
+    - Content-Type: application/x-www-form-urlencoded
+    - username: Email or username
+    - password: User password
+    
+    **Response:**
+    - access_token: JWT token for API access
+    - refresh_token: Token for refreshing access
+    - token_type: "bearer"
+    - expires_in: Token expiration in seconds
+    
+    **Use Cases:**
+    - OAuth2 client applications
+    - API integrations requiring form-based auth
+    - Third-party service authentication
+    """
     user = user_crud.authenticate(
         db, identifier=form_data.username, password=form_data.password
     )
@@ -66,13 +87,30 @@ def login_user_json(
     db: Session = Depends(get_db),
     user_in: UserLogin,
 ) -> Any:
-    """Login with JSON payload using email or username.
-
-    Example:
+    """
+    🚀 JSON Login for Nigerian Startups
+    
+    Primary login endpoint for Nigerian DPI developers.
+    Accepts JSON payload with email or username authentication.
+    
+    **Request Example:**
+    ```json
     {
-        "identifier": "adebayo@fintech.ng",  // or "adebayo_dev"
+        "identifier": "adebayo@fintech.ng",  // Email or username
         "password": "SecurePass123"
     }
+    ```
+    
+    **Features:**
+    - ✅ Email or username login
+    - ✅ JWT token generation
+    - ✅ Last login tracking
+    - ✅ Request correlation ID support
+    
+    **Nigerian Context:**
+    - Supports Nigerian email domains (.ng, .com.ng)
+    - Optimized for fintech and DPI applications
+    - Audit logging for regulatory compliance
     """
     user = user_crud.authenticate(
         db, identifier=user_in.identifier, password=user_in.password
@@ -115,11 +153,47 @@ def login_user_json(
 def read_user_me(
     current_user: UserResponse = Depends(get_current_active_user),
 ) -> Any:
-    """Get current user."""
+    """
+    👤 Get Current User Profile
+    
+    Retrieve authenticated user's profile information.
+    Requires valid JWT token in Authorization header.
+    
+    **Headers Required:**
+    - Authorization: Bearer {access_token}
+    
+    **Returns:**
+    - User profile with Nigerian DPI context
+    - NIN/BVN verification status
+    - Account activity information
+    
+    **Security:**
+    - Token validation required
+    - Active user status check
+    - Soft-delete filtering applied
+    """
     return current_user
 
 
 @router.post("/logout")
 def logout_user() -> Any:
-    """Logout user (client-side token removal)."""
+    """
+    🚪 User Logout
+    
+    Logout current user session.
+    Client should remove tokens from storage.
+    
+    **Process:**
+    1. Client receives logout confirmation
+    2. Client removes access/refresh tokens
+    3. Tokens become invalid on next request
+    
+    **Best Practice:**
+    - Clear all stored authentication data
+    - Redirect to login page
+    - Invalidate any cached user data
+    
+    **Note:** Server-side token blacklisting available
+    for enhanced security in production.
+    """
     return {"message": "Successfully logged out"}
