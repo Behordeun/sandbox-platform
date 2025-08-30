@@ -132,6 +132,25 @@ def run_alembic_migration(service, service_path, db_url):
         else:
             print(f"❌ {service['name']} migrations failed:")
             print(result.stderr)
+            # Fallback: if alembic_version permission blocks migrations, create tables directly
+            if "alembic_version" in (result.stderr or "").lower() and (
+                "permission denied" in (result.stderr or "").lower()
+                or "does not exist" in (result.stderr or "").lower()
+            ):
+                print(
+                    "⚠️  Detected alembic_version issue. Falling back to direct table creation via SQLAlchemy."
+                )
+                try:
+                    # Change back to original cwd to compute import path correctly
+                    os.chdir(original_cwd)
+                except Exception:
+                    pass
+                ok = create_tables_directly(service["path"], db_url)
+                if ok:
+                    print(
+                        f"✅ {service['name']} tables ensured via SQLAlchemy (fallback applied)"
+                    )
+                    return True
             return False
     except Exception as e:
         print(f"❌ Error running migrations for {service['name']}: {e}")

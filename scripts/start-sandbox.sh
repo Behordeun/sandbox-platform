@@ -81,18 +81,24 @@ start_infrastructure() {
     # Start PostgreSQL
     if ! docker ps --format "table {{.Names}}" | grep -q "^sandbox-postgres$"; then
         log_info "Starting PostgreSQL..."
+        # Use credentials from environment or sane defaults
+        local pg_user="${POSTGRES_USER:-sandbox_user}"
+        local pg_password="${POSTGRES_PASSWORD:-sandbox_password}"
+        local pg_db="${POSTGRES_DB:-sandbox_platform}"
+
         docker run -d \
             --name sandbox-postgres \
-            -e POSTGRES_USER=sandbox_user \
-            -e POSTGRES_PASSWORD=sandbox_password \
-            -e POSTGRES_DB=sandbox_platform \
+            -e POSTGRES_USER="$pg_user" \
+            -e POSTGRES_PASSWORD="$pg_password" \
+            -e POSTGRES_DB="$pg_db" \
             -p 5432:5432 \
             postgres:16
         
         # Wait for PostgreSQL to be ready
         log_info "Waiting for PostgreSQL to be ready..."
-        for i in {1..30}; do
-            if psql -h 127.0.0.1 -U sandbox_user -d postgres -c "SELECT 1;" >/dev/null 2>&1; then
+        for i in {1..60}; do
+            if PGPASSWORD="$pg_password" psql -h 127.0.0.1 -U "$pg_user" -d "$pg_db" -c "SELECT 1;" >/dev/null 2>&1; then
+                log_success "PostgreSQL is ready"
                 break
             fi
             sleep 1
@@ -163,12 +169,25 @@ ensure_auth_schema() {
     log_info "Running Alembic migrations for auth-service..."
     pushd services/auth-service >/dev/null
     alembic upgrade head || {
-        log_error "Alembic migrations failed; auth tables may be missing or outdated"
+        log_error "Alembic migrations failed; attempting fallback migration path"
         popd >/dev/null
-        return
+        # Fallback to centralized migration script which can create tables directly
+        if ! python3 ./scripts/migrate-db.py; then
+            log_error "Fallback migrations failed; auth tables may be missing or outdated"
+            return
+        fi
+        log_success "Fallback migrations completed"
+        # continue
     }
     popd >/dev/null
     log_success "Auth-service database schema ensured via Alembic"
+
+    # Quick verification (non-fatal) to confirm auth_users exists
+    if ! python3 ./scripts/verify-auth-db.py >/dev/null 2>&1; then
+        log_warning "Auth DB verification reported an issue. Check ./scripts/verify-auth-db.py output."
+    else
+        log_info "Auth DB verification passed."
+    fi
 }
 
 # Function to ensure non-auth core tables exist (idempotent)
