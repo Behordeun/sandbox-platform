@@ -1,7 +1,7 @@
 from app.core.database import Base
 from app.models.mixins import SoftDeleteMixin
 from app.core.yaml_config import settings
-from sqlalchemy import Boolean, Column, DateTime, Integer, String, Text
+from sqlalchemy import Boolean, Column, DateTime, Integer, String
 from sqlalchemy.sql import func
 
 
@@ -27,6 +27,7 @@ class User(Base, SoftDeleteMixin):
     # Account status
     is_active = Column(Boolean, default=True)
     is_verified = Column(Boolean, default=True)
+    is_deleted = Column(Boolean, default=False)
     role = Column(String(50), default="user", nullable=False)  # Add role field
 
     # Metadata
@@ -34,5 +35,3 @@ class User(Base, SoftDeleteMixin):
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     last_login = Column(DateTime(timezone=True), nullable=True)
 
-    # Additional profile data (JSON)
-    profile_data = Column(Text, nullable=True)  # Store as JSON string
