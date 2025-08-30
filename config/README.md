@@ -80,6 +80,7 @@ database_url = os.getenv("DATABASE_URL") or yaml_config.get("database_url") or "
 - **Centralized Environment Loading**: All services read from root .env file
 - **Environment Variable Priority**: .env values always override YAML configuration
 - **Robust Error Handling**: Graceful fallbacks when config_loader is unavailable
+- **Soft Delete Semantics**: Deleting a config marks it as `deleted` (versions retained). Listing excludes deleted by default; pass `include_deleted=true` to include them.
 
 ## 📝 Tips & Conventions
 
@@ -98,6 +99,14 @@ database_url = os.getenv("DATABASE_URL") or yaml_config.get("database_url") or "
   ```env
   POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
   ```
+
+### API Notes
+
+- List configurations with optional inclusion of soft-deleted records:
+
+```http
+GET /api/v1/config?environment=development&include_deleted=true
+```
 
 - Secrets are never hard‑coded in code. Provide them via the root `.env` or your deployment secret manager.
 

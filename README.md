@@ -65,6 +65,18 @@ PGPASSWORD=sandbox_password \
   -c 'ALTER TABLE IF EXISTS public.alembic_version OWNER TO "sandbox_user"; \nGRANT ALL ON public.alembic_version TO "sandbox_user";'
 ```
 
+### Soft Delete and Uniqueness
+
+- Auth tables now support soft-delete via `is_deleted` + `deleted_at` fields. Deletes mark rows instead of removing them.
+- Reads (CRUD get/list) exclude soft-deleted rows by default.
+- Uniqueness for `auth_users.email` and `auth_users.username` is enforced by partial, case‑insensitive indexes for active users only:
+  - Active rows must be unique by `lower(email)`/`lower(username)`.
+  - Soft-deleted rows don’t block reuse of email/username.
+- Restore policy: attempting to restore a soft-deleted user may fail if an active user already uses that email/username; choose a new value or disallow restore.
+
+Config Service soft-delete:
+- Deleting a config marks it as `status = deleted` (versions retained). Listing excludes deleted by default; use `include_deleted=true` to include them.
+
 ### Production Deployment
 
 ```bash
