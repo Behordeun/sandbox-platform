@@ -344,20 +344,27 @@ class ConfigManager:
         return ConfigResponse(**config_record)
 
     async def delete_config(self, config_id: str) -> bool:
-        """Delete a configuration."""
-        success = await self.storage.delete(config_id)
+        """Soft-delete a configuration (mark as deleted)."""
+        config_record = await self.storage.get(config_id)
+        if not config_record:
+            return False
 
-        # Also delete versions
-        if settings.versioning_enabled:
-            await self.version_storage.delete(config_id)
-
-        return success
+        now = datetime.now()
+        config_record["status"] = ConfigStatus.DELETED
+        config_record["updated_at"] = now
+        try:
+            await self.storage.set(config_id, config_record)
+            # Keep versions for audit; do not delete
+            return True
+        except Exception:
+            return False
 
     async def list_configs(
         self,
         environment: Optional[str] = None,
         config_type: Optional[str] = None,
         tags: Optional[List[str]] = None,
+        include_deleted: bool = False,
     ) -> List[ConfigResponse]:
         """List configurations with optional filtering."""
         config_ids = await self.storage.list_all()
@@ -366,6 +373,10 @@ class ConfigManager:
         for config_id in config_ids:
             config_record = await self.storage.get(config_id)
             if not config_record:
+                continue
+
+            # Skip soft-deleted unless requested
+            if not include_deleted and config_record.get("status") == ConfigStatus.DELETED:
                 continue
 
             # Apply filters

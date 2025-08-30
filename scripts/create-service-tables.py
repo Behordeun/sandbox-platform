@@ -36,7 +36,9 @@ def create_service_tables():
                 status VARCHAR(50) DEFAULT 'pending',
                 verification_data JSONB,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_nin_verifications_nin_hash ON nin_verifications(nin_hash);
             CREATE INDEX IF NOT EXISTS idx_nin_verifications_status ON nin_verifications(status);
@@ -52,7 +54,9 @@ def create_service_tables():
                 status VARCHAR(50) DEFAULT 'pending',
                 verification_data JSONB,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_bvn_verifications_bvn_hash ON bvn_verifications(bvn_hash);
             CREATE INDEX IF NOT EXISTS idx_bvn_verifications_status ON bvn_verifications(status);
@@ -70,7 +74,9 @@ def create_service_tables():
                 message_id VARCHAR(255),
                 provider_response JSONB,
                 sent_at TIMESTAMP WITH TIME ZONE,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_sms_messages_to_number ON sms_messages(to_number);
             CREATE INDEX IF NOT EXISTS idx_sms_messages_status ON sms_messages(status);
@@ -88,7 +94,9 @@ def create_service_tables():
                 model VARCHAR(100),
                 tokens_used INTEGER,
                 response_time_ms INTEGER,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_ai_conversations_session_id ON ai_conversations(session_id);
             CREATE INDEX IF NOT EXISTS idx_ai_conversations_created_at ON ai_conversations(created_at);
@@ -104,7 +112,9 @@ def create_service_tables():
                 description TEXT,
                 is_encrypted BOOLEAN DEFAULT FALSE,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_config_settings_key ON config_settings(key);
             """,
@@ -121,7 +131,9 @@ def create_service_tables():
                 user_agent TEXT,
                 client_ip VARCHAR(45),
                 service_name VARCHAR(100),
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_gateway_requests_created_at ON gateway_requests(created_at);
             CREATE INDEX IF NOT EXISTS idx_gateway_requests_service_name ON gateway_requests(service_name);
@@ -143,7 +155,9 @@ def create_service_tables():
                 duration_ms INTEGER,
                 client_ip VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_created_at ON gateway_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_gateway_access_logs_service ON gateway_access_logs(service_name);
@@ -168,7 +182,9 @@ def create_service_tables():
                 status_code INTEGER NOT NULL,
                 client_ip VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_created_at ON auth_audit_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_auth_audit_logs_user_id ON auth_audit_logs(user_id);
@@ -188,7 +204,9 @@ def create_service_tables():
                 duration_ms INTEGER,
                 client_ip VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_nin_access_logs_created_at ON nin_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_nin_access_logs_status ON nin_access_logs(status_code);
@@ -210,7 +228,9 @@ def create_service_tables():
                 duration_ms INTEGER,
                 client_ip VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_created_at ON bvn_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_bvn_access_logs_status ON bvn_access_logs(status_code);
@@ -232,7 +252,9 @@ def create_service_tables():
                 duration_ms INTEGER,
                 client_ip VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_sms_access_logs_created_at ON sms_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_sms_access_logs_status ON sms_access_logs(status_code);
@@ -254,7 +276,9 @@ def create_service_tables():
                 duration_ms INTEGER,
                 client_ip VARCHAR(45),
                 user_agent TEXT,
-                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+                created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+                is_deleted BOOLEAN DEFAULT FALSE,
+                deleted_at TIMESTAMP WITH TIME ZONE
             );
             CREATE INDEX IF NOT EXISTS idx_ai_access_logs_created_at ON ai_access_logs(created_at);
             CREATE INDEX IF NOT EXISTS idx_ai_access_logs_status ON ai_access_logs(status_code);

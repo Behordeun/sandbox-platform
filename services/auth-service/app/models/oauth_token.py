@@ -1,11 +1,12 @@
 from app.core.database import Base
+from app.models.mixins import SoftDeleteMixin
 from app.core.yaml_config import settings
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class OAuthToken(Base):
+class OAuthToken(Base, SoftDeleteMixin):
     __tablename__ = f"{settings.table_prefix}oauth_tokens"
 
     id = Column(Integer, primary_key=True, index=True)

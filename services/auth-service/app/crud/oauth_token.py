@@ -13,30 +13,29 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
     def get_by_access_token(
         self, db: Session, *, access_token: str
     ) -> Optional[OAuthToken]:
-        return (
-            db.query(OAuthToken).filter(OAuthToken.access_token == access_token).first()
-        )
+        q = db.query(OAuthToken).filter(OAuthToken.access_token == access_token)
+        if hasattr(OAuthToken, "is_deleted"):
+            q = q.filter(OAuthToken.is_deleted == False)  # noqa: E712
+        return q.first()
 
     def get_by_refresh_token(
         self, db: Session, *, refresh_token: str
     ) -> Optional[OAuthToken]:
-        return (
-            db.query(OAuthToken)
-            .filter(OAuthToken.refresh_token == refresh_token)
-            .first()
-        )
+        q = db.query(OAuthToken).filter(OAuthToken.refresh_token == refresh_token)
+        if hasattr(OAuthToken, "is_deleted"):
+            q = q.filter(OAuthToken.is_deleted == False)  # noqa: E712
+        return q.first()
 
     def get_by_authorization_code(
         self, db: Session, *, code: str
     ) -> Optional[OAuthToken]:
-        return (
-            db.query(OAuthToken)
-            .filter(
-                OAuthToken.authorization_code == code,
-                OAuthToken.code_expires_at > datetime.now(),
-            )
-            .first()
+        q = db.query(OAuthToken).filter(
+            OAuthToken.authorization_code == code,
+            OAuthToken.code_expires_at > datetime.now(),
         )
+        if hasattr(OAuthToken, "is_deleted"):
+            q = q.filter(OAuthToken.is_deleted == False)  # noqa: E712
+        return q.first()
 
     def create_authorization_code(
         self,
@@ -163,6 +162,21 @@ class CRUDOAuthToken(CRUDBase[OAuthToken, TokenRequest, TokenResponse]):
         if not token_obj:
             return False
 
+        # Soft delete token (preserve row for audit)
+        try:
+            if hasattr(token_obj, "is_deleted"):
+                from datetime import datetime
+
+                setattr(token_obj, "is_deleted", True)
+                if hasattr(token_obj, "deleted_at"):
+                    setattr(token_obj, "deleted_at", datetime.now())
+                db.add(token_obj)
+                db.commit()
+                db.refresh(token_obj)
+                return True
+        except Exception:
+            pass
+        # Fallback to hard delete if soft-delete not available
         db.delete(token_obj)
         db.commit()
         return True

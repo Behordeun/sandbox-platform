@@ -34,6 +34,7 @@ async def list_configurations(
         None, description="Filter by configuration type"
     ),
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
+    include_deleted: bool = Query(False, description="Include soft-deleted configs"),
 ) -> Any:
     """List all configurations with optional filtering."""
     try:
@@ -44,6 +45,7 @@ async def list_configurations(
         if environment is not None:
             list_configs_kwargs["environment"] = environment
 
+        list_configs_kwargs["include_deleted"] = include_deleted
         configs = await config_manager.list_configs(**list_configs_kwargs)
         return configs
     except Exception as e:

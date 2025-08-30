@@ -1,11 +1,12 @@
 from app.core.database import Base
+from app.models.mixins import SoftDeleteMixin
 from app.core.yaml_config import settings
 from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 
-class TokenBlacklist(Base):
+class TokenBlacklist(Base, SoftDeleteMixin):
     __tablename__ = f"{settings.table_prefix}token_blacklist"
 
     id = Column(Integer, primary_key=True, index=True)
