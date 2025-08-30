@@ -371,8 +371,15 @@ cd sandbox/ai && uvicorn app.main:app --reload --port 8002
 # Build all services
 ./deployment/scripts/build-images.sh
 
-# Run with Docker Compose
-docker-compose -f deployment/docker-compose/docker-compose.dev.yml up
+# Run with Docker Compose (uses centralized .env)
+cd deployment/docker-compose
+docker compose -f docker-compose.dev.yml up -d
+
+# View logs
+docker compose -f docker-compose.dev.yml logs -f
+
+# Stop services
+docker compose -f docker-compose.dev.yml down
 ```
 
 ## 🚢 Deployment
@@ -698,13 +705,13 @@ LOG_LEVEL=INFO
 # DATABASE CONFIGURATION
 # =============================================================================
 # Single PostgreSQL database for all services (matches the dev container)
-DATABASE_URL=postgresql://sandbox_user:sandbox_password@127.0.0.1:5432/sandbox_platform
-POSTGRES_USER=sandbox_user
-POSTGRES_PASSWORD=sandbox_password
+DATABASE_URL=postgresql://postgres:postgres123@postgres:5432/sandbox_platform
+POSTGRES_USER=postgres
+POSTGRES_PASSWORD=postgres123
 POSTGRES_DB=sandbox_platform
 # Quote init args so sourcing .env doesn’t try to execute flags
 POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
-REDIS_URL=redis://127.0.0.1:6379/0
+REDIS_URL=redis://:redis123@redis:6379/0
 
 # =============================================================================
 # SECURITY & AUTHENTICATION
@@ -922,21 +929,19 @@ GET /api/v1/services/health
 - **SMS Service**: Nigerian SMS messaging and notifications
 - **AI Service**: Nigerian-context content generation
 
-### Recent Updates
+### Recent Updates (August 2025)
 
-- ✅ **Token Blacklist System**: Implemented `auth_token_blacklist` table for secure token revocation
-- ✅ **Database Schema Fixes**: All auth tables properly created with foreign key constraints
-- ✅ **Configuration Fixes**: Fixed CORS_ORIGINS JSON parsing and missing config fields
-- ✅ **Health Check Improvements**: Reduced startup noise with graceful health check delays
-- ✅ **Model Registration**: All SQLAlchemy models properly imported and registered
-- ✅ **Centralized secrets**: All services read from the root `.env`; no hard‑coded secrets in code
-- ✅ **Robust CORS parsing**: CORS env vars accept JSON arrays or comma‑separated strings
-- ✅ **DB bootstrap**: `start-sandbox.sh` ensures schemas exist (runs migrations + creates core tables)
-- ✅ **Admin bootstrap**: `scripts/create-admin-user.py` requires `DATABASE_URL` and `JWT_SECRET_KEY`
-- ✅ **System login**: Gateway `POST /api/v1/auth/login` accepts JSON or form and proxies to auth JSON login
-- ✅ **Correlation IDs**: `X-Request-ID` added to all requests/responses for traceability
-- ✅ **Persistent audits**: Gateway and Auth write structured audit logs to PostgreSQL tables
-- ✅ **Verification script**: `scripts/verify-auth-db.py` validates critical tables and FKs
+- ✅ **Docker Compose Fixes**: Updated to use centralized .env file with proper container hostnames
+- ✅ **Database Migration Fixes**: Resolved PostgreSQL version compatibility and migration chain issues
+- ✅ **Soft Delete Implementation**: Added `is_deleted` and `deleted_at` columns to all auth tables
+- ✅ **Token Blacklist System**: Implemented secure token revocation with proper foreign key constraints
+- ✅ **Configuration Centralization**: Single .env file for all services with Docker container networking
+- ✅ **Build Dependencies**: Switched to psycopg2-binary to avoid PostgreSQL development header requirements
+- ✅ **Health Check Improvements**: Reduced startup noise with graceful health check delays and debug logging
+- ✅ **Environment Variable Fixes**: Fixed CORS_ORIGINS JSON parsing and database URL formats for containers
+- ✅ **Migration Chain Repair**: Created proper initial migration and fixed broken migration dependencies
+- ✅ **Monitoring Stack**: Added Prometheus and Grafana configuration with dashboard integration
+- ✅ **Docker Build Optimization**: Removed problematic .env COPY commands and unnecessary build dependencies
 
 ## 🐛 Troubleshooting
 
@@ -976,13 +981,17 @@ psql $DATABASE_URL -c "SELECT 1;"
 
 ```bash
 # Test database connectivity with correct credentials
-psql postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform -c "\dt"
+psql postgresql://postgres:postgres123@127.0.0.1:5432/sandbox_platform -c "\dt"
 
 # Check if database exists
-psql postgresql://postgres:your-password@127.0.0.1:5432/postgres -c "SELECT datname FROM pg_database WHERE datname='sandbox_platform';"
+psql postgresql://postgres:postgres123@127.0.0.1:5432/postgres -c "SELECT datname FROM pg_database WHERE datname='sandbox_platform';"
 
-# Ensure schemas and migrations
-./scripts/migrate-db.py
+# Fix missing soft-delete columns
+python3 fix_auth_table.py
+
+# Run migrations manually
+cd services/auth-service && python3 -m alembic upgrade head
+
 # Or run full startup which ensures tables
 ./scripts/start-sandbox.sh
 ```
