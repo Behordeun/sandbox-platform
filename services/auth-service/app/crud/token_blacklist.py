@@ -43,7 +43,6 @@ class CRUDTokenBlacklist(CRUDBase[TokenBlacklist, dict, dict]):
         # Soft-delete expired tokens to avoid hard deletes in dev
         q = db.query(TokenBlacklist).filter(TokenBlacklist.expires_at < datetime.now())
         if hasattr(TokenBlacklist, "is_deleted"):
-            from datetime import datetime
 
             updated = 0
             for tok in q.all():
