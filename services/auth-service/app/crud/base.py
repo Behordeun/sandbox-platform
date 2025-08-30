@@ -22,12 +22,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
         self.model = model
 
     def get(self, db: Session, id: Any) -> Optional[ModelType]:
-        return db.query(self.model).filter(self.model.id == id).first()
+        q = db.query(self.model).filter(self.model.id == id)
+        if hasattr(self.model, "is_deleted"):
+            q = q.filter(getattr(self.model, "is_deleted") == False)  # noqa: E712
+        return q.first()
 
     def get_multi(
         self, db: Session, *, skip: int = 0, limit: int = 100
     ) -> List[ModelType]:
-        return db.query(self.model).offset(skip).limit(limit).all()
+        q = db.query(self.model)
+        if hasattr(self.model, "is_deleted"):
+            q = q.filter(getattr(self.model, "is_deleted") == False)  # noqa: E712
+        return q.offset(skip).limit(limit).all()
 
     def create(self, db: Session, *, obj_in: CreateSchemaType) -> ModelType:
         obj_in_data = jsonable_encoder(obj_in)
@@ -60,6 +66,18 @@ class CRUDBase(Generic[ModelType, CreateSchemaType, UpdateSchemaType]):
     def remove(self, db: Session, *, id: int) -> Optional[ModelType]:
         obj = db.query(self.model).get(id)
         if obj is not None:
-            db.delete(obj)
-            db.commit()
+            if hasattr(obj, "is_deleted"):
+                # Soft delete
+                from datetime import datetime
+
+                setattr(obj, "is_deleted", True)
+                if hasattr(obj, "deleted_at"):
+                    setattr(obj, "deleted_at", datetime.now())
+                db.add(obj)
+                db.commit()
+                db.refresh(obj)
+            else:
+                # Hard delete fallback (no soft-delete columns)
+                db.delete(obj)
+                db.commit()
         return obj

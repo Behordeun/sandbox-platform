@@ -23,15 +23,14 @@ class CRUDPasswordReset(CRUDBase[PasswordResetToken, dict, dict]):
 
     def get_by_token(self, db: Session, *, token: str) -> Optional[PasswordResetToken]:
         """Get reset token by token string."""
-        return (
-            db.query(PasswordResetToken)
-            .filter(
-                PasswordResetToken.token == token,
-                PasswordResetToken.expires_at > datetime.now(),
-                PasswordResetToken.is_used == False,
-            )
-            .first()
+        q = db.query(PasswordResetToken).filter(
+            PasswordResetToken.token == token,
+            PasswordResetToken.expires_at > datetime.now(),
+            PasswordResetToken.is_used == False,  # noqa: E712
         )
+        if hasattr(PasswordResetToken, "is_deleted"):
+            q = q.filter(PasswordResetToken.is_deleted == False)  # noqa: E712
+        return q.first()
 
     def mark_as_used(
         self, db: Session, *, token_obj: PasswordResetToken
@@ -45,11 +44,25 @@ class CRUDPasswordReset(CRUDBase[PasswordResetToken, dict, dict]):
 
     def cleanup_expired_tokens(self, db: Session) -> int:
         """Remove expired tokens."""
-        count = (
-            db.query(PasswordResetToken)
-            .filter(PasswordResetToken.expires_at < datetime.now())
-            .delete()
+        # Soft-delete expired tokens
+        q = db.query(PasswordResetToken).filter(
+            PasswordResetToken.expires_at < datetime.now()
         )
+        if hasattr(PasswordResetToken, "is_deleted"):
+            from datetime import datetime
+
+            updated = 0
+            for tok in q.all():
+                if getattr(tok, "is_deleted", False):
+                    continue
+                setattr(tok, "is_deleted", True)
+                if hasattr(tok, "deleted_at"):
+                    setattr(tok, "deleted_at", datetime.now())
+                db.add(tok)
+                updated += 1
+            db.commit()
+            return updated
+        count = q.delete()
         db.commit()
         return count
 

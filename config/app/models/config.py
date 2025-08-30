@@ -36,6 +36,7 @@ class ConfigStatus(str, Enum):
     INACTIVE = "inactive"
     DEPRECATED = "deprecated"
     DRAFT = "draft"
+    DELETED = "deleted"
 
 
 class ConfigBase(BaseModel):
