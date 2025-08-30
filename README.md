@@ -21,12 +21,12 @@ cd sandbox-platform
 cp .env.template .env
 # Edit .env with your API keys and secrets
 
-# Setup database and create admin users
-./scripts/setup-db.sh
-./scripts/create-admin-user.py
-
-# Start entire sandbox platform
+# Start the entire sandbox platform (DB + infra + services)
 ./scripts/start-sandbox.sh
+
+# Optional (the start script runs DB setup automatically):
+# ./scripts/setup-db.sh              # Prepare DB and run migrations
+# ./scripts/create-admin-user.py     # Create default admin users
 ```
 
 ### Test Your Setup
@@ -40,6 +40,29 @@ cp .env.template .env
 
 # Access API documentation
 open http://127.0.0.1:8080/docs
+```
+
+### Database and Migrations
+
+- The start script now:
+  - Starts PostgreSQL and Redis using credentials from `.env`
+  - Uses `PGPASSWORD` for reliable Postgres readiness checks
+  - Runs Alembic migrations for `auth-service`
+  - Falls back to direct SQLAlchemy table creation if Alembic can’t access `alembic_version`
+  - Verifies schema using `scripts/verify-auth-db.py`
+
+- Verify schema manually:
+
+```bash
+python3 scripts/verify-auth-db.py
+```
+
+- Troubleshooting migrations (dev only): if you see “permission denied for table alembic_version”, either re-run the start script (it will try the fallback) or fix table ownership:
+
+```bash
+PGPASSWORD=sandbox_password \
+  psql -h 127.0.0.1 -U sandbox_user -d sandbox_platform \
+  -c 'ALTER TABLE IF EXISTS public.alembic_version OWNER TO "sandbox_user"; \nGRANT ALL ON public.alembic_version TO "sandbox_user";'
 ```
 
 ### Production Deployment
@@ -303,8 +326,10 @@ curl http://127.0.0.1:8001/health  # Config service
 # Test configuration loading
 cd services/auth-service && python3 -c "from app.core.config import settings; print('✅ Config OK')"
 
-# Run database migrations
+# Run database migrations (manual)
 cd services/auth-service && python3 -m alembic upgrade head
+# If Alembic is blocked (permissions), fall back to centralized migration:
+cd ../../ && ./scripts/migrate-db.py
 
 # Generate mock Nigerian data (if available)
 ./scripts/mock-data.py
@@ -660,9 +685,13 @@ LOG_LEVEL=INFO
 # =============================================================================
 # DATABASE CONFIGURATION
 # =============================================================================
-# Single PostgreSQL database for all services
-DATABASE_URL=postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform
-DB_PASSWORD=your-database-password
+# Single PostgreSQL database for all services (matches the dev container)
+DATABASE_URL=postgresql://sandbox_user:sandbox_password@127.0.0.1:5432/sandbox_platform
+POSTGRES_USER=sandbox_user
+POSTGRES_PASSWORD=sandbox_password
+POSTGRES_DB=sandbox_platform
+# Quote init args so sourcing .env doesn’t try to execute flags
+POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
 REDIS_URL=redis://127.0.0.1:6379/0
 
 # =============================================================================
