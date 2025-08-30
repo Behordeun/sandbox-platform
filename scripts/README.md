@@ -5,14 +5,10 @@
 ## 🚀 Quick Start
 
 ```bash
-# 1. Setup platform
-./scripts/setup-db.sh
-./scripts/create-admin-user.py
-
-# 2. Start platform
+# 1. Start platform (sets up DB, runs migrations, verifies schema)
 ./scripts/start-sandbox.sh
 
-# 3. Test platform
+# 2. Test platform
 ./scripts/check-services.sh
 ./scripts/test-dpi-apis.sh
 ```
@@ -21,9 +17,10 @@
 
 ### **Database & Setup**
 
-- **`setup-db.sh`** - Complete database setup with migrations
-- **`migrate-db.py`** - Database migration manager
+- **`setup-db.sh`** - Database setup with migrations and privilege fixes
+- **`migrate-db.py`** - Database migration manager (with fallback table creation)
 - **`create-admin-user.py`** - Create admin users
+ - **`verify-auth-db.py`** - Verifies presence of critical auth tables and FKs
 
 ### **Platform Control**
 
@@ -66,6 +63,8 @@
 
 - Validates .env configuration
 - Starts infrastructure (PostgreSQL, Redis)
+- Ensures DB readiness (`PGPASSWORD`), runs Alembic for auth, falls back to direct table creation if needed
+- Verifies schema (`scripts/verify-auth-db.py`)
 - Starts all services (auth, gateway, sandbox services)
 - Performs health checks
 
@@ -148,7 +147,7 @@ echo $DATABASE_URL
 
 ```bash
 # Check database connection
-psql postgresql://postgres:your-password@127.0.0.1:5432/sandbox_platform -c "SELECT 1;"
+psql postgresql://sandbox_user:sandbox_password@127.0.0.1:5432/sandbox_platform -c "SELECT 1;"
 
 # Restart database
 docker ps | grep postgres
@@ -181,6 +180,8 @@ python3 -c "import sys; sys.path.append('.'); from app.core.config import settin
 - **✅ Resolved Import Errors**: Fixed module import paths across all services  
 - **✅ Database Connectivity**: Updated to use correct PostgreSQL credentials
 - **✅ Migration System**: Fixed alembic migrations with python3 -m alembic
+- **✅ Soft Delete**: Auth tables use soft-delete; cleanup jobs avoid hard deletes
+- **✅ Case-Insensitive Uniqueness**: Active users unique by email/username (case-insensitive, partial indexes)
 - **✅ Service Health**: All services now start successfully
 - **✅ Dual Config Support**: Both config.py and yaml_config.py work properly
 

@@ -73,6 +73,13 @@ DB_PASSWORD=sandbox_password
 - **Setup**: `setup-db.sh` - Complete database setup
 - **Individual**: Each service can run migrations independently
 
+### Soft Delete & Indexing
+- Auth tables implement soft-delete with `is_deleted` and `deleted_at`.
+- Uniqueness for users is enforced with partial, case-insensitive indexes:
+  - `uq_auth_users_email_active_ci` on `lower(email)` where `is_deleted = false`
+  - `uq_auth_users_username_active_ci` on `lower(username)` where `is_deleted = false`
+  - This allows reusing email/username from archived (soft-deleted) accounts while preserving uniqueness among active users.
+
 ### **Migration Commands**
 ```bash
 # Run all migrations
@@ -109,11 +116,14 @@ alembic upgrade head
 -- Users table with auth_ prefix
 CREATE TABLE auth_users (
     id SERIAL PRIMARY KEY,
-    email VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) NOT NULL,
     hashed_password VARCHAR(255) NOT NULL,
     nin_verified BOOLEAN DEFAULT FALSE,
     bvn_verified BOOLEAN DEFAULT FALSE,
-    created_at TIMESTAMP DEFAULT NOW()
+    created_at TIMESTAMP DEFAULT NOW(),
+    -- Soft-delete fields
+    is_deleted BOOLEAN DEFAULT FALSE,
+    deleted_at TIMESTAMP
 );
 
 -- OAuth clients table
@@ -123,6 +133,9 @@ CREATE TABLE auth_oauth_clients (
     client_secret VARCHAR(255) NOT NULL,
     client_name VARCHAR(255) NOT NULL
 );
+-- Partial unique indexes enforced by migrations
+-- CREATE UNIQUE INDEX uq_auth_users_email_active_ci ON auth_users (lower(email)) WHERE is_deleted IS FALSE;
+-- CREATE UNIQUE INDEX uq_auth_users_username_active_ci ON auth_users (lower(username)) WHERE is_deleted IS FALSE;
 ```
 
 ### **NIN Service Tables**

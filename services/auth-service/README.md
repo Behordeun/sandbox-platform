@@ -150,6 +150,16 @@ The service uses PostgreSQL with the following main tables:
 
 Tables are created via Alembic migrations or the sandbox migration script.
 
+### Soft Delete and Uniqueness
+
+- Models implement soft-delete using `is_deleted` and `deleted_at`.
+  - Admin delete marks the user/token as deleted; records are retained for audit.
+  - All default queries exclude soft-deleted rows.
+- Uniqueness is enforced for active users only, case‑insensitive:
+  - Partial unique indexes on `lower(email)` and `lower(username)` with `WHERE is_deleted IS FALSE`.
+  - You can reuse an email/username from a soft‑deleted account for a new active account.
+  - Restoring a soft‑deleted user will fail if another active user now uses the same email/username.
+
 ### Table Naming
 
 - All auth tables are prefixed with `auth_` for service isolation
