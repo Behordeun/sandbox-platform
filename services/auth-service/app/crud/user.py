@@ -7,17 +7,18 @@ from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from sqlalchemy.orm import Session
+from sqlalchemy import func
 
 
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email: str) -> Optional[User]:
-        q = db.query(User).filter(User.email == email)
+        q = db.query(User).filter(func.lower(User.email) == email.lower())
         if hasattr(User, "is_deleted"):
             q = q.filter(User.is_deleted == False)  # noqa: E712
         return q.first()
 
     def get_by_username(self, db: Session, *, username: str) -> Optional[User]:
-        q = db.query(User).filter(User.username == username)
+        q = db.query(User).filter(func.lower(User.username) == username.lower())
         if hasattr(User, "is_deleted"):
             q = q.filter(User.is_deleted == False)  # noqa: E712
         return q.first()

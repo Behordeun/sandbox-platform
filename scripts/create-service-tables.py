@@ -17,6 +17,82 @@ DATABASE_URL = os.getenv(
 )
 
 
+def create_tables(engine, table_specs):
+    print("🗄️  Creating service tables...")
+    with engine.connect() as conn:
+        for label, sql in table_specs:
+            try:
+                conn.execute(text(sql))
+                conn.commit()
+                print(f"✅ {label} tables created")
+            except Exception as e:
+                print(f"❌ Error creating tables for {label}: {e}")
+
+def create_views(engine, views):
+    with engine.connect() as conn:
+        for label, sql in views:
+            try:
+                conn.execute(text(sql))
+                conn.commit()
+                print(f"✅ View created/updated: {label}")
+            except Exception as e:
+                print(f"❌ Error creating view {label}: {e}")
+
+def ensure_readonly_role(engine):
+    ro_user = os.getenv("GRAFANA_RO_USER") or os.getenv("READONLY_DB_USER")
+    ro_pass = os.getenv("GRAFANA_RO_PASSWORD") or os.getenv("READONLY_DB_PASSWORD")
+    if ro_user and ro_pass:
+        with engine.connect() as conn:
+            try:
+                exists = conn.execute(
+                    text("SELECT 1 FROM pg_roles WHERE rolname=:u"), {"u": ro_user}
+                ).scalar()
+                if not exists:
+                    conn.execute(
+                        text(f'CREATE ROLE "{ro_user}" LOGIN PASSWORD :p'),
+                        {"p": ro_pass},
+                    )
+                conn.execute(text(f'GRANT USAGE ON SCHEMA public TO "{ro_user}"'))
+                conn.execute(
+                    text(f'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "{ro_user}"')
+                )
+                conn.execute(
+                    text(
+                        f'GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO "{ro_user}"'
+                    )
+                )
+                conn.execute(
+                    text(
+                        f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "{ro_user}"'
+                    )
+                )
+                conn.execute(
+                    text(
+                        f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO "{ro_user}"'
+                    )
+                )
+                conn.commit()
+                print(f"✅ Read-only role ensured: {ro_user}")
+            except Exception as e:
+                print(f"⚠️  Could not ensure read-only role '{ro_user}': {e}")
+
+def verify_tables(engine):
+    with engine.connect() as conn:
+        result = conn.execute(
+            text(
+                """
+            SELECT table_name FROM information_schema.tables 
+            WHERE table_schema = 'public' 
+            AND table_name NOT LIKE 'alembic%'
+            ORDER BY table_name
+        """
+            )
+        )
+        tables = [row[0] for row in result]
+        print(f"\n📊 Total tables created: {len(tables)}")
+        for table in tables:
+            print(f"  ✅ {table}")
+
 def create_service_tables():
     """Create basic tables for all sandbox services."""
     if not DATABASE_URL:
@@ -24,7 +100,6 @@ def create_service_tables():
         return
     engine = create_engine(DATABASE_URL)
 
-    # SQL to create basic tables for each service
     table_specs = [
         (
             "NIN",
@@ -289,17 +364,6 @@ def create_service_tables():
         ),
     ]
 
-    print("🗄️  Creating service tables...")
-
-    with engine.connect() as conn:
-        for label, sql in table_specs:
-            try:
-                conn.execute(text(sql))
-                conn.commit()
-                print(f"✅ {label} tables created")
-            except Exception as e:
-                print(f"❌ Error creating tables for {label}: {e}")
-
     # Create/replace helpful SQL views for analytics
     views = [
         (
@@ -426,73 +490,10 @@ def create_service_tables():
         ),
     ]
 
-    with engine.connect() as conn:
-        for label, sql in views:
-            try:
-                conn.execute(text(sql))
-                conn.commit()
-                print(f"✅ View created/updated: {label}")
-            except Exception as e:
-                print(f"❌ Error creating view {label}: {e}")
-
-    # Optionally seed a read-only role for analytics/Grafana
-    ro_user = os.getenv("GRAFANA_RO_USER") or os.getenv("READONLY_DB_USER")
-    ro_pass = os.getenv("GRAFANA_RO_PASSWORD") or os.getenv("READONLY_DB_PASSWORD")
-    if ro_user and ro_pass:
-        with engine.connect() as conn:
-            try:
-                # Create role if not exists
-                exists = conn.execute(
-                    text("SELECT 1 FROM pg_roles WHERE rolname=:u"), {"u": ro_user}
-                ).scalar()
-                if not exists:
-                    conn.execute(
-                        text(f'CREATE ROLE "{ro_user}" LOGIN PASSWORD :p'),
-                        {"p": ro_pass},
-                    )
-                # Grant permissions
-                conn.execute(text(f'GRANT USAGE ON SCHEMA public TO "{ro_user}"'))
-                conn.execute(
-                    text(f'GRANT SELECT ON ALL TABLES IN SCHEMA public TO "{ro_user}"')
-                )
-                conn.execute(
-                    text(
-                        f'GRANT SELECT ON ALL SEQUENCES IN SCHEMA public TO "{ro_user}"'
-                    )
-                )
-                # Ensure future tables/sequences are granted
-                conn.execute(
-                    text(
-                        f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON TABLES TO "{ro_user}"'
-                    )
-                )
-                conn.execute(
-                    text(
-                        f'ALTER DEFAULT PRIVILEGES IN SCHEMA public GRANT SELECT ON SEQUENCES TO "{ro_user}"'
-                    )
-                )
-                conn.commit()
-                print(f"✅ Read-only role ensured: {ro_user}")
-            except Exception as e:
-                print(f"⚠️  Could not ensure read-only role '{ro_user}': {e}")
-
-    # Verify tables were created
-    with engine.connect() as conn:
-        result = conn.execute(
-            text(
-                """
-            SELECT table_name FROM information_schema.tables 
-            WHERE table_schema = 'public' 
-            AND table_name NOT LIKE 'alembic%'
-            ORDER BY table_name
-        """
-            )
-        )
-        tables = [row[0] for row in result]
-
-        print(f"\n📊 Total tables created: {len(tables)}")
-        for table in tables:
-            print(f"  ✅ {table}")
+    create_tables(engine, table_specs)
+    create_views(engine, views)
+    ensure_readonly_role(engine)
+    verify_tables(engine)
 
 
 if __name__ == "__main__":
