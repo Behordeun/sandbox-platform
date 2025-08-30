@@ -19,7 +19,20 @@ router = APIRouter()
 
 @router.post("/", response_model=ConfigResponse)
 async def create_configuration(config_data: ConfigCreate) -> Any:
-    """Create a new configuration."""
+    """
+    ⚙️ Create New Configuration
+    
+    Create centralized configuration for Nigerian DPI services.
+    Supports encryption for sensitive values.
+    
+    **Features:**
+    - ✅ Automatic encryption for sensitive data
+    - ✅ Environment-specific configurations
+    - ✅ Version control and history
+    - ✅ Tag-based organization
+    
+    **Nigerian Context:** Optimized for fintech compliance and security
+    """
     try:
         config = await config_manager.create_config(config_data)
         return config
@@ -36,7 +49,23 @@ async def list_configurations(
     tags: Optional[List[str]] = Query(None, description="Filter by tags"),
     include_deleted: bool = Query(False, description="Include soft-deleted configs"),
 ) -> Any:
-    """List all configurations with optional filtering."""
+    """
+    📄 List Platform Configurations
+    
+    Retrieve all configurations with advanced filtering.
+    Essential for managing Nigerian DPI platform settings.
+    
+    **Filters Available:**
+    - environment: development, staging, production
+    - config_type: service, database, api, security
+    - tags: Custom organizational tags
+    - include_deleted: Show soft-deleted configs
+    
+    **Use Cases:**
+    - Environment-specific deployments
+    - Service configuration management
+    - Compliance auditing
+    """
     try:
         list_configs_kwargs = {
             "config_type": config_type.value if config_type else None,
@@ -57,7 +86,19 @@ async def get_configuration(
     config_id: str,
     decrypt_sensitive: bool = Query(True, description="Decrypt sensitive values"),
 ) -> Any:
-    """Get a specific configuration by ID."""
+    """
+    🔍 Get Specific Configuration
+    
+    Retrieve detailed configuration by unique identifier.
+    Supports selective decryption for security.
+    
+    **Security Features:**
+    - decrypt_sensitive: Control sensitive data exposure
+    - Audit logging for access tracking
+    - Role-based access control
+    
+    **Nigerian Compliance:** NDPR-compliant data handling
+    """
     try:
         config = await config_manager.get_config(config_id, decrypt_sensitive)
         if not config:
