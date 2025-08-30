@@ -24,7 +24,7 @@ config/
 
 ```bash
 # Root .env file (PRIMARY configuration)
-DATABASE_URL=postgresql://postgres:password@127.0.0.1:5432/sandbox_platform
+DATABASE_URL=postgresql://sandbox_user:sandbox_password@127.0.0.1:5432/sandbox_platform
 JWT_SECRET_KEY=your-secret-key
 DOJAH_API_KEY=your-dojah-key
 SMS_API_KEY=your-sms-key
@@ -92,6 +92,12 @@ database_url = os.getenv("DATABASE_URL") or yaml_config.get("database_url") or "
   ```
 
   Comma‑separated strings are also accepted and will be parsed accordingly.
+
+- When adding Postgres init flags to `.env`, quote them so the shell doesn’t try to execute them when sourcing:
+
+  ```env
+  POSTGRES_INITDB_ARGS="--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+  ```
 
 - Secrets are never hard‑coded in code. Provide them via the root `.env` or your deployment secret manager.
 

@@ -100,19 +100,7 @@ def run_alembic_migration(service, service_path, db_url):
         env["DATABASE_URL"] = db_url
         env["MIGRATIONS"] = "1"
 
-        alembic_cmd = None
-        for cmd in ["python3", "python"]:
-            try:
-                subprocess.run(
-                    [cmd, "-m", "alembic", "--version"],
-                    capture_output=True,
-                    check=True,
-                )
-                alembic_cmd = [cmd, "-m", "alembic"]
-                break
-            except (subprocess.CalledProcessError, FileNotFoundError):
-                continue
-
+        alembic_cmd = find_alembic_command()
         if not alembic_cmd:
             print(
                 f"⚠️  Alembic not found for {service['name']}. Falling back to direct table creation."
@@ -132,31 +120,49 @@ def run_alembic_migration(service, service_path, db_url):
         else:
             print(f"❌ {service['name']} migrations failed:")
             print(result.stderr)
-            # Fallback: if alembic_version permission blocks migrations, create tables directly
-            if "alembic_version" in (result.stderr or "").lower() and (
-                "permission denied" in (result.stderr or "").lower()
-                or "does not exist" in (result.stderr or "").lower()
-            ):
-                print(
-                    "⚠️  Detected alembic_version issue. Falling back to direct table creation via SQLAlchemy."
-                )
-                try:
-                    # Change back to original cwd to compute import path correctly
-                    os.chdir(original_cwd)
-                except Exception:
-                    pass
-                ok = create_tables_directly(service["path"], db_url)
-                if ok:
-                    print(
-                        f"✅ {service['name']} tables ensured via SQLAlchemy (fallback applied)"
-                    )
-                    return True
-            return False
+            return handle_alembic_fallback(result, service, original_cwd, db_url)
     except Exception as e:
         print(f"❌ Error running migrations for {service['name']}: {e}")
         return False
     finally:
         os.chdir(original_cwd)
+
+
+def find_alembic_command():
+    """Find a working Alembic command."""
+    for cmd in ["python3", "python"]:
+        try:
+            subprocess.run(
+                [cmd, "-m", "alembic", "--version"],
+                capture_output=True,
+                check=True,
+            )
+            return [cmd, "-m", "alembic"]
+        except (subprocess.CalledProcessError, FileNotFoundError):
+            continue
+    return None
+
+
+def handle_alembic_fallback(result, service, original_cwd, db_url):
+    """Handle fallback if Alembic migration fails due to alembic_version issues."""
+    stderr = (result.stderr or "").lower()
+    if "alembic_version" in stderr and (
+        "permission denied" in stderr or "does not exist" in stderr
+    ):
+        print(
+            "⚠️  Detected alembic_version issue. Falling back to direct table creation via SQLAlchemy."
+        )
+        try:
+            os.chdir(original_cwd)
+        except Exception:
+            pass
+        ok = create_tables_directly(service["path"], db_url)
+        if ok:
+            print(
+                f"✅ {service['name']} tables ensured via SQLAlchemy (fallback applied)"
+            )
+            return True
+    return False
 
 
 def create_tables_directly(service_rel_path: str, db_url: str) -> bool:

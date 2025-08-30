@@ -17,7 +17,6 @@ A FastAPI-based authentication and authorization service for the Sandbox Platfor
 - **Usage Analytics**: User engagement patterns and service usage metrics
 - **Audit Logging**: Security event logging for compliance
 - **Standardized Responses**: Consistent API responses with helpful error messages
-- **SQLite Development**: Easy local development with SQLite database
 - **Docker Support**: Containerized deployment ready
 - **Kubernetes Ready**: Helm charts for production deployment
 
@@ -49,9 +48,39 @@ docker build -t your-dockerhub-username/sandbox-auth-service:1.0.0 .
 
 ```bash
 docker run -p 8000:8000 \
-   -e DATABASE_URL="postgresql://user:pass@host:5432/db" \
+   -e DATABASE_URL="postgresql://sandbox_user:sandbox_password@127.0.0.1:5432/sandbox_platform" \
    -e JWT_SECRET_KEY="your-secret-key" \
    your-dockerhub-username/sandbox-auth-service:1.0.0
+```
+
+### Database and Migrations (Local Dev)
+
+- The root `./scripts/start-sandbox.sh` script:
+  - Starts Postgres using `.env` credentials and waits with `PGPASSWORD`
+  - Runs Alembic migrations for auth-service
+  - Falls back to a safe table creation path if Alembic can’t access `alembic_version`
+  - Runs `scripts/verify-auth-db.py` to confirm presence of `auth_users`
+
+- Manual operations:
+
+```bash
+# Manual Alembic run
+cd services/auth-service && python3 -m alembic upgrade head
+
+# Fallback (centralized) if Alembic is blocked
+cd ../../ && ./scripts/migrate-db.py
+
+# Verify schema
+python3 scripts/verify-auth-db.py
+```
+
+Troubleshooting Alembic (dev only):
+
+```bash
+# Fix alembic_version ownership for the dev user
+PGPASSWORD=sandbox_password \
+  psql -h 127.0.0.1 -U sandbox_user -d sandbox_platform \
+  -c 'ALTER TABLE IF EXISTS public.alembic_version OWNER TO "sandbox_user"; \nGRANT ALL ON public.alembic_version TO "sandbox_user";'
 ```
 
 ### Kubernetes Deployment
