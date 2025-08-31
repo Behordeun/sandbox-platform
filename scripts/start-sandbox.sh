@@ -81,10 +81,10 @@ start_infrastructure() {
     # Start PostgreSQL
     if ! docker ps --format "table {{.Names}}" | grep -q "^sandbox-postgres$"; then
         log_info "Starting PostgreSQL..."
-        # Use credentials from environment or sane defaults
-        local pg_user="${POSTGRES_USER:-sandbox_user}"
-        local pg_password="${POSTGRES_PASSWORD:-sandbox_password}"
-        local pg_db="${POSTGRES_DB:-sandbox_platform}"
+        # Use credentials from environment (required)
+        local pg_user="${POSTGRES_USER:?POSTGRES_USER is required}"
+        local pg_password="${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
+        local pg_db="${POSTGRES_DB:?POSTGRES_DB is required}"
 
         docker run -d \
             --name sandbox-postgres \

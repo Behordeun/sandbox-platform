@@ -156,8 +156,8 @@ monitoring:
   grafana:
     enabled: true
     port: 3001
-    username: "admin"
-    password: "admin123"
+    username: "${GRAFANA_USERNAME}"
+    password: "${GRAFANA_PASSWORD}"
 # Security Configuration
 security:
   cors:

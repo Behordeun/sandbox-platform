@@ -33,11 +33,15 @@ log_info "Starting infrastructure services..."
 
 # Start PostgreSQL
 log_info "Starting PostgreSQL..."
+# Require credentials from environment (do not hardcode)
+: "${POSTGRES_DB:?POSTGRES_DB is required}"
+: "${POSTGRES_USER:?POSTGRES_USER is required}"
+: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}"
 docker run -d \
   --name sandbox-postgres \
-  -e POSTGRES_DB=sandbox_db \
-  -e POSTGRES_USER=sandbox_user \
-  -e POSTGRES_PASSWORD=sandbox_password \
+  -e POSTGRES_DB="$POSTGRES_DB" \
+  -e POSTGRES_USER="$POSTGRES_USER" \
+  -e POSTGRES_PASSWORD="$POSTGRES_PASSWORD" \
   -p 5432:5432 \
   postgres:16 || log_warning "PostgreSQL container may already be running"
 
@@ -50,11 +54,15 @@ docker run -d \
 
 # Start MongoDB
 log_info "Starting MongoDB..."
+# Require Mongo credentials from environment
+: "${MONGO_INITDB_ROOT_USERNAME:?MONGO_INITDB_ROOT_USERNAME is required}"
+: "${MONGO_INITDB_ROOT_PASSWORD:?MONGO_INITDB_ROOT_PASSWORD is required}"
+: "${MONGO_INITDB_DATABASE:?MONGO_INITDB_DATABASE is required}"
 docker run -d \
   --name sandbox-mongo \
-  -e MONGO_INITDB_ROOT_USERNAME=sandbox_user \
-  -e MONGO_INITDB_ROOT_PASSWORD=sandbox_password \
-  -e MONGO_INITDB_DATABASE=sandbox_db \
+  -e MONGO_INITDB_ROOT_USERNAME="$MONGO_INITDB_ROOT_USERNAME" \
+  -e MONGO_INITDB_ROOT_PASSWORD="$MONGO_INITDB_ROOT_PASSWORD" \
+  -e MONGO_INITDB_DATABASE="$MONGO_INITDB_DATABASE" \
   -p 27017:27017 \
   mongo:6 || log_warning "MongoDB container may already be running"
 
@@ -65,6 +73,6 @@ sleep 10
 log_success "Infrastructure services started!"
 echo ""
 log_info "Infrastructure Status:"
-echo "PostgreSQL:  127.0.0.1:5432 (sandbox_user/sandbox_password)"
+echo "PostgreSQL:  127.0.0.1:5432 (user: $POSTGRES_USER)"
 echo "Redis:       127.0.0.1:6379"
-echo "MongoDB:     127.0.0.1:27017 (sandbox_user/sandbox_password)"
+echo "MongoDB:     127.0.0.1:27017 (user: $MONGO_INITDB_ROOT_USERNAME)"
