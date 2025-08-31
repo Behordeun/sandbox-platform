@@ -1,0 +1,165 @@
+{
+  "title": "Performance & SLA Monitoring",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Avg Response Time (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT ROUND(AVG(duration_ms), 2) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 500},
+              {"color": "red", "value": 1000}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "99th Percentile (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT ROUND(PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY duration_ms), 2) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ms",
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 2000},
+              {"color": "red", "value": 5000}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Success Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT ROUND(COUNT(CASE WHEN status_code<400 THEN 1 END)*100.0/COUNT(*), 2) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "percent",
+          "thresholds": {
+            "steps": [
+              {"color": "red", "value": null},
+              {"color": "yellow", "value": 95},
+              {"color": "green", "value": 99}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Requests/Min (5min avg)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT ROUND(COUNT(*)/5.0, 2) FROM gateway_access_logs WHERE created_at>now()-interval '5 minutes';"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "timeseries",
+      "title": "Response Time Percentiles",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT date_trunc('minute', created_at) as time, ROUND(AVG(duration_ms), 2) as avg_ms, ROUND(PERCENTILE_CONT(0.50) WITHIN GROUP (ORDER BY duration_ms), 2) as p50, ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms), 2) as p95, ROUND(PERCENTILE_CONT(0.99) WITHIN GROUP (ORDER BY duration_ms), 2) as p99 FROM gateway_access_logs WHERE created_at>now()-interval '2 hours' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Service Performance Breakdown",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT service_name, COUNT(*) as requests, ROUND(AVG(duration_ms), 2) as avg_ms, ROUND(PERCENTILE_CONT(0.95) WITHIN GROUP (ORDER BY duration_ms), 2) as p95_ms, ROUND(COUNT(CASE WHEN status_code<400 THEN 1 END)*100.0/COUNT(*), 2) as success_rate FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' GROUP BY service_name ORDER BY requests DESC;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 12, "w": 12, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Nigerian DPI SLA Compliance",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT CASE WHEN path LIKE '/nin/%' THEN 'NIN Verification' WHEN path LIKE '/bvn/%' THEN 'BVN Verification' WHEN path LIKE '/sms/%' THEN 'SMS Service' WHEN path LIKE '/llm/%' THEN 'AI Service' ELSE 'Other' END as service, COUNT(*) as requests, ROUND(AVG(duration_ms), 2) as avg_response_ms, ROUND(COUNT(CASE WHEN duration_ms<=2000 THEN 1 END)*100.0/COUNT(*), 2) as sla_compliance_pct FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path NOT LIKE '/health%' GROUP BY 1 ORDER BY requests DESC;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Request Volume by Service",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT date_trunc('minute', created_at) as time, service_name, COUNT(*) as requests FROM gateway_access_logs WHERE created_at>now()-interval '2 hours' GROUP BY 1, 2 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 20, "w": 24, "h": 8}
+    }
+  ],
+  "time": {"from": "now-2h", "to": "now"},
+  "refresh": "30s",
+  "schemaVersion": 38,
+  "version": 1
+}

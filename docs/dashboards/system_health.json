@@ -1,0 +1,149 @@
+{
+  "title": "System Health & Infrastructure",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Database Connections",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT count(*) FROM pg_stat_activity WHERE state = 'active';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Database Size",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT pg_size_pretty(pg_database_size('sandbox_platform'));"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Total Users",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM auth_users WHERE is_deleted=false;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "System Uptime",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT EXTRACT(epoch FROM (now() - pg_postmaster_start_time()))/3600 as uptime_hours;"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "unit": "h"
+        }
+      }
+    },
+    {
+      "type": "table",
+      "title": "Service Health Status",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT 'Auth Service' as service, CASE WHEN COUNT(*) > 0 THEN 'Healthy' ELSE 'Down' END as status, MAX(created_at) as last_activity FROM gateway_access_logs WHERE created_at>now()-interval '5 minutes' AND service_name='auth' UNION ALL SELECT 'SMS Service', CASE WHEN COUNT(*) > 0 THEN 'Healthy' ELSE 'Inactive' END, MAX(created_at) FROM gateway_access_logs WHERE created_at>now()-interval '5 minutes' AND service_name='sms' UNION ALL SELECT 'NIN Service', CASE WHEN COUNT(*) > 0 THEN 'Healthy' ELSE 'Inactive' END, MAX(created_at) FROM gateway_access_logs WHERE created_at>now()-interval '5 minutes' AND path LIKE '/nin/%' UNION ALL SELECT 'BVN Service', CASE WHEN COUNT(*) > 0 THEN 'Healthy' ELSE 'Inactive' END, MAX(created_at) FROM gateway_access_logs WHERE created_at>now()-interval '5 minutes' AND path LIKE '/bvn/%';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Database Table Sizes",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT schemaname, tablename, pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size, pg_total_relation_size(schemaname||'.'||tablename) as size_bytes FROM pg_tables WHERE schemaname = 'public' ORDER BY size_bytes DESC LIMIT 10;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Database Performance Metrics",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT now() as time, (SELECT count(*) FROM pg_stat_activity WHERE state = 'active') as active_connections, (SELECT count(*) FROM pg_stat_activity WHERE state = 'idle') as idle_connections, (SELECT count(*) FROM pg_stat_activity WHERE state = 'idle in transaction') as idle_in_transaction;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Recent Error Analysis",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT status_code, COUNT(*) as error_count, service_name, MAX(created_at) as last_occurrence FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND status_code >= 400 GROUP BY status_code, service_name ORDER BY error_count DESC LIMIT 20;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Nigerian DPI Infrastructure Status",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT 'NIMC Integration' as component, CASE WHEN COUNT(*) > 0 THEN 'Active' ELSE 'Inactive' END as status, COUNT(*) as requests_24h FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path LIKE '/nin/%' UNION ALL SELECT 'CBN Integration', CASE WHEN COUNT(*) > 0 THEN 'Active' ELSE 'Inactive' END, COUNT(*) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path LIKE '/bvn/%' UNION ALL SELECT 'Nigerian SMS Networks', CASE WHEN COUNT(*) > 0 THEN 'Active' ELSE 'Inactive' END, COUNT(*) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path LIKE '/sms/%' UNION ALL SELECT 'AI/LLM Services', CASE WHEN COUNT(*) > 0 THEN 'Active' ELSE 'Inactive' END, COUNT(*) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path LIKE '/llm/%';"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8}
+    }
+  ],
+  "time": {"from": "now-1h", "to": "now"},
+  "refresh": "1m",
+  "schemaVersion": 38,
+  "version": 1
+}

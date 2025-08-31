@@ -1,0 +1,143 @@
+{
+  "title": "Data Retention & Storage Management",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Total Database Size",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT pg_size_pretty(pg_database_size('sandbox_platform'));"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Raw Logs Count",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM gateway_access_logs;"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Rollup Records",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT (SELECT COUNT(*) FROM gateway_access_hourly) + (SELECT COUNT(*) FROM gateway_access_daily) + (SELECT COUNT(*) FROM dpi_usage_daily);"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Compliance Records",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM compliance_audit_monthly;"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "table",
+      "title": "Table Storage Analysis",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT tablename, pg_size_pretty(pg_total_relation_size('public.'||tablename)) as size, pg_total_relation_size('public.'||tablename) as size_bytes, (SELECT COUNT(*) FROM information_schema.columns WHERE table_name = t.tablename) as columns FROM pg_tables t WHERE schemaname = 'public' AND tablename LIKE '%_logs' OR tablename LIKE '%_hourly' OR tablename LIKE '%_daily' OR tablename LIKE '%_monthly' ORDER BY size_bytes DESC;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 12, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Nigerian NDPR Compliance Status",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT 'Raw Access Logs' as data_type, '6 months' as retention_policy, CASE WHEN MIN(created_at) > NOW() - INTERVAL '6 months' THEN 'Compliant' ELSE 'Cleanup Needed' END as status, COUNT(*) as records FROM gateway_access_logs UNION ALL SELECT 'Audit Logs', '7 years', CASE WHEN MIN(created_at) > NOW() - INTERVAL '7 years' THEN 'Compliant' ELSE 'Compliant (Historical)' END, COUNT(*) FROM auth_audit_logs UNION ALL SELECT 'Hourly Rollups', '1 year', CASE WHEN MIN(hour_bucket) > NOW() - INTERVAL '1 year' THEN 'Compliant' ELSE 'Cleanup Needed' END, COUNT(*) FROM gateway_access_hourly UNION ALL SELECT 'Daily Rollups', '3 years', CASE WHEN MIN(date_bucket) > NOW() - INTERVAL '3 years' THEN 'Compliant' ELSE 'Compliant (Historical)' END, COUNT(*) FROM gateway_access_daily;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "Data Growth Trends",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT date_bucket, total_requests as raw_logs, 0 as rollup_records FROM gateway_access_daily WHERE date_bucket > NOW() - INTERVAL '30 days' UNION ALL SELECT date_bucket::timestamp, 0, total_requests FROM gateway_access_daily WHERE date_bucket > NOW() - INTERVAL '30 days' ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "DPI Service Data Retention",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT service_type, COUNT(*) as daily_records, MIN(date_bucket) as oldest_record, MAX(date_bucket) as newest_record, SUM(total_requests) as total_api_calls, SUM(successful_verifications) as successful_ops FROM dpi_usage_daily GROUP BY service_type ORDER BY total_api_calls DESC;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Storage Optimization Recommendations",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT 'Partition large tables' as recommendation, 'High' as priority, 'gateway_access_logs > 1M records' as condition, CASE WHEN (SELECT COUNT(*) FROM gateway_access_logs) > 1000000 THEN 'Action Required' ELSE 'OK' END as status UNION ALL SELECT 'Archive old audit logs', 'Medium', 'auth_audit_logs > 6 months old', CASE WHEN (SELECT COUNT(*) FROM auth_audit_logs WHERE created_at < NOW() - INTERVAL '6 months') > 0 THEN 'Consider Archiving' ELSE 'OK' END UNION ALL SELECT 'Compress rollup tables', 'Low', 'Rollup tables > 100MB', CASE WHEN (SELECT pg_total_relation_size('gateway_access_daily')) > 104857600 THEN 'Consider Compression' ELSE 'OK' END;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8}
+    }
+  ],
+  "time": {"from": "now-30d", "to": "now"},
+  "schemaVersion": 38,
+  "version": 1
+}

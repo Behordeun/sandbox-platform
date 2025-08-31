@@ -1,0 +1,125 @@
+{
+  "title": "Security & Compliance Monitoring",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "Failed Logins (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM auth_audit_logs WHERE created_at>now()-interval '24 hours' AND activity_type='login' AND success=false;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
+      "fieldConfig": {
+        "defaults": {
+          "color": {"mode": "thresholds"},
+          "thresholds": {
+            "steps": [
+              {"color": "green", "value": null},
+              {"color": "yellow", "value": 10},
+              {"color": "red", "value": 50}
+            ]
+          }
+        }
+      }
+    },
+    {
+      "type": "stat",
+      "title": "Suspicious IPs (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(DISTINCT client_ip) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND status_code IN (401,403,429);"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Rate Limited Requests",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND status_code=429;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "Active Users (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(DISTINCT user_id) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND user_id IS NOT NULL;"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "table",
+      "title": "Security Events (Recent)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT created_at, activity_type, u.email as user_email, client_ip, success, details FROM auth_audit_logs a LEFT JOIN auth_users u ON a.user_id = u.id WHERE a.created_at>now()-interval '24 hours' AND (success=false OR activity_type IN ('password_reset', 'account_locked')) ORDER BY created_at DESC LIMIT 50;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Nigerian Data Protection Compliance",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT 'NIN Verifications' as data_type, COUNT(*) as total_requests, COUNT(CASE WHEN status_code=200 THEN 1 END) as successful, 'NDPR Compliant' as compliance_status FROM nin_access_logs WHERE created_at>now()-interval '7 days' UNION ALL SELECT 'BVN Verifications', COUNT(*), COUNT(CASE WHEN status_code=200 THEN 1 END), 'CBN Compliant' FROM bvn_access_logs WHERE created_at>now()-interval '7 days' UNION ALL SELECT 'SMS Messages', COUNT(*), COUNT(CASE WHEN status_code=200 THEN 1 END), 'NCC Compliant' FROM sms_access_logs WHERE created_at>now()-interval '7 days';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 12, "w": 24, "h": 6}
+    },
+    {
+      "type": "timeseries",
+      "title": "Authentication Patterns",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT date_trunc('hour', created_at) as time, COUNT(CASE WHEN success=true THEN 1 END) as successful_logins, COUNT(CASE WHEN success=false THEN 1 END) as failed_logins FROM auth_audit_logs WHERE created_at>now()-interval '7 days' AND activity_type='login' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 18, "w": 24, "h": 8}
+    }
+  ],
+  "time": {"from": "now-24h", "to": "now"},
+  "schemaVersion": 38,
+  "version": 1
+}
