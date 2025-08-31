@@ -1,0 +1,98 @@
+{
+  "title": "Nigerian DPI Services",
+  "panels": [
+    {
+      "type": "stat",
+      "title": "NIN Verifications (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM nin_access_logs WHERE created_at>now()-interval '24 hours' AND status_code=200;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "BVN Verifications (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM bvn_access_logs WHERE created_at>now()-interval '24 hours' AND status_code=200;"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "SMS Sent (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM sms_access_logs WHERE created_at>now()-interval '24 hours' AND status_code=200;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "AI Requests (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT COUNT(*) FROM ai_access_logs WHERE created_at>now()-interval '24 hours' AND status_code=200;"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
+    },
+    {
+      "type": "timeseries",
+      "title": "DPI Service Usage Trends",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT date_trunc('hour', created_at) as time, 'NIN' as service, COUNT(*) as requests FROM nin_access_logs WHERE created_at>now()-interval '7 days' GROUP BY 1 UNION ALL SELECT date_trunc('hour', created_at), 'BVN', COUNT(*) FROM bvn_access_logs WHERE created_at>now()-interval '7 days' GROUP BY 1 UNION ALL SELECT date_trunc('hour', created_at), 'SMS', COUNT(*) FROM sms_access_logs WHERE created_at>now()-interval '7 days' GROUP BY 1 UNION ALL SELECT date_trunc('hour', created_at), 'AI', COUNT(*) FROM ai_access_logs WHERE created_at>now()-interval '7 days' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8}
+    },
+    {
+      "type": "table",
+      "title": "Nigerian Startup Usage",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT u.email as startup, COUNT(CASE WHEN g.path LIKE '/nin/%' THEN 1 END) as nin_calls, COUNT(CASE WHEN g.path LIKE '/bvn/%' THEN 1 END) as bvn_calls, COUNT(CASE WHEN g.path LIKE '/sms/%' THEN 1 END) as sms_calls, COUNT(CASE WHEN g.path LIKE '/llm/%' THEN 1 END) as ai_calls, COUNT(*) as total_calls FROM gateway_access_logs g JOIN auth_users u ON g.user_id::int = u.id WHERE g.created_at>now()-interval '7 days' AND u.is_deleted=false GROUP BY u.email ORDER BY total_calls DESC;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8}
+    }
+  ],
+  "time": {"from": "now-7d", "to": "now"},
+  "schemaVersion": 38,
+  "version": 1
+}
