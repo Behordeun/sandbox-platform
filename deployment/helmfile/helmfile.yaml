@@ -27,14 +27,14 @@ environments:
           memory: 128Mi
       postgres:
         auth:
-          postgresPassword: {{ env "DEV_POSTGRES_PASSWORD" | default "dev-postgres-123" }}
+          postgresPassword: {{ requiredEnv "DEV_POSTGRES_PASSWORD" }}
           database: sandbox_dev
         primary:
           persistence:
             size: 1Gi
       redis:
         auth:
-          password: {{ env "DEV_REDIS_PASSWORD" | default "dev-redis-123" }}
+          password: {{ requiredEnv "DEV_REDIS_PASSWORD" }}
         master:
           persistence:
             size: 1Gi

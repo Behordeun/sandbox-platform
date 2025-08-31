@@ -31,9 +31,10 @@ log_error() {
 # Resolve DB connection parameters from environment or defaults
 PG_HOST=${PG_HOST:-127.0.0.1}
 PG_PORT=${PG_PORT:-5432}
-PG_USER=${POSTGRES_USER:-sandbox_user}
-PG_PASSWORD=${POSTGRES_PASSWORD:-sandbox_password}
-PG_DB=${POSTGRES_DB:-sandbox_platform}
+# Require explicit credentials; do not hardcode
+PG_USER=${POSTGRES_USER:?POSTGRES_USER is required}
+PG_PASSWORD=${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+PG_DB=${POSTGRES_DB:?POSTGRES_DB is required}
 
 # Check if PostgreSQL is running
 check_postgres() {
@@ -154,7 +155,8 @@ run_migrations() {
     
     # Set environment variables
     export ENVIRONMENT=${ENVIRONMENT:-development}
-    export DB_PASSWORD=${DB_PASSWORD:-sandbox_password}
+    # DB_PASSWORD intentionally not defaulted; use POSTGRES_PASSWORD if needed
+    export DB_PASSWORD=${DB_PASSWORD:-$PG_PASSWORD}
     
     # Run the migration script
     python "$(dirname "$0")/migrate-db.py"
@@ -200,9 +202,9 @@ main() {
         log_success "Database setup completed successfully!"
         echo ""
         log_info "📋 Database Information:"
-        log_info "   Host: 127.0.0.1:5432"
-        log_info "   Database: sandbox_platform"
-        log_info "   User: sandbox_user"
+        log_info "   Host: ${PG_HOST}:${PG_PORT}"
+        log_info "   Database: ${PG_DB}"
+        log_info "   User: ${PG_USER}"
         log_info "   Tables: Prefixed by service (auth_, config_, nin_, etc.)"
         echo ""
         log_info "🚀 You can now start your services!"
