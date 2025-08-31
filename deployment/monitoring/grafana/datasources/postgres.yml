@@ -5,11 +5,11 @@ datasources:
     type: postgres
     access: proxy
     url: host.docker.internal:5432
-    user: ${POSTGRES_USER:sandbox_user}
+    user: ${POSTGRES_USER}
     secureJsonData:
-      password: ${POSTGRES_PASSWORD:sandbox_password}
+      password: ${POSTGRES_PASSWORD}
     jsonData:
-      database: ${POSTGRES_DB:sandbox_platform}
+      database: ${POSTGRES_DB}
       sslmode: disable
       postgresVersion: 1500
       timescaledb: false
