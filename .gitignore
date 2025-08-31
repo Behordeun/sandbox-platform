@@ -41,3 +41,4 @@ flow_diagrams
 logs
 migrations
 Makefile
+scripts/data_retention/
