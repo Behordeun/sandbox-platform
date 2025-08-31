@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from app.api.v1.router import api_router
 from app.core.config import settings
 from fastapi import FastAPI
+from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 
@@ -75,6 +76,12 @@ async def root():
 
 # Include API routers
 app.include_router(api_router, prefix="/api/v1")
+
+# Metrics instrumentation
+try:
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+except Exception:
+    pass
 
 
 # Global exception handler

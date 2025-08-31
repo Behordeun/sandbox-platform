@@ -12,6 +12,7 @@ from app.models import oauth_token  # Import to register models
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.routing import APIRoute
 from sqlalchemy import text
 
@@ -96,6 +97,13 @@ app.add_middleware(
 # Add correlation and user activity logging middleware
 app.add_middleware(CorrelationIdMiddleware)
 app.add_middleware(UserActivityLoggingMiddleware)
+
+# Metrics instrumentation (Prometheus)
+try:
+    Instrumentator().instrument(app).expose(app, endpoint="/metrics")
+except Exception:
+    # Keep service running even if instrumentation fails
+    pass
 
 
 # Health check endpoint
