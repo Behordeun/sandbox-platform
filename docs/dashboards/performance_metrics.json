@@ -137,7 +137,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT CASE WHEN path LIKE '/nin/%' THEN 'NIN Verification' WHEN path LIKE '/bvn/%' THEN 'BVN Verification' WHEN path LIKE '/sms/%' THEN 'SMS Service' WHEN path LIKE '/llm/%' THEN 'AI Service' ELSE 'Other' END as service, COUNT(*) as requests, ROUND(AVG(duration_ms), 2) as avg_response_ms, ROUND(COUNT(CASE WHEN duration_ms<=2000 THEN 1 END)*100.0/COUNT(*), 2) as sla_compliance_pct FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path NOT LIKE '/health%' GROUP BY 1 ORDER BY requests DESC;"
+          "rawSql": "SELECT CASE WHEN path LIKE '/api/v1/nin/%' THEN 'NIN Verification' WHEN path LIKE '/api/v1/bvn/%' THEN 'BVN Verification' WHEN path LIKE '/api/v1/sms/%' THEN 'SMS Service' WHEN path LIKE '/api/v1/llm/%' THEN 'AI Service' ELSE 'Other' END as service, COUNT(*) as requests, ROUND(AVG(duration_ms), 2) as avg_response_ms, ROUND(COUNT(CASE WHEN duration_ms<=2000 THEN 1 END)*100.0/COUNT(*), 2) as sla_compliance_pct FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND path NOT LIKE '/health%' GROUP BY 1 ORDER BY requests DESC;"
         }
       ],
       "gridPos": {"x": 12, "y": 12, "w": 12, "h": 8}
