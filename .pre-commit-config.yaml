@@ -1,0 +1,11 @@
+repos:
+  - repo: local
+    hooks:
+      - id: gitleaks-docker
+        name: gitleaks (docker)
+        language: docker_image
+        entry: zricethezav/gitleaks:latest detect --source . --config .gitleaks.toml --redact
+        pass_filenames: false
+        types: [text]
+        stages: [pre-commit, pre-push, manual]
+
