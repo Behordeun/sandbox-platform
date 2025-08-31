@@ -90,6 +90,190 @@
         }
       ],
       "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "SMS Hourly (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT date_trunc('hour', created_at) as time, COUNT(*) as requests, COUNT(CASE WHEN status_code >= 400 THEN 1 END) as errors FROM sms_access_logs WHERE created_at>now()-interval '24 hours' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "AI Hourly (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT date_trunc('hour', created_at) as time, COUNT(*) as requests, COUNT(CASE WHEN status_code >= 400 THEN 1 END) as errors FROM ai_access_logs WHERE created_at>now()-interval '24 hours' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "NIN Hourly (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT date_trunc('hour', created_at) as time, COUNT(*) as requests, COUNT(CASE WHEN status_code >= 400 THEN 1 END) as errors FROM nin_access_logs WHERE created_at>now()-interval '24 hours' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 28, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "BVN Hourly (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT date_trunc('hour', created_at) as time, COUNT(*) as requests, COUNT(CASE WHEN status_code >= 400 THEN 1 END) as errors FROM bvn_access_logs WHERE created_at>now()-interval '24 hours' GROUP BY 1 ORDER BY 1;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 28, "w": 12, "h": 8}
+    },
+    {
+      "type": "stat",
+      "title": "AI Conversations (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT COUNT(*) FROM ai_conversations WHERE created_at>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 36, "w": 6, "h": 4}
+    },
+    {
+      "type": "stat",
+      "title": "SMS Messages (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT COUNT(*) FROM sms_messages WHERE created_at>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 36, "w": 6, "h": 4}
+    },
+    {
+      "type": "timeseries",
+      "title": "SMS Latency Percentiles (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT bucket as time, p50_ms, p95_ms, p99_ms FROM v_service_latency_pcts WHERE service='sms' AND bucket>now()-interval '24 hours' ORDER BY time;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 40, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "AI Latency Percentiles (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT bucket as time, p50_ms, p95_ms, p99_ms FROM v_service_latency_pcts WHERE service='ai' AND bucket>now()-interval '24 hours' ORDER BY time;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 40, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "NIN Latency Percentiles (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT bucket as time, p50_ms, p95_ms, p99_ms FROM v_service_latency_pcts WHERE service='nin' AND bucket>now()-interval '24 hours' ORDER BY time;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 48, "w": 12, "h": 8}
+    },
+    {
+      "type": "timeseries",
+      "title": "BVN Latency Percentiles (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT bucket as time, p50_ms, p95_ms, p99_ms FROM v_service_latency_pcts WHERE service='bvn' AND bucket>now()-interval '24 hours' ORDER BY time;"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 48, "w": 12, "h": 8}
+    },
+    {
+      "type": "stat",
+      "title": "NIN Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='nin' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 56, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "stat",
+      "title": "BVN Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='bvn' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 56, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "stat",
+      "title": "SMS Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='sms' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 56, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "stat",
+      "title": "AI Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='ai' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 56, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "table",
+      "title": "AI Models Usage (7d)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT COALESCE(model,'unknown') as model, COUNT(*) as conversations, ROUND(AVG(tokens_used),2) as avg_tokens, ROUND(AVG(response_time_ms),2) as avg_response_ms FROM ai_conversations WHERE created_at>now()-interval '7 days' GROUP BY 1 ORDER BY conversations DESC;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 60, "w": 24, "h": 8}
     }
   ],
   "time": {"from": "now-7d", "to": "now"},
