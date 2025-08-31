@@ -68,7 +68,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT COUNT(DISTINCT user_id) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours' AND user_id IS NOT NULL;"
+          "rawSql": "SELECT COUNT(DISTINCT CASE WHEN user_id ~ '^[0-9]+$' THEN user_id ELSE NULL END) FROM gateway_access_logs WHERE created_at>now()-interval '24 hours';"
         }
       ],
       "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
@@ -83,7 +83,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT created_at, activity_type, u.email as user_email, client_ip, success, details FROM auth_audit_logs a LEFT JOIN auth_users u ON a.user_id = u.id WHERE a.created_at>now()-interval '24 hours' AND (success=false OR activity_type IN ('password_reset', 'account_locked')) ORDER BY created_at DESC LIMIT 50;"
+          "rawSql": "SELECT a.created_at, a.activity_type, u.email as user_email, a.client_ip, a.success, a.method, a.path, a.status_code FROM auth_audit_logs a LEFT JOIN auth_users u ON a.user_id = u.id WHERE a.created_at>now()-interval '24 hours' AND (a.success=false OR a.activity_type IN ('password_reset', 'account_locked')) ORDER BY a.created_at DESC LIMIT 50;"
         }
       ],
       "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8}
