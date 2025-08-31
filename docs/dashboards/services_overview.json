@@ -23,6 +23,73 @@
     },
     {
       "type": "table",
+      "title": "All Services Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {
+            "type": "postgres",
+            "uid": "postgres"
+          },
+          "rawSql": "SELECT service, SUM(total) AS total, SUM(server_err) AS server_err, ROUND(100.0*SUM(server_err)/NULLIF(SUM(total),0),2) AS server_err_pct FROM v_service_error_rate WHERE bucket>now()-interval '24 hours' GROUP BY service ORDER BY server_err_pct DESC;"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 24, "w": 24, "h": 8}
+    },
+    {
+      "type": "stat",
+      "title": "NIN Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='nin' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 0, "y": 32, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "stat",
+      "title": "BVN Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='bvn' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 6, "y": 32, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "stat",
+      "title": "SMS Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='sms' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 12, "y": 32, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "stat",
+      "title": "AI Error Rate (24h)",
+      "targets": [
+        {
+          "refId": "A",
+          "datasource": {"type": "postgres", "uid": "postgres"},
+          "rawSql": "SELECT ROUND(100.0 * SUM(server_err) / NULLIF(SUM(total),0), 2) FROM v_service_error_rate WHERE service='ai' AND bucket>now()-interval '24 hours';"
+        }
+      ],
+      "gridPos": {"x": 18, "y": 32, "w": 6, "h": 4},
+      "fieldConfig": {"defaults": {"unit": "percent", "thresholds": {"steps": [{"color": "green", "value": null}, {"color": "yellow", "value": 1}, {"color": "red", "value": 5}]}}}
+    },
+    {
+      "type": "table",
       "title": "Service Latency (24h)",
       "targets": [
         {

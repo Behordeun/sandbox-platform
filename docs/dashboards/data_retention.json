@@ -41,7 +41,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT COUNT(*) FROM v_gateway_access_summary WHERE bucket > now()-interval '30 days';"
+          "rawSql": "SELECT (SELECT COUNT(*) FROM gateway_access_hourly) + (SELECT COUNT(*) FROM gateway_access_daily) + (SELECT COUNT(*) FROM dpi_usage_daily);"
         }
       ],
       "gridPos": {"x": 12, "y": 0, "w": 6, "h": 4}
@@ -56,7 +56,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT COUNT(*) FROM auth_audit_logs;"
+          "rawSql": "SELECT COUNT(*) FROM compliance_audit_monthly;"
         }
       ],
       "gridPos": {"x": 18, "y": 0, "w": 6, "h": 4}
@@ -86,7 +86,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT 'Raw Access Logs' as data_type, '6 months' as retention_policy, CASE WHEN MIN(created_at) > NOW() - INTERVAL '6 months' THEN 'Compliant' ELSE 'Cleanup Needed' END as status, COUNT(*) as records FROM gateway_access_logs UNION ALL SELECT 'Audit Logs', '7 years', CASE WHEN MIN(created_at) > NOW() - INTERVAL '7 years' THEN 'Compliant' ELSE 'Compliant (Historical)' END, COUNT(*) FROM auth_audit_logs UNION ALL SELECT 'Hourly Aggregates (view)', 'Ephemeral', 'N/A' as status, COUNT(*) FROM v_gateway_access_summary;"
+          "rawSql": "SELECT 'Raw Access Logs' as data_type, '6 months' as retention_policy, CASE WHEN MIN(created_at) > NOW() - INTERVAL '6 months' THEN 'Compliant' ELSE 'Cleanup Needed' END as status, COUNT(*) as records FROM gateway_access_logs UNION ALL SELECT 'Audit Logs', '7 years', CASE WHEN MIN(created_at) > NOW() - INTERVAL '7 years' THEN 'Compliant' ELSE 'Compliant (Historical)' END, COUNT(*) FROM auth_audit_logs UNION ALL SELECT 'Hourly Rollups', '1 year', CASE WHEN MIN(hour_bucket) > NOW() - INTERVAL '1 year' THEN 'Compliant' ELSE 'Cleanup Needed' END, COUNT(*) FROM gateway_access_hourly UNION ALL SELECT 'Daily Rollups', '3 years', CASE WHEN MIN(date_bucket) > NOW() - INTERVAL '3 years' THEN 'Compliant' ELSE 'Compliant (Historical)' END, COUNT(*) FROM gateway_access_daily;"
         }
       ],
       "gridPos": {"x": 12, "y": 4, "w": 12, "h": 8}
@@ -101,7 +101,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT date_trunc('day', created_at) as time, COUNT(*) as raw_logs, 0 as rollup_records FROM gateway_access_logs WHERE created_at > NOW() - INTERVAL '30 days' GROUP BY 1 ORDER BY 1;"
+          "rawSql": "SELECT date_bucket, total_requests as raw_logs, 0 as rollup_records FROM gateway_access_daily WHERE date_bucket > NOW() - INTERVAL '30 days' UNION ALL SELECT date_bucket::timestamp, 0, total_requests FROM gateway_access_daily WHERE date_bucket > NOW() - INTERVAL '30 days' ORDER BY 1;"
         }
       ],
       "gridPos": {"x": 0, "y": 12, "w": 24, "h": 8}
@@ -116,7 +116,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT service as service_type, COUNT(*) as daily_records, MIN(date_trunc('day', created_at)) as oldest_record, MAX(date_trunc('day', created_at)) as newest_record, COUNT(*) as total_api_calls, COUNT(CASE WHEN status_code = 200 THEN 1 END) as successful_ops FROM v_service_access_summary WHERE created_at > NOW() - INTERVAL '30 days' GROUP BY service ORDER BY total_api_calls DESC;"
+          "rawSql": "SELECT service_type, COUNT(*) as daily_records, MIN(date_bucket) as oldest_record, MAX(date_bucket) as newest_record, SUM(total_requests) as total_api_calls, SUM(successful_verifications) as successful_ops FROM dpi_usage_daily GROUP BY service_type ORDER BY total_api_calls DESC;"
         }
       ],
       "gridPos": {"x": 0, "y": 20, "w": 12, "h": 8}
@@ -131,7 +131,7 @@
             "type": "postgres",
             "uid": "postgres"
           },
-          "rawSql": "SELECT 'Partition large tables' as recommendation, 'High' as priority, 'gateway_access_logs > 1M records' as condition, CASE WHEN (SELECT COUNT(*) FROM gateway_access_logs) > 1000000 THEN 'Action Required' ELSE 'OK' END as status UNION ALL SELECT 'Archive old audit logs', 'Medium', 'auth_audit_logs > 6 months old', CASE WHEN (SELECT COUNT(*) FROM auth_audit_logs WHERE created_at < NOW() - INTERVAL '6 months') > 0 THEN 'Consider Archiving' ELSE 'OK' END UNION ALL SELECT 'Compress raw table', 'Low', 'gateway_access_logs > 100MB', CASE WHEN (SELECT pg_total_relation_size('gateway_access_logs')) > 104857600 THEN 'Consider Compression' ELSE 'OK' END;"
+          "rawSql": "SELECT 'Partition large tables' as recommendation, 'High' as priority, 'gateway_access_logs > 1M records' as condition, CASE WHEN (SELECT COUNT(*) FROM gateway_access_logs) > 1000000 THEN 'Action Required' ELSE 'OK' END as status UNION ALL SELECT 'Archive old audit logs', 'Medium', 'auth_audit_logs > 6 months old', CASE WHEN (SELECT COUNT(*) FROM auth_audit_logs WHERE created_at < NOW() - INTERVAL '6 months') > 0 THEN 'Consider Archiving' ELSE 'OK' END UNION ALL SELECT 'Compress rollup tables', 'Low', 'Rollup tables > 100MB', CASE WHEN (SELECT pg_total_relation_size('gateway_access_daily')) > 104857600 THEN 'Consider Compression' ELSE 'OK' END;"
         }
       ],
       "gridPos": {"x": 12, "y": 20, "w": 12, "h": 8}
