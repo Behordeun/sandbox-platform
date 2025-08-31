@@ -3,7 +3,7 @@ environment: "development"
 # Development Database Settings
 database:
   # Use PostgreSQL for development (consistent with production)
-  url: "postgresql://sandbox_user:${DB_PASSWORD:sandbox_password}@127.0.0.1:5432/sandbox_platform"
+  url: "postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@127.0.0.1:5432/${POSTGRES_DB}"
 # Development API Settings (use sandbox endpoints)
 providers:
   dojah:

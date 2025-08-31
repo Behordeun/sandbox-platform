@@ -1,0 +1,33 @@
+title = "Sandbox Platform Gitleaks Config"
+
+# Extend the built-in rules (keep all defaults) and add allowlists for
+# example credentials and local-dev placeholders to reduce false positives.
+
+[allowlist]
+description = "Global allowlist for documented examples and dev placeholders"
+regexes = [
+  '''(?i)your[-_ ]?(api|sms|ai|dojah)[-_ ]?key''',
+  '''(?i)your[-_ ]?(jwt|secret)[-_ ]?key''',
+  '''(?i)your[-_ ]?production[-_ ]?secret''',
+  '''(?i)your[-_ ]?secure[-_ ]?jwt[-_ ]?secret''',
+  '''(?i)change[_-]?me''',
+  '''(?i)admin123''',
+  '''(?i)dev[-_]?postgres[-_]?123''',
+  '''(?i)dev[-_]?redis[-_]?123''',
+  '''sandbox_password''',
+  '''postgres123''',
+  '''postgresql://sandbox_user:sandbox_password@127\.0\.0\.1:5432/sandbox_platform''',
+  '''postgresql://postgres:postgres123@127\.0\.0\.1:5432/\w+''',
+  '''postgresql://postgres:password@localhost:5432/sandbox_platform''',
+  '''127\.0\.0\.1'''
+]
+paths = [
+  '''^README\.md$''',
+  '''^docs/''',
+  '''^flow_diagrams/''',
+  '''^sandbox/.*/helm/.+''',
+  '''^deployment/helmfile/helmfile\.yaml$''',
+  '''^deployment/monitoring/grafana/dashboards/''',
+  '''^\.env\.template$'''
+]
+

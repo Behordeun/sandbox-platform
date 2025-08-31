@@ -5,9 +5,9 @@ datasources:
     type: postgres
     access: proxy
     url: host.docker.internal:5432
-    user: ${POSTGRES_USER}
+    user: ${GRAFANA_RO_USER}
     secureJsonData:
-      password: ${POSTGRES_PASSWORD}
+      password: ${GRAFANA_RO_PASSWORD}
     jsonData:
       database: ${POSTGRES_DB}
       sslmode: disable
