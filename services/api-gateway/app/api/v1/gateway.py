@@ -12,11 +12,12 @@ security = HTTPBearer()
 
 router = APIRouter()
 
+APPLICATION_JSON = "application/json"
 
 # Specific system login endpoint MUST be declared before catch-all /auth/{path}
 async def parse_login_payload(request: Request, content_type: str):
     try:
-        if "application/json" in content_type:
+        if APPLICATION_JSON in content_type:
             data = await request.json()
         else:
             form = await request.form()
@@ -62,7 +63,7 @@ def validate_login_payload(data):
         "requestBody": {
             "required": True,
             "content": {
-                "application/json": {
+                APPLICATION_JSON: {
                     "schema": {
                         "title": "LoginRequest",
                         "type": "object",
@@ -89,7 +90,7 @@ def validate_login_payload(data):
             "200": {
                 "description": "Login successful",
                 "content": {
-                    "application/json": {
+                    APPLICATION_JSON: {
                         "schema": {
                             "type": "object",
                             "properties": {
@@ -105,6 +106,8 @@ def validate_login_payload(data):
         },
     },
 )
+
+
 async def system_login(request: Request) -> Response:
     """
     🚪 Universal Login Gateway
@@ -808,7 +811,7 @@ async def auth_examples():
             "step_1_login": {
                 "method": "POST",
                 "url": "/api/v1/auth/login",
-                "headers": {"Content-Type": "application/json"},
+                "headers": {"Content-Type": APPLICATION_JSON},
                 "body": {
                     "identifier": "startup@fintech.ng",
                     "password": "your-password"
@@ -829,7 +832,7 @@ async def auth_examples():
                 "url": "/api/v1/nin/verify",
                 "headers": {
                     "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                    "Content-Type": "application/json"
+                    "Content-Type": APPLICATION_JSON
                 },
                 "body": {"nin": "12345678901"},
                 "note": "Replace the token with your actual access_token from step 1"
@@ -971,6 +974,3 @@ sms_response = requests.post(
             }
         }
     }
-
-
-## end system_login helpers
