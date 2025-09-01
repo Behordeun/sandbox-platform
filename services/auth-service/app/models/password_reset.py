@@ -1,6 +1,6 @@
 from app.core.database import Base
-from app.models.mixins import SoftDeleteMixin
 from app.core.yaml_config import settings
+from app.models.mixins import SoftDeleteMixin
 from sqlalchemy import Boolean, Column, DateTime, ForeignKey, Integer, String
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func

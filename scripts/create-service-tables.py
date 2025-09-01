@@ -28,6 +28,7 @@ def create_tables(engine, table_specs):
             except Exception as e:
                 print(f"❌ Error creating tables for {label}: {e}")
 
+
 def create_views(engine, views):
     with engine.connect() as conn:
         for label, sql in views:
@@ -37,6 +38,7 @@ def create_views(engine, views):
                 print(f"✅ View created/updated: {label}")
             except Exception as e:
                 print(f"❌ Error creating view {label}: {e}")
+
 
 def ensure_readonly_role(engine):
     ro_user = os.getenv("GRAFANA_RO_USER") or os.getenv("READONLY_DB_USER")
@@ -76,6 +78,7 @@ def ensure_readonly_role(engine):
             except Exception as e:
                 print(f"⚠️  Could not ensure read-only role '{ro_user}': {e}")
 
+
 def verify_tables(engine):
     with engine.connect() as conn:
         result = conn.execute(
@@ -92,6 +95,7 @@ def verify_tables(engine):
         print(f"\n📊 Total tables created: {len(tables)}")
         for table in tables:
             print(f"  ✅ {table}")
+
 
 def create_service_tables():
     """Create basic tables for all sandbox services."""

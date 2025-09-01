@@ -376,7 +376,10 @@ class ConfigManager:
                 continue
 
             # Skip soft-deleted unless requested
-            if not include_deleted and config_record.get("status") == ConfigStatus.DELETED:
+            if (
+                not include_deleted
+                and config_record.get("status") == ConfigStatus.DELETED
+            ):
                 continue
 
             # Apply filters

@@ -23,21 +23,21 @@ def login_user(
 ) -> Any:
     """
     🔐 OAuth2 Compatible Login
-    
+
     Authenticate user with form data and return JWT tokens.
     Compatible with OAuth2 password flow for API clients.
-    
+
     **Request Format:**
     - Content-Type: application/x-www-form-urlencoded
     - username: Email or username
     - password: User password
-    
+
     **Response:**
     - access_token: JWT token for API access
     - refresh_token: Token for refreshing access
     - token_type: "bearer"
     - expires_in: Token expiration in seconds
-    
+
     **Use Cases:**
     - OAuth2 client applications
     - API integrations requiring form-based auth
@@ -89,10 +89,10 @@ def login_user_json(
 ) -> Any:
     """
     🚀 JSON Login for Nigerian Startups
-    
+
     Primary login endpoint for Nigerian DPI developers.
     Accepts JSON payload with email or username authentication.
-    
+
     **Request Example:**
     ```json
     {
@@ -100,13 +100,13 @@ def login_user_json(
         "password": "SecurePass123"
     }
     ```
-    
+
     **Features:**
     - ✅ Email or username login
     - ✅ JWT token generation
     - ✅ Last login tracking
     - ✅ Request correlation ID support
-    
+
     **Nigerian Context:**
     - Supports Nigerian email domains (.ng, .com.ng)
     - Optimized for fintech and DPI applications
@@ -155,18 +155,18 @@ def read_user_me(
 ) -> Any:
     """
     👤 Get Current User Profile
-    
+
     Retrieve authenticated user's profile information.
     Requires valid JWT token in Authorization header.
-    
+
     **Headers Required:**
     - Authorization: Bearer {access_token}
-    
+
     **Returns:**
     - User profile with Nigerian DPI context
     - NIN/BVN verification status
     - Account activity information
-    
+
     **Security:**
     - Token validation required
     - Active user status check
@@ -179,20 +179,20 @@ def read_user_me(
 def logout_user() -> Any:
     """
     🚪 User Logout
-    
+
     Logout current user session.
     Client should remove tokens from storage.
-    
+
     **Process:**
     1. Client receives logout confirmation
     2. Client removes access/refresh tokens
     3. Tokens become invalid on next request
-    
+
     **Best Practice:**
     - Clear all stored authentication data
     - Redirect to login page
     - Invalidate any cached user data
-    
+
     **Note:** Server-side token blacklisting available
     for enhanced security in production.
     """

@@ -49,28 +49,28 @@ def create_user(
 ) -> Any:
     """
     👥 Create Nigerian Startup Account
-    
+
     Create new user account for Nigerian DPI developers.
     Only accessible by platform administrators.
-    
+
     **Request Example:**
     ```json
     {
         "email": "developer@fintech.ng",
-        "username": "fintech_dev", 
+        "username": "fintech_dev",
         "password": "TempPass123",
         "first_name": "Adebayo",
         "last_name": "Ogundimu",
         "role": "developer"  // Optional: admin, developer
     }
     ```
-    
+
     **Features:**
     - ✅ Email uniqueness validation
     - ✅ Username availability check
     - ✅ Automatic welcome email
     - ✅ Nigerian domain support (.ng, .com.ng)
-    
+
     **Admin Access Required:**
     - Must be authenticated as admin
     - Closed sandbox: Only 9 Nigerian startups
@@ -113,20 +113,20 @@ def list_users(
 ) -> Any:
     """
     📄 List All Nigerian Startup Users
-    
+
     Retrieve paginated list of all registered users.
     Includes verification status and activity metrics.
-    
+
     **Query Parameters:**
     - skip: Number of records to skip (default: 0)
     - limit: Maximum records to return (default: 100)
-    
+
     **Response Includes:**
     - User profiles with NIN/BVN status
     - Last login and activity data
     - Account verification levels
     - Soft-delete filtering applied
-    
+
     **Admin Only:** Platform oversight and user management
     """
     users = user_crud.get_multi(db, skip=skip, limit=limit)
@@ -142,19 +142,19 @@ def get_user(
 ) -> Any:
     """
     🔍 Get Specific User Details
-    
+
     Retrieve detailed information for a specific user.
     Includes full profile and verification status.
-    
+
     **Path Parameters:**
     - user_id: Unique user identifier
-    
+
     **Returns:**
     - Complete user profile
     - NIN/BVN verification status
     - Account activity history
     - Role and permissions
-    
+
     **Use Cases:**
     - User support and troubleshooting
     - Account verification review
@@ -176,22 +176,22 @@ def update_user(
 ) -> Any:
     """
     ✏️ Update User Profile
-    
+
     Modify user account information and settings.
     Supports partial updates with validation.
-    
+
     **Updatable Fields:**
     - first_name, last_name
     - email (with uniqueness check)
     - username (with availability check)
     - role (admin, developer)
     - is_active status
-    
+
     **Validation:**
     - Email format and domain validation
     - Username uniqueness across platform
     - Role permission verification
-    
+
     **Audit Trail:** All changes logged for compliance
     """
     user = user_crud.get(db, id=user_id)
@@ -211,21 +211,21 @@ def delete_user(
 ) -> Any:
     """
     🗑️ Soft Delete User Account
-    
+
     Mark user account as deleted (soft delete).
     Preserves data for audit compliance.
-    
+
     **Process:**
     1. Sets is_deleted = true
     2. Records deletion timestamp
     3. Maintains audit trail
     4. Frees email/username for reuse
-    
+
     **Data Retention:**
     - User data preserved for compliance
     - API access immediately revoked
     - Email/username become available
-    
+
     **NDPR Compliant:** Nigerian Data Protection Regulation
     """
     user = user_crud.get(db, id=user_id)
@@ -245,21 +245,21 @@ def activate_user(
 ) -> Any:
     """
     ✅ Activate User Account
-    
+
     Enable user account for API access.
     Restores full platform functionality.
-    
+
     **Effects:**
     - Enables login and API access
     - Restores DPI service usage
     - Allows NIN/BVN verification
     - Resumes audit logging
-    
+
     **Use Cases:**
     - New account activation
     - Account restoration after suspension
     - Startup onboarding completion
-    
+
     **Notification:** User receives activation email
     """
     user = user_crud.get(db, id=user_id)
@@ -282,21 +282,21 @@ def deactivate_user(
 ) -> Any:
     """
     ❌ Deactivate User Account
-    
+
     Suspend user account and revoke API access.
     Temporary suspension without data loss.
-    
+
     **Effects:**
     - Blocks login attempts
     - Revokes API access tokens
     - Suspends DPI service usage
     - Maintains audit trail
-    
+
     **Use Cases:**
     - Policy violation suspension
     - Security incident response
     - Temporary account freeze
-    
+
     **Reversible:** Account can be reactivated
     """
     user = user_crud.get(db, id=user_id)
@@ -320,24 +320,24 @@ def reset_user_password(
 ) -> Any:
     """
     🔑 Admin Password Reset
-    
+
     Reset user password for account recovery.
     Sends secure notification to user email.
-    
+
     **Request Body:**
     ```json
     {
         "new_password": "NewSecurePass123"
     }
     ```
-    
+
     **Security Process:**
     1. Validates admin permissions
     2. Hashes new password securely
     3. Updates user credentials
     4. Sends notification email
     5. Logs password change event
-    
+
     **Best Practice:** User should change password on next login
     """
     from app.core.security import get_password_hash
