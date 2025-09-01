@@ -1,10 +1,14 @@
 from typing import Any
 
+from app.dependencies.auth import get_current_user, get_optional_current_user
 from app.services.discovery import service_discovery
 from app.services.health import health_service
 from app.services.proxy import proxy_service
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
 
 router = APIRouter()
 

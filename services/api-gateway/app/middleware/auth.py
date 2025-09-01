@@ -25,6 +25,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
     def __init__(self, app, excluded_paths: Optional[List[str]] = None):
         super().__init__(app)
         WELL_KNOWN_PATH = "/.well-known/"
+        # Minimal exclusions - let backend services handle their own auth requirements
         self.excluded_paths = excluded_paths or [
             "/",
             "/health",
@@ -32,19 +33,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/docs",
             "/redoc",
             "/openapi.json",
-            "/api/v1/openapi.json",  # <-- Add this line
-            "/api/v1/auth/register",
-            "/api/v1/auth/login",
-            "/api/v1/auth/login/json",
-            "/api/v1/auth/token",
+            "/api/v1/openapi.json",
             "/api/v1/services/health",
             "/api/v1/services/status",
-            "/api/v1/services/",
             "/api/v1/examples/",
             WELL_KNOWN_PATH,
-            f"{WELL_KNOWN_PATH}/openid_configuration",
-            f"{WELL_KNOWN_PATH}/oauth-authorization-server",
-            f"{WELL_KNOWN_PATH}/jwks.json",
         ]
 
     async def dispatch(self, request: Request, call_next):
@@ -69,24 +62,8 @@ class AuthMiddleware(BaseHTTPMiddleware):
         user_id = None
         auth_method = None
 
-        # Check for authentication credentials (bearer token, API key, or session)
-        if not auth_header and not api_key and not session_id:
-            response = JSONResponse(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                content={"error": "Authentication required"},
-            )
-            self._log_access(
-                request,
-                response,
-                "",
-                "unauthenticated",
-                start_time,
-                client_ip,
-                user_agent,
-            )
-            return response
-
-        # Delegate authentication logic to helper methods
+        # Pass through to backend services - let them handle auth requirements
+        # Only validate if credentials are provided
         if auth_header:
             user_id, auth_method, error_response = self._authenticate_jwt(request, auth_header, start_time, client_ip, user_agent)
             if error_response:
@@ -99,6 +76,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
             user_id, auth_method, error_response = await self._authenticate_session(request, session_id, start_time, client_ip, user_agent)
             if error_response:
                 return error_response
+        else:
+            # No credentials provided - pass through to backend
+            auth_method = "passthrough"
+
+
 
         response = await call_next(request)
         self._log_access(
