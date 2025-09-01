@@ -80,7 +80,25 @@ def validate_login_payload(data):
                     }
                 },
             },
-        }
+        },
+        "responses": {
+            "200": {
+                "description": "Login successful",
+                "content": {
+                    "application/json": {
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "access_token": {"type": "string"},
+                                "token_type": {"type": "string", "default": "bearer"},
+                                "expires_in": {"type": "integer"},
+                                "user": {"type": "object"},
+                            },
+                        }
+                    }
+                },
+            }
+        },
     },
 )
 async def system_login(request: Request) -> Response:
@@ -88,17 +106,22 @@ async def system_login(request: Request) -> Response:
     🚪 Universal Login Gateway
 
     Primary authentication endpoint for Nigerian DPI platform.
-    Accepts both JSON and form data for maximum compatibility.
+    Returns OAuth2-compatible bearer token for API access.
 
     **Supported Formats:**
     - JSON: {"identifier": "user@fintech.ng", "password": "pass"}
     - Form: username=user&password=pass
 
-    **Features:**
-    - ✅ Email or username login
-    - ✅ OAuth2 form compatibility
-    - ✅ JSON API compatibility
-    - ✅ Request correlation tracking
+    **Response:**
+    - access_token: Bearer token for API authorization
+    - token_type: "bearer"
+    - expires_in: Token expiration time in seconds
+    - user: User profile information
+
+    **Usage:**
+    1. Login to get bearer token
+    2. Include token in Authorization header: "Bearer {token}"
+    3. Access all DPI services with authenticated requests
 
     **Nigerian Context:** Optimized for fintech and DPI applications
     """
@@ -140,6 +163,32 @@ async def proxy_auth_get(request: Request, path: str) -> Response:
     return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
 
 
+@router.post("/auth/token", operation_id="oauth_token_endpoint")
+async def oauth_token(request: Request) -> Response:
+    """
+    🔑 OAuth2 Token Endpoint
+
+    Standard OAuth2 token endpoint for bearer token generation.
+    Compatible with OAuth2 client credentials and password flows.
+
+    **Grant Types:**
+    - password: Username/password authentication
+    - client_credentials: Service-to-service authentication
+
+    **Request Format:**
+    - Content-Type: application/x-www-form-urlencoded
+    - grant_type: "password" or "client_credentials"
+    - username/password: For password grant
+    - client_id/client_secret: For client credentials
+
+    **Response:**
+    - access_token: Bearer token
+    - token_type: "bearer"
+    - expires_in: Expiration time
+    """
+    return await proxy_service.proxy_request(request, "auth", "/api/v1/oauth2/token")
+
+
 @router.post("/auth/{path:path}", operation_id="proxy_auth_service_post")
 async def proxy_auth_post(request: Request, path: str) -> Response:
     """
@@ -154,6 +203,7 @@ async def proxy_auth_post(request: Request, path: str) -> Response:
     - /auth/admin/users - Create user (admin only)
     - /auth/oauth2/token - OAuth token exchange
 
+    **Authorization:** Bearer token required for protected endpoints
     **Nigerian Context:** Optimized for fintech authentication flows
     """
     return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
@@ -268,6 +318,9 @@ async def proxy_sms_post(request: Request, path: str) -> Response:
     Route POST requests to Nigerian SMS service.
     Send SMS messages, OTP codes, and bulk notifications.
 
+    **Authorization:** Bearer token required
+    **Header:** Authorization: Bearer {your_token}
+
     **Common Paths:**
     - /sms/send - Send single SMS
     - /sms/bulk - Send bulk SMS
@@ -335,6 +388,9 @@ async def proxy_llm_post(request: Request, path: str) -> Response:
 
     Route POST requests to Nigerian-context AI service.
     Generate content, analyze text, and process conversations.
+
+    **Authorization:** Bearer token required
+    **Header:** Authorization: Bearer {your_token}
 
     **Common Paths:**
     - /llm/chat - Interactive chat completion
@@ -405,6 +461,9 @@ async def proxy_nin_post(request: Request, path: str) -> Response:
     Route POST requests to Nigerian Identity Number service.
     Initiate NIN verification and identity validation.
 
+    **Authorization:** Bearer token required
+    **Header:** Authorization: Bearer {your_token}
+
     **Common Paths:**
     - /nin/verify - Verify NIN with NIMC
     - /nin/lookup - Basic NIN information lookup
@@ -474,6 +533,9 @@ async def proxy_bvn_post(request: Request, path: str) -> Response:
 
     Route POST requests to Bank Verification Number service.
     Initiate BVN verification and financial identity validation.
+
+    **Authorization:** Bearer token required
+    **Header:** Authorization: Bearer {your_token}
 
     **Common Paths:**
     - /bvn/verify - Verify BVN with CBN
@@ -717,6 +779,193 @@ async def sms_examples():
                 "message": "Welcome to our DPI platform!",
             },
         },
+    }
+
+
+@router.get("/examples/auth")
+async def auth_examples():
+    """
+    🔐 OAuth2 Bearer Token Examples
+
+    Complete authentication flow examples for Nigerian DPI platform.
+    Shows how to login and use bearer tokens for API access.
+
+    **Authentication Flow:**
+    1. Login to get bearer token
+    2. Use token in Authorization header
+    3. Access protected DPI services
+
+    **Token Usage:** Include in all API requests as Authorization header
+    """
+    return {
+        "success": True,
+        "message": "OAuth2 Bearer Token authentication examples",
+        "data": {
+            "step_1_login": {
+                "method": "POST",
+                "url": "/api/v1/auth/login",
+                "headers": {"Content-Type": "application/json"},
+                "body": {
+                    "identifier": "startup@fintech.ng",
+                    "password": "your-password"
+                },
+                "response": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "token_type": "bearer",
+                    "expires_in": 3600,
+                    "user": {
+                        "id": 1,
+                        "email": "startup@fintech.ng",
+                        "username": "startup_dev"
+                    }
+                }
+            },
+            "step_2_use_token": {
+                "method": "POST",
+                "url": "/api/v1/nin/verify",
+                "headers": {
+                    "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "Content-Type": "application/json"
+                },
+                "body": {"nin": "12345678901"},
+                "note": "Replace the token with your actual access_token from step 1"
+            },
+            "curl_examples": {
+                "login": "curl -X POST http://localhost:8080/api/v1/auth/login -H 'Content-Type: application/json' -d '{\"identifier\": \"startup@fintech.ng\", \"password\": \"your-password\"}'",
+                "verify_nin": "curl -X POST http://localhost:8080/api/v1/nin/verify -H 'Authorization: Bearer YOUR_TOKEN' -H 'Content-Type: application/json' -d '{\"nin\": \"12345678901\"}'",
+                "send_sms": "curl -X POST http://localhost:8080/api/v1/sms/send -H 'Authorization: Bearer YOUR_TOKEN' -H 'Content-Type: application/json' -d '{\"to\": \"+2348012345678\", \"message\": \"Your OTP is 123456\"}'"
+            },
+            "oauth2_token_endpoint": {
+                "method": "POST",
+                "url": "/api/v1/auth/token",
+                "headers": {"Content-Type": "application/x-www-form-urlencoded"},
+                "body": "grant_type=password&username=startup@fintech.ng&password=your-password",
+                "note": "Standard OAuth2 token endpoint for client integrations"
+            }
+        }
+    }
+
+
+@router.get("/examples/integration")
+async def integration_examples():
+    """
+    🚀 Complete DPI Integration Examples
+
+    End-to-end integration examples for Nigerian startups.
+    Shows complete workflow from authentication to DPI service usage.
+
+    **Integration Steps:**
+    1. Authenticate and get bearer token
+    2. Verify user identity (NIN/BVN)
+    3. Send notifications (SMS)
+    4. Generate content (AI)
+
+    **Nigerian Startup Ready:** Production-ready code examples
+    """
+    return {
+        "success": True,
+        "message": "Complete DPI integration workflow",
+        "data": {
+            "workflow": {
+                "1_authenticate": {
+                    "description": "Get bearer token for API access",
+                    "endpoint": "POST /api/v1/auth/login",
+                    "required": True
+                },
+                "2_verify_identity": {
+                    "description": "Verify user NIN or BVN for KYC",
+                    "endpoints": [
+                        "POST /api/v1/nin/verify",
+                        "POST /api/v1/bvn/verify"
+                    ],
+                    "requires_token": True
+                },
+                "3_send_notification": {
+                    "description": "Send SMS notifications to users",
+                    "endpoint": "POST /api/v1/sms/send",
+                    "requires_token": True
+                },
+                "4_ai_assistance": {
+                    "description": "Generate Nigerian-context content",
+                    "endpoint": "POST /api/v1/llm/chat",
+                    "requires_token": True
+                }
+            },
+            "javascript_example": {
+                "description": "Complete JavaScript integration example",
+                "code": """
+// 1. Login and get token
+const loginResponse = await fetch('/api/v1/auth/login', {
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json' },
+  body: JSON.stringify({
+    identifier: 'startup@fintech.ng',
+    password: 'your-password'
+  })
+});
+const { access_token } = await loginResponse.json();
+
+// 2. Verify NIN with token
+const ninResponse = await fetch('/api/v1/nin/verify', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${access_token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({ nin: '12345678901' })
+});
+
+// 3. Send SMS notification
+const smsResponse = await fetch('/api/v1/sms/send', {
+  method: 'POST',
+  headers: {
+    'Authorization': `Bearer ${access_token}`,
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    to: '+2348012345678',
+    message: 'Your identity verification is complete!'
+  })
+});
+"""
+            },
+            "python_example": {
+                "description": "Complete Python integration example",
+                "code": """
+import requests
+
+# 1. Login and get token
+login_response = requests.post('http://localhost:8080/api/v1/auth/login', json={
+    'identifier': 'startup@fintech.ng',
+    'password': 'your-password'
+})
+token = login_response.json()['access_token']
+
+# 2. Set up headers with bearer token
+headers = {
+    'Authorization': f'Bearer {token}',
+    'Content-Type': 'application/json'
+}
+
+# 3. Verify NIN
+nin_response = requests.post(
+    'http://localhost:8080/api/v1/nin/verify',
+    headers=headers,
+    json={'nin': '12345678901'}
+)
+
+# 4. Send SMS
+sms_response = requests.post(
+    'http://localhost:8080/api/v1/sms/send',
+    headers=headers,
+    json={
+        'to': '+2348012345678',
+        'message': 'Your identity verification is complete!'
+    }
+)
+"""
+            }
+        }
     }
 
 

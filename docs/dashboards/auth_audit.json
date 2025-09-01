@@ -3,12 +3,12 @@
   "panels": [
     {
       "type": "stat",
-      "title": "Login Success Rate (24h)",
+      "title": "user_login Success Rate (24h)",
       "targets": [
         {
           "refId": "A",
           "datasource": {"type": "postgres", "uid": "postgres"},
-          "rawSql": "SELECT ROUND(100.0 * SUM(success_count) / NULLIF(SUM(total),0), 2) FROM v_auth_audit_summary WHERE bucket > now()-interval '24 hours' AND activity_type='login';"
+          "rawSql": "SELECT ROUND(100.0 * SUM(success_count) / NULLIF(SUM(total),0), 2) FROM v_auth_audit_summary WHERE bucket > now()-interval '24 hours' AND activity_type='user_login';"
         }
       ],
       "gridPos": {"x": 0, "y": 0, "w": 6, "h": 4},
@@ -16,12 +16,12 @@
     },
     {
       "type": "stat",
-      "title": "Failed Logins (24h)",
+      "title": "Failed user_logins (24h)",
       "targets": [
         {
           "refId": "A",
           "datasource": {"type": "postgres", "uid": "postgres"},
-          "rawSql": "SELECT COALESCE(SUM(failure_count),0) FROM v_auth_audit_summary WHERE bucket > now()-interval '24 hours' AND activity_type='login';"
+          "rawSql": "SELECT COALESCE(SUM(failure_count),0) FROM v_auth_audit_summary WHERE bucket > now()-interval '24 hours' AND activity_type='user_login';"
         }
       ],
       "gridPos": {"x": 6, "y": 0, "w": 6, "h": 4}
@@ -52,12 +52,12 @@
     },
     {
       "type": "timeseries",
-      "title": "Login Success vs Fail (7d)",
+      "title": "user_login Success vs Fail (7d)",
       "targets": [
         {
           "refId": "A",
           "datasource": {"type": "postgres", "uid": "postgres"},
-          "rawSql": "SELECT bucket as time, SUM(success_count) as successful_logins, SUM(failure_count) as failed_logins FROM v_auth_audit_summary WHERE bucket > now()-interval '7 days' AND activity_type='login' GROUP BY 1 ORDER BY 1;"
+          "rawSql": "SELECT bucket as time, SUM(success_count) as successful_user_logins, SUM(failure_count) as failed_user_logins FROM v_auth_audit_summary WHERE bucket > now()-interval '7 days' AND activity_type='user_login' GROUP BY 1 ORDER BY 1;"
         }
       ],
       "gridPos": {"x": 0, "y": 4, "w": 24, "h": 8}
@@ -83,7 +83,7 @@
           "refId": "A",
           "format": "table",
           "datasource": {"type": "postgres", "uid": "postgres"},
-          "rawSql": "SELECT COALESCE(u.email,'(unknown)') as startup_email, COUNT(*) FILTER (WHERE a.activity_type='login' AND a.success=true) as successful_logins, COUNT(*) FILTER (WHERE a.activity_type='login' AND a.success=false) as failed_logins, MAX(a.created_at) as last_activity FROM auth_audit_logs a LEFT JOIN auth_users u ON a.user_id = u.id WHERE a.created_at > now()-interval '7 days' GROUP BY 1 ORDER BY last_activity DESC LIMIT 100;"
+          "rawSql": "SELECT COALESCE(u.email,'(unknown)') as startup_email, COUNT(*) FILTER (WHERE a.activity_type='user_login' AND a.success=true) as successful_user_logins, COUNT(*) FILTER (WHERE a.activity_type='user_login' AND a.success=false) as failed_user_logins, MAX(a.created_at) as last_activity FROM auth_audit_logs a LEFT JOIN auth_users u ON a.user_id = u.id WHERE a.created_at > now()-interval '7 days' GROUP BY 1 ORDER BY last_activity DESC LIMIT 100;"
         }
       ],
       "gridPos": {"x": 0, "y": 24, "w": 24, "h": 12}

@@ -4,6 +4,8 @@ import re
 import time
 from typing import List, Optional
 
+import httpx
+from app.core.config import settings
 from app.core.security import validate_api_key, verify_token
 from app.db import insert_gateway_access_log
 from fastapi import Request, status
@@ -34,9 +36,11 @@ class AuthMiddleware(BaseHTTPMiddleware):
             "/api/v1/auth/register",
             "/api/v1/auth/login",
             "/api/v1/auth/login/json",
+            "/api/v1/auth/token",
             "/api/v1/services/health",
             "/api/v1/services/status",
             "/api/v1/services/",
+            "/api/v1/examples/",
             WELL_KNOWN_PATH,
             f"{WELL_KNOWN_PATH}/openid_configuration",
             f"{WELL_KNOWN_PATH}/oauth-authorization-server",
@@ -60,11 +64,13 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # Extract authentication credentials
         auth_header = request.headers.get("Authorization")
         api_key = request.headers.get("X-API-Key")
+        session_id = request.cookies.get("session_id")
+
         user_id = None
         auth_method = None
 
-        # Check for authentication credentials
-        if not auth_header and not api_key:
+        # Check for authentication credentials (bearer token, API key, or session)
+        if not auth_header and not api_key and not session_id:
             response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 content={"error": "Authentication required"},
@@ -80,71 +86,19 @@ class AuthMiddleware(BaseHTTPMiddleware):
             )
             return response
 
-        # Validate JWT token
+        # Delegate authentication logic to helper methods
         if auth_header:
-            if not auth_header.startswith("Bearer "):
-                response = JSONResponse(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"error": "Invalid authorization header format"},
-                )
-                self._log_access(
-                    request,
-                    response,
-                    "",
-                    "invalid_token_format",
-                    start_time,
-                    client_ip,
-                    user_agent,
-                )
-                return response
-
-            token = auth_header.split(" ")[1]
-            payload = verify_token(token)
-
-            if not payload:
-                response = JSONResponse(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"error": "Invalid or expired token"},
-                )
-                self._log_access(
-                    request,
-                    response,
-                    "",
-                    "invalid_token",
-                    start_time,
-                    client_ip,
-                    user_agent,
-                )
-                return response
-
-            # Add user info to request state
-            user_id = payload.get("sub")
-            request.state.user_id = user_id
-            request.state.token_payload = payload
-            auth_method = "jwt_token"
-
-        # Validate API key
+            user_id, auth_method, error_response = self._authenticate_jwt(request, auth_header, start_time, client_ip, user_agent)
+            if error_response:
+                return error_response
         elif api_key:
-            if not validate_api_key(api_key):
-                response = JSONResponse(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    content={"error": "Invalid API key"},
-                )
-                self._log_access(
-                    request,
-                    response,
-                    "",
-                    "invalid_api_key",
-                    start_time,
-                    client_ip,
-                    user_agent,
-                )
-                return response
-
-            # Add API key info to request state
-            request.state.api_key = api_key
-            auth_method = "api_key"
-            user_id = "api_key_user"
+            user_id, auth_method, error_response = self._authenticate_api_key(request, api_key, start_time, client_ip, user_agent)
+            if error_response:
+                return error_response
+        elif session_id:
+            user_id, auth_method, error_response = await self._authenticate_session(request, session_id, start_time, client_ip, user_agent)
+            if error_response:
+                return error_response
 
         response = await call_next(request)
         self._log_access(
@@ -157,6 +111,90 @@ class AuthMiddleware(BaseHTTPMiddleware):
             user_agent,
         )
         return response
+
+    def _authenticate_jwt(self, request, auth_header, start_time, client_ip, user_agent):
+        if not auth_header.startswith("Bearer "):
+            response = JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Invalid authorization header format"},
+            )
+            self._log_access(
+                request,
+                response,
+                "",
+                "invalid_token_format",
+                start_time,
+                client_ip,
+                user_agent,
+            )
+            return None, None, response
+
+        token = auth_header.split(" ")[1]
+        payload = verify_token(token)
+
+        if not payload:
+            response = JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Invalid or expired token"},
+            )
+            self._log_access(
+                request,
+                response,
+                "",
+                "invalid_token",
+                start_time,
+                client_ip,
+                user_agent,
+            )
+            return None, None, response
+
+        user_id = payload.get("sub")
+        request.state.user_id = user_id
+        request.state.token_payload = payload
+        return user_id, "jwt_token", None
+
+    def _authenticate_api_key(self, request, api_key, start_time, client_ip, user_agent):
+        if not validate_api_key(api_key):
+            response = JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Invalid API key"},
+            )
+            self._log_access(
+                request,
+                response,
+                "",
+                "invalid_api_key",
+                start_time,
+                client_ip,
+                user_agent,
+            )
+            return None, None, response
+
+        request.state.api_key = api_key
+        return "api_key_user", "api_key", None
+
+    async def _authenticate_session(self, request, session_id, start_time, client_ip, user_agent):
+        session_data = await self._validate_session(session_id)
+        if not session_data:
+            response = JSONResponse(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                content={"error": "Invalid or expired session"},
+            )
+            self._log_access(
+                request,
+                response,
+                "",
+                "invalid_session",
+                start_time,
+                client_ip,
+                user_agent,
+            )
+            return None, None, response
+
+        user_id = session_data.get("user_id")
+        request.state.user_id = user_id
+        request.state.session_data = session_data
+        return user_id, "session_id", None
 
     def _log_access(
         self,
@@ -212,7 +250,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # Persist to DB asynchronously (best-effort), but skip health endpoints
         try:
             if not str(request.url.path).endswith("/health"):
-                asyncio.create_task(insert_gateway_access_log(log_data))
+                _task = asyncio.create_task(insert_gateway_access_log(log_data))
         except Exception:
             pass
 
@@ -245,3 +283,17 @@ class AuthMiddleware(BaseHTTPMiddleware):
                 if path == excluded_path or re.match(f"^{excluded_path}.*", path):
                     return True
         return False
+
+    async def _validate_session(self, session_id: str) -> Optional[dict]:
+        """Validate session ID with auth service."""
+        try:
+            async with httpx.AsyncClient(timeout=5.0) as client:
+                response = await client.get(
+                    f"{settings.auth_service_url}/api/v1/auth/me",
+                    cookies={"session_id": session_id}
+                )
+                if response.status_code == 200:
+                    return response.json()
+                return None
+        except Exception:
+            return None

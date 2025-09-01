@@ -82,6 +82,11 @@ app = FastAPI(
     redoc_url="/redoc",
     lifespan=lifespan,
     generate_unique_id_function=generate_unique_id,
+    swagger_ui_init_oauth={
+        "clientId": "swagger-ui",
+        "appName": "Nigerian DPI Sandbox",
+        "usePkceWithAuthorizationCodeGrant": True,
+    },
 )
 
 # Add CORS middleware
