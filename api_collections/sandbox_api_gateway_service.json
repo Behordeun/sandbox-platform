@@ -1,0 +1,1600 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Sandbox API Gateway",
+    "description": "API Gateway for the Sandbox Platform",
+    "version": "1.0.0"
+  },
+  "paths": {
+    "/health": {
+      "get": {
+        "summary": "Health Check",
+        "description": "Health check endpoint.",
+        "operationId": "api_get_health_health_check",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/metrics": {
+      "get": {
+        "summary": "Metrics",
+        "description": "Prometheus metrics endpoint.",
+        "operationId": "api_get_metrics_metrics",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "text/plain": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/": {
+      "get": {
+        "summary": "Root",
+        "description": "Root endpoint.",
+        "operationId": "api_get_root_root",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/login": {
+      "post": {
+        "tags": [
+          "gateway",
+          "gateway"
+        ],
+        "summary": "System Login",
+        "description": "🚪 Universal Login Gateway\n\nPrimary authentication endpoint for Nigerian DPI platform.\nAccepts both JSON and form data for maximum compatibility.\n\n**Supported Formats:**\n- JSON: {\"identifier\": \"user@fintech.ng\", \"password\": \"pass\"}\n- Form: username=user&password=pass\n\n**Features:**\n- ✅ Email or username login\n- ✅ OAuth2 form compatibility\n- ✅ JSON API compatibility\n- ✅ Request correlation tracking\n\n**Nigerian Context:** Optimized for fintech and DPI applications",
+        "operationId": "system_login",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "properties": {
+                  "identifier": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "identifier",
+                  "password"
+                ],
+                "title": "LoginRequest"
+              }
+            },
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "properties": {
+                  "username": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "type": "string"
+                  }
+                },
+                "type": "object",
+                "required": [
+                  "username",
+                  "password"
+                ]
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/{path}": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Auth Get",
+        "description": "🔐 Auth Service GET Proxy\n\nRoute GET requests to authentication service.\nHandles user profile, admin endpoints, and OAuth flows.\n\n**Common Paths:**\n- /auth/me - Get current user profile\n- /auth/admin/users - List users (admin only)\n- /auth/oauth2/clients - OAuth client management\n\n**Features:**\n- ✅ Request correlation tracking\n- ✅ Authentication header forwarding\n- ✅ Error handling and logging",
+        "operationId": "proxy_auth_service_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Auth Post",
+        "description": "🔐 Auth Service POST Proxy\n\nRoute POST requests to authentication service.\nHandles login, user creation, and admin operations.\n\n**Common Paths:**\n- /auth/login/json - JSON login endpoint\n- /auth/logout - User logout\n- /auth/admin/users - Create user (admin only)\n- /auth/oauth2/token - OAuth token exchange\n\n**Nigerian Context:** Optimized for fintech authentication flows",
+        "operationId": "proxy_auth_service_post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Auth Put",
+        "description": "🔐 Auth Service PUT Proxy\n\nRoute PUT requests to authentication service.\nHandles user profile updates and admin modifications.\n\n**Common Paths:**\n- /auth/admin/users/{id} - Update user profile\n- /auth/oauth2/clients/{id} - Update OAuth client\n\n**Features:**\n- ✅ Profile data validation\n- ✅ Admin permission checks\n- ✅ Audit trail logging",
+        "operationId": "proxy_auth_service_put",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Auth Delete",
+        "description": "🔐 Auth Service DELETE Proxy\n\nRoute DELETE requests to authentication service.\nHandles user account deletion and cleanup operations.\n\n**Common Paths:**\n- /auth/admin/users/{id} - Soft delete user account\n- /auth/oauth2/clients/{id} - Remove OAuth client\n\n**Security:**\n- ✅ Soft delete for compliance\n- ✅ Admin-only access\n- ✅ NDPR compliant data handling",
+        "operationId": "proxy_auth_service_delete",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Auth Patch",
+        "description": "🔐 Auth Service PATCH Proxy\n\nRoute PATCH requests to authentication service.\nHandles partial updates and status changes.\n\n**Common Paths:**\n- /auth/admin/users/{id}/activate - Activate user\n- /auth/admin/users/{id}/deactivate - Deactivate user\n- /auth/admin/users/{id}/reset-password - Reset password\n\n**Use Cases:**\n- Account status management\n- Partial profile updates\n- Administrative actions",
+        "operationId": "proxy_auth_service_patch",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Auth Options",
+        "description": "🔐 Auth Service OPTIONS Proxy\n\nHandle CORS preflight requests for authentication service.\nEssential for web application integration.\n\n**CORS Support:**\n- ✅ Preflight request handling\n- ✅ Nigerian domain support (.ng, .com.ng)\n- ✅ Fintech application compatibility\n\n**Headers:** Returns allowed methods and CORS policies",
+        "operationId": "proxy_auth_service_options",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sms/{path}": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Sms Get",
+        "description": "📱 SMS Service GET Proxy\n\nRoute GET requests to Nigerian SMS service.\nRetrieve message status, delivery reports, and service info.\n\n**Common Paths:**\n- /sms/status/{message_id} - Check message delivery\n- /sms/balance - Check SMS credit balance\n- /sms/templates - Get message templates\n\n**Nigerian Networks:** MTN, Airtel, Glo, 9mobile support",
+        "operationId": "proxy_sms_service_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Sms Post",
+        "description": "📱 SMS Service POST Proxy\n\nRoute POST requests to Nigerian SMS service.\nSend SMS messages, OTP codes, and bulk notifications.\n\n**Common Paths:**\n- /sms/send - Send single SMS\n- /sms/bulk - Send bulk SMS\n- /sms/otp/generate - Generate OTP code\n- /sms/otp/verify - Verify OTP code\n\n**Features:**\n- ✅ Nigerian phone number validation\n- ✅ Network-optimized routing\n- ✅ Delivery confirmation\n- ✅ Cost optimization",
+        "operationId": "proxy_sms_service_post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Sms Put",
+        "operationId": "proxy_sms_service_put",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Sms Delete",
+        "operationId": "proxy_sms_service_delete",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Sms Patch",
+        "operationId": "proxy_sms_service_patch",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Sms Options",
+        "operationId": "proxy_sms_service_options",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/llm/{path}": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Llm Get",
+        "description": "🤖 AI/LLM Service GET Proxy\n\nRoute GET requests to Nigerian-context AI service.\nRetrieve conversation history, model info, and analytics.\n\n**Common Paths:**\n- /llm/models - Available AI models\n- /llm/conversations/{id} - Get conversation\n- /llm/usage - Token usage statistics\n\n**Nigerian Context:**\n- ✅ Local language support (Yoruba, Igbo, Hausa)\n- ✅ Fintech terminology understanding\n- ✅ Cultural context awareness",
+        "operationId": "proxy_llm_service_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Llm Post",
+        "description": "🤖 AI/LLM Service POST Proxy\n\nRoute POST requests to Nigerian-context AI service.\nGenerate content, analyze text, and process conversations.\n\n**Common Paths:**\n- /llm/chat - Interactive chat completion\n- /llm/generate - Content generation\n- /llm/analyze - Text analysis\n- /llm/translate - Nigerian language translation\n\n**Capabilities:**\n- ✅ Nigerian financial terminology\n- ✅ Multi-language support\n- ✅ Context-aware responses\n- ✅ Compliance-friendly content",
+        "operationId": "proxy_llm_service_post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Llm Put",
+        "operationId": "proxy_llm_service_put",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Llm Delete",
+        "operationId": "proxy_llm_service_delete",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Llm Patch",
+        "operationId": "proxy_llm_service_patch",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Llm Options",
+        "operationId": "proxy_llm_service_options",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/nin/{path}": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Nin Get",
+        "description": "🇳🇬 NIN Service GET Proxy\n\nRoute GET requests to Nigerian Identity Number service.\nCheck verification status and retrieve identity data.\n\n**Common Paths:**\n- /nin/status/{nin} - Check NIN verification status\n- /nin/verify/{request_id} - Get verification result\n- /nin/statistics - Service usage statistics\n\n**NIMC Integration:**\n- ✅ Real-time NIN validation\n- ✅ Dojah API integration\n- ✅ Privacy-compliant data handling\n- ✅ Audit trail maintenance",
+        "operationId": "proxy_nin_service_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Nin Post",
+        "description": "🇳🇬 NIN Service POST Proxy\n\nRoute POST requests to Nigerian Identity Number service.\nInitiate NIN verification and identity validation.\n\n**Common Paths:**\n- /nin/verify - Verify NIN with NIMC\n- /nin/lookup - Basic NIN information lookup\n- /nin/batch - Bulk NIN verification\n\n**Verification Process:**\n1. NIN format validation\n2. NIMC database query via Dojah\n3. Identity data extraction\n4. Privacy-compliant response\n\n**Compliance:** NDPR and KYC regulation compliant",
+        "operationId": "proxy_nin_service_post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Nin Put",
+        "operationId": "proxy_nin_service_put",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Nin Delete",
+        "operationId": "proxy_nin_service_delete",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Nin Patch",
+        "operationId": "proxy_nin_service_patch",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Nin Options",
+        "operationId": "proxy_nin_service_options",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bvn/{path}": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Bvn Get",
+        "description": "🇳🇬 BVN Service GET Proxy\n\nRoute GET requests to Bank Verification Number service.\nCheck BVN status and retrieve banking identity data.\n\n**Common Paths:**\n- /bvn/status/{bvn} - Check BVN verification status\n- /bvn/verify/{request_id} - Get verification result\n- /bvn/banks - Supported Nigerian banks\n\n**CBN Integration:**\n- ✅ Real-time BVN validation\n- ✅ Nigerian bank network access\n- ✅ Financial identity verification\n- ✅ Regulatory compliance",
+        "operationId": "proxy_bvn_service_get",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Bvn Post",
+        "description": "🇳🇬 BVN Service POST Proxy\n\nRoute POST requests to Bank Verification Number service.\nInitiate BVN verification and financial identity validation.\n\n**Common Paths:**\n- /bvn/verify - Verify BVN with CBN\n- /bvn/lookup - Basic BVN information lookup\n- /bvn/match - Match BVN with user data\n\n**Verification Features:**\n- ✅ 11-digit BVN validation\n- ✅ Nigerian banking system integration\n- ✅ Financial KYC compliance\n- ✅ Anti-fraud protection\n\n**Fintech Ready:** Optimized for Nigerian fintech applications",
+        "operationId": "proxy_bvn_service_post",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Bvn Put",
+        "operationId": "proxy_bvn_service_put",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Bvn Delete",
+        "operationId": "proxy_bvn_service_delete",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Bvn Patch",
+        "operationId": "proxy_bvn_service_patch",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      },
+      "options": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Proxy Bvn Options",
+        "operationId": "proxy_bvn_service_options",
+        "parameters": [
+          {
+            "name": "path",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Path"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/services/health": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Get Services Health",
+        "description": "💚 Platform Health Overview\n\nComprehensive health check for all backend services.\nEssential for monitoring Nigerian DPI platform status.\n\n**Returns:**\n- Overall platform status\n- Individual service health\n- Response times and availability\n- Database connectivity status\n\n**Use Cases:**\n- Platform monitoring dashboards\n- Startup integration health checks\n- DevOps service discovery",
+        "operationId": "gateway_get_api_v1_services_health_get_services_health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Gateway Get Api V1 Services Health Get Services Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/dpi/health": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Get Dpi Health",
+        "description": "🇳🇬 Nigerian DPI Services Health\n\nFocused health check for core DPI services.\nTailored for Nigerian startup developers.\n\n**DPI Services Monitored:**\n- NIN verification service\n- BVN validation service\n- SMS messaging service\n- AI/LLM service\n\n**Response Includes:**\n- ready_for_development: Boolean status\n- Individual service availability\n- Development environment readiness",
+        "operationId": "gateway_get_api_v1_dpi_health_get_dpi_health",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Gateway Get Api V1 Dpi Health Get Dpi Health"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/services/status": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Get Services Status",
+        "description": "📊 Detailed Service Status\n\nComprehensive status report for all platform services.\nIncludes performance metrics and availability data.\n\n**Status Information:**\n- Service discovery registry\n- Response time metrics\n- Error rate statistics\n- Resource utilization\n\n**DevOps Integration:**\n- ✅ Kubernetes health checks\n- ✅ Load balancer status\n- ✅ Database connectivity\n- ✅ External API dependencies",
+        "operationId": "gateway_get_api_v1_services_status_get_services_status",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Gateway Get Api V1 Services Status Get Services Status"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/services/{service_name}/health": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Get Service Health",
+        "description": "🔍 Individual Service Health\n\nDetailed health check for a specific service.\nEssential for troubleshooting and monitoring.\n\n**Supported Services:**\n- auth: Authentication service\n- sms: Nigerian SMS service\n- nin: NIN verification service\n- bvn: BVN validation service\n- ai: AI/LLM service\n\n**Health Metrics:**\n- ✅ Service availability\n- ✅ Response time\n- ✅ Database connectivity\n- ✅ External API status",
+        "operationId": "gateway_get_api_v1_services_service_name_health_get_service_health",
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Gateway Get Api V1 Services Service Name Health Get Service Health"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/services/{service_name}/metrics": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Get Service Metrics",
+        "description": "📈 Service Performance Metrics\n\nDetailed performance and usage metrics for specific service.\nCritical for capacity planning and optimization.\n\n**Metrics Included:**\n- Request volume and patterns\n- Response time percentiles\n- Error rates and types\n- Resource consumption\n- Nigerian-specific usage patterns\n\n**Use Cases:**\n- Performance optimization\n- Capacity planning\n- SLA monitoring\n- Cost analysis",
+        "operationId": "gateway_get_api_v1_services_service_name_metrics_get_service_metrics",
+        "parameters": [
+          {
+            "name": "service_name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Service Name"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Gateway Get Api V1 Services Service Name Metrics Get Service Metrics"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/examples/nin": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Nin Examples",
+        "description": "📋 NIN Verification Examples\n\nSample requests and responses for Nigerian Identity Number verification.\nEssential reference for DPI integration.\n\n**Includes:**\n- Test NIN numbers for development\n- Request/response format examples\n- Expected data structure\n- Integration patterns\n\n**Nigerian Context:** Real NIN format and validation examples",
+        "operationId": "gateway_get_api_v1_examples_nin_nin_examples",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/examples/sms": {
+      "get": {
+        "tags": [
+          "gateway"
+        ],
+        "summary": "Sms Examples",
+        "description": "📱 Nigerian SMS Examples\n\nSample SMS requests for Nigerian mobile networks.\nIncludes OTP and bulk messaging patterns.\n\n**Features:**\n- Nigerian phone number formats\n- OTP message templates\n- Bulk SMS examples\n- Network-specific optimizations\n\n**Supported Networks:** MTN, Airtel, Glo, 9mobile",
+        "operationId": "gateway_get_api_v1_examples_sms_sms_examples",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      }
+    }
+  }
+}
