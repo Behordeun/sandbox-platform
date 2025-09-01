@@ -86,20 +86,20 @@ def validate_login_payload(data):
 async def system_login(request: Request) -> Response:
     """
     🚪 Universal Login Gateway
-    
+
     Primary authentication endpoint for Nigerian DPI platform.
     Accepts both JSON and form data for maximum compatibility.
-    
+
     **Supported Formats:**
     - JSON: {"identifier": "user@fintech.ng", "password": "pass"}
     - Form: username=user&password=pass
-    
+
     **Features:**
     - ✅ Email or username login
     - ✅ OAuth2 form compatibility
     - ✅ JSON API compatibility
     - ✅ Request correlation tracking
-    
+
     **Nigerian Context:** Optimized for fintech and DPI applications
     """
     content_type = request.headers.get("content-type", "").lower()
@@ -123,15 +123,15 @@ def _auth_upstream(path: str) -> str:
 async def proxy_auth_get(request: Request, path: str) -> Response:
     """
     🔐 Auth Service GET Proxy
-    
+
     Route GET requests to authentication service.
     Handles user profile, admin endpoints, and OAuth flows.
-    
+
     **Common Paths:**
     - /auth/me - Get current user profile
     - /auth/admin/users - List users (admin only)
     - /auth/oauth2/clients - OAuth client management
-    
+
     **Features:**
     - ✅ Request correlation tracking
     - ✅ Authentication header forwarding
@@ -144,16 +144,16 @@ async def proxy_auth_get(request: Request, path: str) -> Response:
 async def proxy_auth_post(request: Request, path: str) -> Response:
     """
     🔐 Auth Service POST Proxy
-    
+
     Route POST requests to authentication service.
     Handles login, user creation, and admin operations.
-    
+
     **Common Paths:**
     - /auth/login/json - JSON login endpoint
     - /auth/logout - User logout
     - /auth/admin/users - Create user (admin only)
     - /auth/oauth2/token - OAuth token exchange
-    
+
     **Nigerian Context:** Optimized for fintech authentication flows
     """
     return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
@@ -163,14 +163,14 @@ async def proxy_auth_post(request: Request, path: str) -> Response:
 async def proxy_auth_put(request: Request, path: str) -> Response:
     """
     🔐 Auth Service PUT Proxy
-    
+
     Route PUT requests to authentication service.
     Handles user profile updates and admin modifications.
-    
+
     **Common Paths:**
     - /auth/admin/users/{id} - Update user profile
     - /auth/oauth2/clients/{id} - Update OAuth client
-    
+
     **Features:**
     - ✅ Profile data validation
     - ✅ Admin permission checks
@@ -183,14 +183,14 @@ async def proxy_auth_put(request: Request, path: str) -> Response:
 async def proxy_auth_delete(request: Request, path: str) -> Response:
     """
     🔐 Auth Service DELETE Proxy
-    
+
     Route DELETE requests to authentication service.
     Handles user account deletion and cleanup operations.
-    
+
     **Common Paths:**
     - /auth/admin/users/{id} - Soft delete user account
     - /auth/oauth2/clients/{id} - Remove OAuth client
-    
+
     **Security:**
     - ✅ Soft delete for compliance
     - ✅ Admin-only access
@@ -203,15 +203,15 @@ async def proxy_auth_delete(request: Request, path: str) -> Response:
 async def proxy_auth_patch(request: Request, path: str) -> Response:
     """
     🔐 Auth Service PATCH Proxy
-    
+
     Route PATCH requests to authentication service.
     Handles partial updates and status changes.
-    
+
     **Common Paths:**
     - /auth/admin/users/{id}/activate - Activate user
     - /auth/admin/users/{id}/deactivate - Deactivate user
     - /auth/admin/users/{id}/reset-password - Reset password
-    
+
     **Use Cases:**
     - Account status management
     - Partial profile updates
@@ -224,15 +224,15 @@ async def proxy_auth_patch(request: Request, path: str) -> Response:
 async def proxy_auth_options(request: Request, path: str) -> Response:
     """
     🔐 Auth Service OPTIONS Proxy
-    
+
     Handle CORS preflight requests for authentication service.
     Essential for web application integration.
-    
+
     **CORS Support:**
     - ✅ Preflight request handling
     - ✅ Nigerian domain support (.ng, .com.ng)
     - ✅ Fintech application compatibility
-    
+
     **Headers:** Returns allowed methods and CORS policies
     """
     return await proxy_service.proxy_request(request, "auth", _auth_upstream(path))
@@ -246,15 +246,15 @@ def _sms_upstream(path: str) -> str:
 async def proxy_sms_get(request: Request, path: str) -> Response:
     """
     📱 SMS Service GET Proxy
-    
+
     Route GET requests to Nigerian SMS service.
     Retrieve message status, delivery reports, and service info.
-    
+
     **Common Paths:**
     - /sms/status/{message_id} - Check message delivery
     - /sms/balance - Check SMS credit balance
     - /sms/templates - Get message templates
-    
+
     **Nigerian Networks:** MTN, Airtel, Glo, 9mobile support
     """
     return await proxy_service.proxy_request(request, "sms", _sms_upstream(path))
@@ -264,16 +264,16 @@ async def proxy_sms_get(request: Request, path: str) -> Response:
 async def proxy_sms_post(request: Request, path: str) -> Response:
     """
     📱 SMS Service POST Proxy
-    
+
     Route POST requests to Nigerian SMS service.
     Send SMS messages, OTP codes, and bulk notifications.
-    
+
     **Common Paths:**
     - /sms/send - Send single SMS
     - /sms/bulk - Send bulk SMS
     - /sms/otp/generate - Generate OTP code
     - /sms/otp/verify - Verify OTP code
-    
+
     **Features:**
     - ✅ Nigerian phone number validation
     - ✅ Network-optimized routing
@@ -311,15 +311,15 @@ def _llm_upstream(path: str) -> str:
 async def proxy_llm_get(request: Request, path: str) -> Response:
     """
     🤖 AI/LLM Service GET Proxy
-    
+
     Route GET requests to Nigerian-context AI service.
     Retrieve conversation history, model info, and analytics.
-    
+
     **Common Paths:**
     - /llm/models - Available AI models
     - /llm/conversations/{id} - Get conversation
     - /llm/usage - Token usage statistics
-    
+
     **Nigerian Context:**
     - ✅ Local language support (Yoruba, Igbo, Hausa)
     - ✅ Fintech terminology understanding
@@ -332,16 +332,16 @@ async def proxy_llm_get(request: Request, path: str) -> Response:
 async def proxy_llm_post(request: Request, path: str) -> Response:
     """
     🤖 AI/LLM Service POST Proxy
-    
+
     Route POST requests to Nigerian-context AI service.
     Generate content, analyze text, and process conversations.
-    
+
     **Common Paths:**
     - /llm/chat - Interactive chat completion
     - /llm/generate - Content generation
     - /llm/analyze - Text analysis
     - /llm/translate - Nigerian language translation
-    
+
     **Capabilities:**
     - ✅ Nigerian financial terminology
     - ✅ Multi-language support
@@ -379,15 +379,15 @@ def _nin_upstream(path: str) -> str:
 async def proxy_nin_get(request: Request, path: str) -> Response:
     """
     🇳🇬 NIN Service GET Proxy
-    
+
     Route GET requests to Nigerian Identity Number service.
     Check verification status and retrieve identity data.
-    
+
     **Common Paths:**
     - /nin/status/{nin} - Check NIN verification status
     - /nin/verify/{request_id} - Get verification result
     - /nin/statistics - Service usage statistics
-    
+
     **NIMC Integration:**
     - ✅ Real-time NIN validation
     - ✅ Dojah API integration
@@ -401,21 +401,21 @@ async def proxy_nin_get(request: Request, path: str) -> Response:
 async def proxy_nin_post(request: Request, path: str) -> Response:
     """
     🇳🇬 NIN Service POST Proxy
-    
+
     Route POST requests to Nigerian Identity Number service.
     Initiate NIN verification and identity validation.
-    
+
     **Common Paths:**
     - /nin/verify - Verify NIN with NIMC
     - /nin/lookup - Basic NIN information lookup
     - /nin/batch - Bulk NIN verification
-    
+
     **Verification Process:**
     1. NIN format validation
     2. NIMC database query via Dojah
     3. Identity data extraction
     4. Privacy-compliant response
-    
+
     **Compliance:** NDPR and KYC regulation compliant
     """
     return await proxy_service.proxy_request(request, "nin", _nin_upstream(path))
@@ -449,15 +449,15 @@ def _bvn_upstream(path: str) -> str:
 async def proxy_bvn_get(request: Request, path: str) -> Response:
     """
     🇳🇬 BVN Service GET Proxy
-    
+
     Route GET requests to Bank Verification Number service.
     Check BVN status and retrieve banking identity data.
-    
+
     **Common Paths:**
     - /bvn/status/{bvn} - Check BVN verification status
     - /bvn/verify/{request_id} - Get verification result
     - /bvn/banks - Supported Nigerian banks
-    
+
     **CBN Integration:**
     - ✅ Real-time BVN validation
     - ✅ Nigerian bank network access
@@ -471,21 +471,21 @@ async def proxy_bvn_get(request: Request, path: str) -> Response:
 async def proxy_bvn_post(request: Request, path: str) -> Response:
     """
     🇳🇬 BVN Service POST Proxy
-    
+
     Route POST requests to Bank Verification Number service.
     Initiate BVN verification and financial identity validation.
-    
+
     **Common Paths:**
     - /bvn/verify - Verify BVN with CBN
     - /bvn/lookup - Basic BVN information lookup
     - /bvn/match - Match BVN with user data
-    
+
     **Verification Features:**
     - ✅ 11-digit BVN validation
     - ✅ Nigerian banking system integration
     - ✅ Financial KYC compliance
     - ✅ Anti-fraud protection
-    
+
     **Fintech Ready:** Optimized for Nigerian fintech applications
     """
     return await proxy_service.proxy_request(request, "bvn", _bvn_upstream(path))
@@ -515,16 +515,16 @@ async def proxy_bvn_options(request: Request, path: str) -> Response:
 async def get_services_health() -> Any:
     """
     💚 Platform Health Overview
-    
+
     Comprehensive health check for all backend services.
     Essential for monitoring Nigerian DPI platform status.
-    
+
     **Returns:**
     - Overall platform status
     - Individual service health
     - Response times and availability
     - Database connectivity status
-    
+
     **Use Cases:**
     - Platform monitoring dashboards
     - Startup integration health checks
@@ -537,16 +537,16 @@ async def get_services_health() -> Any:
 async def get_dpi_health() -> Any:
     """
     🇳🇬 Nigerian DPI Services Health
-    
+
     Focused health check for core DPI services.
     Tailored for Nigerian startup developers.
-    
+
     **DPI Services Monitored:**
     - NIN verification service
-    - BVN validation service  
+    - BVN validation service
     - SMS messaging service
     - AI/LLM service
-    
+
     **Response Includes:**
     - ready_for_development: Boolean status
     - Individual service availability
@@ -578,16 +578,16 @@ async def get_dpi_health() -> Any:
 async def get_services_status() -> Any:
     """
     📊 Detailed Service Status
-    
+
     Comprehensive status report for all platform services.
     Includes performance metrics and availability data.
-    
+
     **Status Information:**
     - Service discovery registry
     - Response time metrics
     - Error rate statistics
     - Resource utilization
-    
+
     **DevOps Integration:**
     - ✅ Kubernetes health checks
     - ✅ Load balancer status
@@ -601,17 +601,17 @@ async def get_services_status() -> Any:
 async def get_service_health(service_name: str) -> Any:
     """
     🔍 Individual Service Health
-    
+
     Detailed health check for a specific service.
     Essential for troubleshooting and monitoring.
-    
+
     **Supported Services:**
     - auth: Authentication service
     - sms: Nigerian SMS service
     - nin: NIN verification service
     - bvn: BVN validation service
     - ai: AI/LLM service
-    
+
     **Health Metrics:**
     - ✅ Service availability
     - ✅ Response time
@@ -628,17 +628,17 @@ async def get_service_health(service_name: str) -> Any:
 async def get_service_metrics(service_name: str) -> Any:
     """
     📈 Service Performance Metrics
-    
+
     Detailed performance and usage metrics for specific service.
     Critical for capacity planning and optimization.
-    
+
     **Metrics Included:**
     - Request volume and patterns
     - Response time percentiles
     - Error rates and types
     - Resource consumption
     - Nigerian-specific usage patterns
-    
+
     **Use Cases:**
     - Performance optimization
     - Capacity planning
@@ -655,16 +655,16 @@ async def get_service_metrics(service_name: str) -> Any:
 async def nin_examples():
     """
     📋 NIN Verification Examples
-    
+
     Sample requests and responses for Nigerian Identity Number verification.
     Essential reference for DPI integration.
-    
+
     **Includes:**
     - Test NIN numbers for development
     - Request/response format examples
     - Expected data structure
     - Integration patterns
-    
+
     **Nigerian Context:** Real NIN format and validation examples
     """
     return {
@@ -692,16 +692,16 @@ async def nin_examples():
 async def sms_examples():
     """
     📱 Nigerian SMS Examples
-    
+
     Sample SMS requests for Nigerian mobile networks.
     Includes OTP and bulk messaging patterns.
-    
+
     **Features:**
     - Nigerian phone number formats
     - OTP message templates
     - Bulk SMS examples
     - Network-specific optimizations
-    
+
     **Supported Networks:** MTN, Airtel, Glo, 9mobile
     """
     return {

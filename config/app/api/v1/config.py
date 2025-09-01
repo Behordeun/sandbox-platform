@@ -21,16 +21,16 @@ router = APIRouter()
 async def create_configuration(config_data: ConfigCreate) -> Any:
     """
     ⚙️ Create New Configuration
-    
+
     Create centralized configuration for Nigerian DPI services.
     Supports encryption for sensitive values.
-    
+
     **Features:**
     - ✅ Automatic encryption for sensitive data
     - ✅ Environment-specific configurations
     - ✅ Version control and history
     - ✅ Tag-based organization
-    
+
     **Nigerian Context:** Optimized for fintech compliance and security
     """
     try:
@@ -51,16 +51,16 @@ async def list_configurations(
 ) -> Any:
     """
     📄 List Platform Configurations
-    
+
     Retrieve all configurations with advanced filtering.
     Essential for managing Nigerian DPI platform settings.
-    
+
     **Filters Available:**
     - environment: development, staging, production
     - config_type: service, database, api, security
     - tags: Custom organizational tags
     - include_deleted: Show soft-deleted configs
-    
+
     **Use Cases:**
     - Environment-specific deployments
     - Service configuration management
@@ -88,15 +88,15 @@ async def get_configuration(
 ) -> Any:
     """
     🔍 Get Specific Configuration
-    
+
     Retrieve detailed configuration by unique identifier.
     Supports selective decryption for security.
-    
+
     **Security Features:**
     - decrypt_sensitive: Control sensitive data exposure
     - Audit logging for access tracking
     - Role-based access control
-    
+
     **Nigerian Compliance:** NDPR-compliant data handling
     """
     try:

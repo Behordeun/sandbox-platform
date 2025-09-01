@@ -12,8 +12,8 @@ from app.models import oauth_token  # Import to register models
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from prometheus_fastapi_instrumentator import Instrumentator
 from fastapi.routing import APIRoute
+from prometheus_fastapi_instrumentator import Instrumentator
 from sqlalchemy import text
 
 # Configure logging

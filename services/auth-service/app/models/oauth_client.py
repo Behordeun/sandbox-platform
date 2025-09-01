@@ -1,6 +1,6 @@
 from app.core.database import Base
-from app.models.mixins import SoftDeleteMixin
 from app.core.yaml_config import settings
+from app.models.mixins import SoftDeleteMixin
 from sqlalchemy import JSON, Boolean, Column, DateTime, Integer, String, Text
 from sqlalchemy.sql import func
 

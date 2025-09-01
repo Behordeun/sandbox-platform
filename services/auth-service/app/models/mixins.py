@@ -1,5 +1,4 @@
 from sqlalchemy import Boolean, Column, DateTime
-from sqlalchemy.sql import func
 
 
 class SoftDeleteMixin:
@@ -12,4 +11,3 @@ class SoftDeleteMixin:
 
     is_deleted = Column(Boolean, nullable=True, default=False, server_default="false")
     deleted_at = Column(DateTime(timezone=True), nullable=True)
-
