@@ -1,0 +1,6 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+africastalking
+pydantic
+firebase_admin
