@@ -65,22 +65,26 @@ class AuthMiddleware(BaseHTTPMiddleware):
         # Pass through to backend services - let them handle auth requirements
         # Only validate if credentials are provided
         if auth_header:
-            user_id, auth_method, error_response = self._authenticate_jwt(request, auth_header, start_time, client_ip, user_agent)
+            user_id, auth_method, error_response = self._authenticate_jwt(
+                request, auth_header, start_time, client_ip, user_agent
+            )
             if error_response:
                 return error_response
         elif api_key:
-            user_id, auth_method, error_response = self._authenticate_api_key(request, api_key, start_time, client_ip, user_agent)
+            user_id, auth_method, error_response = self._authenticate_api_key(
+                request, api_key, start_time, client_ip, user_agent
+            )
             if error_response:
                 return error_response
         elif session_id:
-            user_id, auth_method, error_response = await self._authenticate_session(request, session_id, start_time, client_ip, user_agent)
+            user_id, auth_method, error_response = await self._authenticate_session(
+                request, session_id, start_time, client_ip, user_agent
+            )
             if error_response:
                 return error_response
         else:
             # No credentials provided - pass through to backend
             auth_method = "passthrough"
-
-
 
         response = await call_next(request)
         self._log_access(
@@ -94,7 +98,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         )
         return response
 
-    def _authenticate_jwt(self, request, auth_header, start_time, client_ip, user_agent):
+    def _authenticate_jwt(
+        self, request, auth_header, start_time, client_ip, user_agent
+    ):
         if not auth_header.startswith("Bearer "):
             response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -135,7 +141,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.token_payload = payload
         return user_id, "jwt_token", None
 
-    def _authenticate_api_key(self, request, api_key, start_time, client_ip, user_agent):
+    def _authenticate_api_key(
+        self, request, api_key, start_time, client_ip, user_agent
+    ):
         if not validate_api_key(api_key):
             response = JSONResponse(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -155,7 +163,9 @@ class AuthMiddleware(BaseHTTPMiddleware):
         request.state.api_key = api_key
         return "api_key_user", "api_key", None
 
-    async def _authenticate_session(self, request, session_id, start_time, client_ip, user_agent):
+    async def _authenticate_session(
+        self, request, session_id, start_time, client_ip, user_agent
+    ):
         session_data = await self._validate_session(session_id)
         if not session_data:
             response = JSONResponse(
@@ -229,10 +239,10 @@ class AuthMiddleware(BaseHTTPMiddleware):
         else:
             logger.info(f"ACCESS_GRANTED: {log_data}")
 
-        # Persist to DB asynchronously (best-effort), but skip health endpoints
+        # Persist to DB asynchronouslywith client code, further OpenAPI improvements, or dependency upgrades. (best-effort), but skip health endpoints
         try:
             if not str(request.url.path).endswith("/health"):
-                _task = asyncio.create_task(insert_gateway_access_log(log_data))
+                _ = asyncio.create_task(insert_gateway_access_log(log_data))
         except Exception:
             pass
 
@@ -272,7 +282,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
             async with httpx.AsyncClient(timeout=5.0) as client:
                 response = await client.get(
                     f"{settings.auth_service_url}/api/v1/auth/me",
-                    cookies={"session_id": session_id}
+                    cookies={"session_id": session_id},
                 )
                 if response.status_code == 200:
                     return response.json()

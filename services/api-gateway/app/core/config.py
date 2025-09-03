@@ -102,6 +102,12 @@ class Settings(BaseSettings):
         "ai": ServiceConfig(
             name="ai-service", url="http://127.0.0.1:8002", health_path=HEALTH_PATH
         ),
+        "nin": ServiceConfig(
+            name="nin-service", url="http://127.0.0.1:8005", health_path=HEALTH_PATH
+        ),
+        "bvn": ServiceConfig(
+            name="bvn-service", url="http://127.0.0.1:8006", health_path=HEALTH_PATH
+        ),
     }
 
     # Load balancing
@@ -142,6 +148,8 @@ class Settings(BaseSettings):
             auth_url = os.getenv("AUTH_SERVICE_URL") or self.auth_service_url
             sms_url = os.getenv("SMS_SERVICE_URL") or "http://127.0.0.1:8003"
             ai_url = os.getenv("AI_SERVICE_URL") or "http://127.0.0.1:8002"
+            nin_url = os.getenv("NIN_SERVICE_URL") or "http://127.0.0.1:8005"
+            bvn_url = os.getenv("BVN_SERVICE_URL") or "http://127.0.0.1:8006"
 
             if "auth" in self.services:
                 self.services["auth"].url = auth_url
@@ -149,6 +157,10 @@ class Settings(BaseSettings):
                 self.services["sms"].url = sms_url
             if "ai" in self.services:
                 self.services["ai"].url = ai_url
+            if "nin" in self.services:
+                self.services["nin"].url = nin_url
+            if "bvn" in self.services:
+                self.services["bvn"].url = bvn_url
         except Exception:
             # Keep defaults if any issue occurs
             pass

@@ -10,8 +10,9 @@ from app.middleware.correlation import CorrelationIdMiddleware
 from app.middleware.logging import LoggingMiddleware
 from app.middleware.metrics import MetricsMiddleware, get_metrics
 from app.middleware.rate_limit import RateLimitMiddleware
+from app.middleware.token_forwarding import TokenForwardingMiddleware
+from app.services.client import service_client
 from app.services.discovery import service_discovery
-from app.services.proxy import proxy_service
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, PlainTextResponse
@@ -36,7 +37,7 @@ async def lifespan(app: FastAPI):
     # Shutdown
     logger.info("Shutting down Sandbox API Gateway...")
     health_check_task.cancel()
-    await proxy_service.close()
+    await service_client.close()
 
 
 async def periodic_health_checks():
@@ -89,6 +90,35 @@ app = FastAPI(
     },
 )
 
+# Add security scheme for Bearer token
+from fastapi.openapi.utils import get_openapi
+from fastapi.security import HTTPBearer
+
+security = HTTPBearer()
+
+def custom_openapi():
+    if app.openapi_schema:
+        return app.openapi_schema
+    openapi_schema = get_openapi(
+        title=app.title,
+        version=app.version,
+        description=app.description,
+        routes=app.routes,
+    )
+    openapi_schema["components"]["securitySchemes"] = {
+        "HTTPBearer": {
+            "type": "http",
+            "scheme": "bearer",
+            "bearerFormat": "JWT",
+        }
+    }
+    # Add global security requirement for SwaggerUI
+    openapi_schema["security"] = [{"HTTPBearer": []}]
+    app.openapi_schema = openapi_schema
+    return app.openapi_schema
+
+app.openapi = custom_openapi
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -121,6 +151,9 @@ if settings.rate_limit_enabled:
             logger.warning("Redis client is None, disabling rate limiting.")
     except Exception as e:
         logger.warning(f"Redis not available, disabling rate limiting: {e}")
+
+# Add token forwarding middleware (before auth middleware)
+app.add_middleware(TokenForwardingMiddleware)
 
 # Add authentication middleware (should be last)
 app.add_middleware(AuthMiddleware)

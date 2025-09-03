@@ -25,6 +25,7 @@ class ProxyService:
         service_name: str,
         path: Optional[str] = None,
         json_payload: Optional[Dict[str, Any]] = None,
+        **kwargs
     ) -> Response:
         """Proxy request to backend service."""
         # Get service configuration
@@ -90,10 +91,72 @@ class ProxyService:
         """Make HTTP request to backend service."""
         start_time = time.time()
 
-        # Prepare headers
-        headers = dict(request.headers)
+        headers = self._prepare_proxy_headers(request)
 
-        # Remove hop-by-hop headers
+        # Handle request body and parameters
+        body = None
+        params = dict(request.query_params)
+        
+        if request.method in ["POST", "PUT", "PATCH"]:
+            if json_payload is not None:
+                import json
+                body = json.dumps(json_payload).encode("utf-8")
+                headers["content-type"] = "application/json"
+            else:
+                content_type = request.headers.get("content-type", "")
+                if "application/json" in content_type:
+                    body = await request.body()
+                elif "application/x-www-form-urlencoded" in content_type:
+                    form_data = await request.form()
+                    body = "&".join([f"{k}={v}" for k, v in form_data.items()]).encode("utf-8")
+                else:
+                    body = await request.body()
+
+        try:
+            response = await self.client.request(
+                method=request.method,
+                url=target_url,
+                headers=headers,
+                content=body,
+                params=params,
+                timeout=service_config.timeout,
+            )
+
+            duration = time.time() - start_time
+            metrics_collector.record_service_request(
+                service_config.name, request.method, response.status_code, duration
+            )
+
+            structured_logger.log_service_call(
+                service_config.name,
+                request.method,
+                target_url,
+                response.status_code,
+                duration,
+            )
+
+            return Response(
+                content=response.content,
+                status_code=response.status_code,
+                headers=dict(response.headers),
+                media_type=response.headers.get("content-type"),
+            )
+
+        except Exception as e:
+            duration = time.time() - start_time
+            metrics_collector.record_service_request(
+                service_config.name, request.method, 500, duration
+            )
+
+            structured_logger.log_service_call(
+                service_config.name, request.method, target_url, 500, duration, str(e)
+            )
+
+            raise e
+
+    def _prepare_proxy_headers(self, request: Request) -> Dict[str, str]:
+        """Prepare headers for proxying, including token forwarding."""
+        headers = dict(request.headers)
         hop_by_hop_headers = [
             "connection",
             "keep-alive",
@@ -106,16 +169,12 @@ class ProxyService:
         ]
         for header in hop_by_hop_headers:
             headers.pop(header, None)
-
-        # Always remove content-length; httpx will set the correct one
         headers.pop("content-length", None)
 
-        # Add forwarded headers
         if request.client:
             headers["X-Forwarded-For"] = request.client.host
         headers["X-Forwarded-Proto"] = request.url.scheme
         headers["X-Forwarded-Host"] = request.headers.get("host", "")
-        # Correlation and user context
         request_id = getattr(request.state, "request_id", None)
         if request_id:
             headers["X-Request-ID"] = request_id
@@ -123,63 +182,16 @@ class ProxyService:
         if user_id:
             headers["X-User-Id"] = str(user_id)
 
-        # Get request body
-        body = None
-        if request.method in ["POST", "PUT", "PATCH"]:
-            if json_payload is not None:
-                import json
+        # Get token from request state (set by security dependency) or headers
+        token = getattr(request.state, "bearer_token", None)
+        if not token:
+            auth_header = request.headers.get("Authorization")
+            if auth_header and auth_header.startswith("Bearer "):
+                token = auth_header.split(" ", 1)[1]
+        if token:
+            headers["Authorization"] = f"Bearer {token}"
 
-                body = json.dumps(json_payload).encode("utf-8")
-                headers["content-type"] = "application/json"
-            else:
-                body = await request.body()
-
-        try:
-            # Make request
-            response = await self.client.request(
-                method=request.method,
-                url=target_url,
-                headers=headers,
-                content=body,
-                timeout=service_config.timeout,
-            )
-
-            # Record metrics
-            duration = time.time() - start_time
-            metrics_collector.record_service_request(
-                service_config.name, request.method, response.status_code, duration
-            )
-
-            # Log service call
-            structured_logger.log_service_call(
-                service_config.name,
-                request.method,
-                target_url,
-                response.status_code,
-                duration,
-            )
-
-            # Create response
-            return Response(
-                content=response.content,
-                status_code=response.status_code,
-                headers=dict(response.headers),
-                media_type=response.headers.get("content-type"),
-            )
-
-        except Exception as e:
-            # Record error metrics
-            duration = time.time() - start_time
-            metrics_collector.record_service_request(
-                service_config.name, request.method, 500, duration
-            )
-
-            # Log error
-            structured_logger.log_service_call(
-                service_config.name, request.method, target_url, 500, duration, str(e)
-            )
-
-            raise e
+        return headers
 
     async def health_check_service(self, service_name: str) -> Dict[str, Any]:
         """Check health of a backend service."""
