@@ -66,47 +66,17 @@
     "/api/v1/auth/login": {
       "post": {
         "tags": [
-          "gateway",
-          "gateway"
+          "auth",
+          "auth"
         ],
-        "summary": "System Login",
-        "description": "🚪 Universal Login Gateway\n\nPrimary authentication endpoint for Nigerian DPI platform.\nAccepts both JSON and form data for maximum compatibility.\n\n**Supported Formats:**\n- JSON: {\"identifier\": \"user@fintech.ng\", \"password\": \"pass\"}\n- Form: username=user&password=pass\n\n**Features:**\n- ✅ Email or username login\n- ✅ OAuth2 form compatibility\n- ✅ JSON API compatibility\n- ✅ Request correlation tracking\n\n**Nigerian Context:** Optimized for fintech and DPI applications",
-        "operationId": "system_login",
+        "summary": "Login",
+        "description": "🔐 OAuth2 Compatible Login",
+        "operationId": "auth_post_api_v1_auth_login_login",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "properties": {
-                  "identifier": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  }
-                },
-                "type": "object",
-                "required": [
-                  "identifier",
-                  "password"
-                ],
-                "title": "LoginRequest"
-              }
-            },
-            "application/x-www-form-urlencoded": {
-              "schema": {
-                "properties": {
-                  "username": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "type": "string"
-                  }
-                },
-                "type": "object",
-                "required": [
-                  "username",
-                  "password"
-                ]
+                "$ref": "#/components/schemas/UserLogin"
               }
             }
           },
@@ -118,40 +88,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/auth/{path}": {
-      "get": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Auth Get",
-        "description": "🔐 Auth Service GET Proxy\n\nRoute GET requests to authentication service.\nHandles user profile, admin endpoints, and OAuth flows.\n\n**Common Paths:**\n- /auth/me - Get current user profile\n- /auth/admin/users - List users (admin only)\n- /auth/oauth2/clients - OAuth client management\n\n**Features:**\n- ✅ Request correlation tracking\n- ✅ Authentication header forwarding\n- ✅ Error handling and logging",
-        "operationId": "proxy_auth_service_get",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
+                  "title": "Response Auth Post Api V1 Auth Login Login"
                 }
               }
             }
@@ -167,22 +104,249 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/auth/login/json": {
+      "post": {
+        "tags": [
+          "auth",
+          "auth"
+        ],
+        "summary": "Login Json",
+        "description": "🚀 JSON Login for Nigerian Startups",
+        "operationId": "auth_post_api_v1_auth_login_json_login_json",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserLogin"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Auth Post Api V1 Auth Login Json Login Json"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/me": {
+      "get": {
+        "tags": [
+          "auth",
+          "auth"
+        ],
+        "summary": "Get Current User Profile",
+        "description": "👤 Get Current User Profile",
+        "operationId": "auth_get_api_v1_auth_me_get_current_user_profile",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Auth Get Api V1 Auth Me Get Current User Profile"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/logout": {
+      "post": {
+        "tags": [
+          "auth",
+          "auth"
+        ],
+        "summary": "Logout",
+        "description": "🚪 User Logout",
+        "operationId": "auth_post_api_v1_auth_logout_logout",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Auth Post Api V1 Auth Logout Logout"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/token": {
+      "post": {
+        "tags": [
+          "auth",
+          "auth"
+        ],
+        "summary": "Oauth Token",
+        "description": "🔑 OAuth2 Token Endpoint",
+        "operationId": "auth_post_api_v1_auth_token_oauth_token",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuth2TokenRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Auth Post Api V1 Auth Token Oauth Token"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/auth/admin/users": {
+      "get": {
+        "tags": [
+          "auth",
+          "auth",
+          "admin"
+        ],
+        "summary": "List Users",
+        "description": "📋 List All Users (Admin Only)",
+        "operationId": "auth_get_api_v1_auth_admin_users_list_users",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Auth Get Api V1 Auth Admin Users List Users"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       },
       "post": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "admin"
         ],
-        "summary": "Proxy Auth Post",
-        "description": "🔐 Auth Service POST Proxy\n\nRoute POST requests to authentication service.\nHandles login, user creation, and admin operations.\n\n**Common Paths:**\n- /auth/login/json - JSON login endpoint\n- /auth/logout - User logout\n- /auth/admin/users - Create user (admin only)\n- /auth/oauth2/token - OAuth token exchange\n\n**Nigerian Context:** Optimized for fintech authentication flows",
-        "operationId": "proxy_auth_service_post",
+        "summary": "Create User",
+        "description": "👥 Create User Account (Admin Only)",
+        "operationId": "auth_post_api_v1_auth_admin_users_create_user",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserCreate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Auth Post Api V1 Auth Admin Users Create User"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/admin/users/{user_id}": {
+      "get": {
+        "tags": [
+          "auth",
+          "auth",
+          "admin"
+        ],
+        "summary": "Get User",
+        "description": "👤 Get User by ID (Admin Only)",
+        "operationId": "auth_get_api_v1_auth_admin_users_user_id_get_user",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Path"
+              "type": "integer",
+              "title": "User Id"
             }
           }
         ],
@@ -192,7 +356,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Auth Get Api V1 Auth Admin Users User Id Get User"
                 }
               }
             }
@@ -211,29 +375,46 @@
       },
       "put": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "admin"
         ],
-        "summary": "Proxy Auth Put",
-        "description": "🔐 Auth Service PUT Proxy\n\nRoute PUT requests to authentication service.\nHandles user profile updates and admin modifications.\n\n**Common Paths:**\n- /auth/admin/users/{id} - Update user profile\n- /auth/oauth2/clients/{id} - Update OAuth client\n\n**Features:**\n- ✅ Profile data validation\n- ✅ Admin permission checks\n- ✅ Audit trail logging",
-        "operationId": "proxy_auth_service_put",
+        "summary": "Update User",
+        "description": "✏️ Update User (Admin Only)",
+        "operationId": "auth_put_api_v1_auth_admin_users_user_id_update_user",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Path"
+              "type": "integer",
+              "title": "User Id"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserUpdate"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Auth Put Api V1 Auth Admin Users User Id Update User"
                 }
               }
             }
@@ -252,19 +433,26 @@
       },
       "delete": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "admin"
         ],
-        "summary": "Proxy Auth Delete",
-        "description": "🔐 Auth Service DELETE Proxy\n\nRoute DELETE requests to authentication service.\nHandles user account deletion and cleanup operations.\n\n**Common Paths:**\n- /auth/admin/users/{id} - Soft delete user account\n- /auth/oauth2/clients/{id} - Remove OAuth client\n\n**Security:**\n- ✅ Soft delete for compliance\n- ✅ Admin-only access\n- ✅ NDPR compliant data handling",
-        "operationId": "proxy_auth_service_delete",
+        "summary": "Delete User",
+        "description": "🗑️ Delete User (Admin Only)",
+        "operationId": "auth_delete_api_v1_auth_admin_users_user_id_delete_user",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Path"
+              "type": "integer",
+              "title": "User Id"
             }
           }
         ],
@@ -274,89 +462,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Auth Patch",
-        "description": "🔐 Auth Service PATCH Proxy\n\nRoute PATCH requests to authentication service.\nHandles partial updates and status changes.\n\n**Common Paths:**\n- /auth/admin/users/{id}/activate - Activate user\n- /auth/admin/users/{id}/deactivate - Deactivate user\n- /auth/admin/users/{id}/reset-password - Reset password\n\n**Use Cases:**\n- Account status management\n- Partial profile updates\n- Administrative actions",
-        "operationId": "proxy_auth_service_patch",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "options": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Auth Options",
-        "description": "🔐 Auth Service OPTIONS Proxy\n\nHandle CORS preflight requests for authentication service.\nEssential for web application integration.\n\n**CORS Support:**\n- ✅ Preflight request handling\n- ✅ Nigerian domain support (.ng, .com.ng)\n- ✅ Fintech application compatibility\n\n**Headers:** Returns allowed methods and CORS policies",
-        "operationId": "proxy_auth_service_options",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
+                  "title": "Response Auth Delete Api V1 Auth Admin Users User Id Delete User"
                 }
               }
             }
@@ -374,63 +480,29 @@
         }
       }
     },
-    "/api/v1/sms/{path}": {
-      "get": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Sms Get",
-        "description": "📱 SMS Service GET Proxy\n\nRoute GET requests to Nigerian SMS service.\nRetrieve message status, delivery reports, and service info.\n\n**Common Paths:**\n- /sms/status/{message_id} - Check message delivery\n- /sms/balance - Check SMS credit balance\n- /sms/templates - Get message templates\n\n**Nigerian Networks:** MTN, Airtel, Glo, 9mobile support",
-        "operationId": "proxy_sms_service_get",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/auth/admin/users/{user_id}/activate": {
       "post": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "admin"
         ],
-        "summary": "Proxy Sms Post",
-        "description": "📱 SMS Service POST Proxy\n\nRoute POST requests to Nigerian SMS service.\nSend SMS messages, OTP codes, and bulk notifications.\n\n**Common Paths:**\n- /sms/send - Send single SMS\n- /sms/bulk - Send bulk SMS\n- /sms/otp/generate - Generate OTP code\n- /sms/otp/verify - Verify OTP code\n\n**Features:**\n- ✅ Nigerian phone number validation\n- ✅ Network-optimized routing\n- ✅ Delivery confirmation\n- ✅ Cost optimization",
-        "operationId": "proxy_sms_service_post",
+        "summary": "Activate User",
+        "description": "✅ Activate User Account (Admin Only)",
+        "operationId": "auth_post_api_v1_auth_admin_users_user_id_activate_activate_user",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Path"
+              "type": "integer",
+              "title": "User Id"
             }
           }
         ],
@@ -440,167 +512,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Sms Put",
-        "operationId": "proxy_sms_service_put",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Sms Delete",
-        "operationId": "proxy_sms_service_delete",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Sms Patch",
-        "operationId": "proxy_sms_service_patch",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "options": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Sms Options",
-        "operationId": "proxy_sms_service_options",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
+                  "title": "Response Auth Post Api V1 Auth Admin Users User Id Activate Activate User"
                 }
               }
             }
@@ -618,63 +530,29 @@
         }
       }
     },
-    "/api/v1/llm/{path}": {
-      "get": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Llm Get",
-        "description": "🤖 AI/LLM Service GET Proxy\n\nRoute GET requests to Nigerian-context AI service.\nRetrieve conversation history, model info, and analytics.\n\n**Common Paths:**\n- /llm/models - Available AI models\n- /llm/conversations/{id} - Get conversation\n- /llm/usage - Token usage statistics\n\n**Nigerian Context:**\n- ✅ Local language support (Yoruba, Igbo, Hausa)\n- ✅ Fintech terminology understanding\n- ✅ Cultural context awareness",
-        "operationId": "proxy_llm_service_get",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/auth/admin/users/{user_id}/deactivate": {
       "post": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "admin"
         ],
-        "summary": "Proxy Llm Post",
-        "description": "🤖 AI/LLM Service POST Proxy\n\nRoute POST requests to Nigerian-context AI service.\nGenerate content, analyze text, and process conversations.\n\n**Common Paths:**\n- /llm/chat - Interactive chat completion\n- /llm/generate - Content generation\n- /llm/analyze - Text analysis\n- /llm/translate - Nigerian language translation\n\n**Capabilities:**\n- ✅ Nigerian financial terminology\n- ✅ Multi-language support\n- ✅ Context-aware responses\n- ✅ Compliance-friendly content",
-        "operationId": "proxy_llm_service_post",
+        "summary": "Deactivate User",
+        "description": "❌ Deactivate User Account (Admin Only)",
+        "operationId": "auth_post_api_v1_auth_admin_users_user_id_deactivate_deactivate_user",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Path"
+              "type": "integer",
+              "title": "User Id"
             }
           }
         ],
@@ -684,167 +562,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Llm Put",
-        "operationId": "proxy_llm_service_put",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Llm Delete",
-        "operationId": "proxy_llm_service_delete",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Llm Patch",
-        "operationId": "proxy_llm_service_patch",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "options": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Llm Options",
-        "operationId": "proxy_llm_service_options",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
+                  "title": "Response Auth Post Api V1 Auth Admin Users User Id Deactivate Deactivate User"
                 }
               }
             }
@@ -862,233 +580,49 @@
         }
       }
     },
-    "/api/v1/nin/{path}": {
-      "get": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Nin Get",
-        "description": "🇳🇬 NIN Service GET Proxy\n\nRoute GET requests to Nigerian Identity Number service.\nCheck verification status and retrieve identity data.\n\n**Common Paths:**\n- /nin/status/{nin} - Check NIN verification status\n- /nin/verify/{request_id} - Get verification result\n- /nin/statistics - Service usage statistics\n\n**NIMC Integration:**\n- ✅ Real-time NIN validation\n- ✅ Dojah API integration\n- ✅ Privacy-compliant data handling\n- ✅ Audit trail maintenance",
-        "operationId": "proxy_nin_service_get",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/auth/admin/users/{user_id}/reset-password": {
       "post": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "admin"
         ],
-        "summary": "Proxy Nin Post",
-        "description": "🇳🇬 NIN Service POST Proxy\n\nRoute POST requests to Nigerian Identity Number service.\nInitiate NIN verification and identity validation.\n\n**Common Paths:**\n- /nin/verify - Verify NIN with NIMC\n- /nin/lookup - Basic NIN information lookup\n- /nin/batch - Bulk NIN verification\n\n**Verification Process:**\n1. NIN format validation\n2. NIMC database query via Dojah\n3. Identity data extraction\n4. Privacy-compliant response\n\n**Compliance:** NDPR and KYC regulation compliant",
-        "operationId": "proxy_nin_service_post",
+        "summary": "Reset User Password",
+        "description": "🔑 Reset User Password (Admin Only)",
+        "operationId": "auth_post_api_v1_auth_admin_users_user_id_reset_password_reset_user_password",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "user_id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "string",
-              "title": "Path"
+              "type": "integer",
+              "title": "User Id"
             }
           }
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PasswordReset"
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Nin Put",
-        "operationId": "proxy_nin_service_put",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Nin Delete",
-        "operationId": "proxy_nin_service_delete",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "patch": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Nin Patch",
-        "operationId": "proxy_nin_service_patch",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
-      "options": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Nin Options",
-        "operationId": "proxy_nin_service_options",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
+                  "title": "Response Auth Post Api V1 Auth Admin Users User Id Reset Password Reset User Password"
                 }
               }
             }
@@ -1106,73 +640,33 @@
         }
       }
     },
-    "/api/v1/bvn/{path}": {
-      "get": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Proxy Bvn Get",
-        "description": "🇳🇬 BVN Service GET Proxy\n\nRoute GET requests to Bank Verification Number service.\nCheck BVN status and retrieve banking identity data.\n\n**Common Paths:**\n- /bvn/status/{bvn} - Check BVN verification status\n- /bvn/verify/{request_id} - Get verification result\n- /bvn/banks - Supported Nigerian banks\n\n**CBN Integration:**\n- ✅ Real-time BVN validation\n- ✅ Nigerian bank network access\n- ✅ Financial identity verification\n- ✅ Regulatory compliance",
-        "operationId": "proxy_bvn_service_get",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            }
-          }
-        }
-      },
+    "/api/v1/auth/oauth2/clients": {
       "post": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "oauth2"
         ],
-        "summary": "Proxy Bvn Post",
-        "description": "🇳🇬 BVN Service POST Proxy\n\nRoute POST requests to Bank Verification Number service.\nInitiate BVN verification and financial identity validation.\n\n**Common Paths:**\n- /bvn/verify - Verify BVN with CBN\n- /bvn/lookup - Basic BVN information lookup\n- /bvn/match - Match BVN with user data\n\n**Verification Features:**\n- ✅ 11-digit BVN validation\n- ✅ Nigerian banking system integration\n- ✅ Financial KYC compliance\n- ✅ Anti-fraud protection\n\n**Fintech Ready:** Optimized for Nigerian fintech applications",
-        "operationId": "proxy_bvn_service_post",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
+        "summary": "Create Oauth Client",
+        "description": "🔗 Create OAuth2 Client",
+        "operationId": "auth_post_api_v1_auth_oauth2_clients_create_oauth_client",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OAuth2ClientCreate"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Auth Post Api V1 Auth Oauth2 Clients Create Oauth Client"
                 }
               }
             }
@@ -1187,22 +681,37 @@
               }
             }
           }
-        }
-      },
-      "put": {
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/auth/oauth2/clients/{client_id}": {
+      "get": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "oauth2"
         ],
-        "summary": "Proxy Bvn Put",
-        "operationId": "proxy_bvn_service_put",
+        "summary": "Get Oauth Client",
+        "description": "🔍 Get OAuth2 Client",
+        "operationId": "auth_get_api_v1_auth_oauth2_clients_client_id_get_oauth_client",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "client_id",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Path"
+              "title": "Client Id"
             }
           }
         ],
@@ -1212,7 +721,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Auth Get Api V1 Auth Oauth2 Clients Client Id Get Oauth Client"
                 }
               }
             }
@@ -1228,71 +737,63 @@
             }
           }
         }
-      },
-      "delete": {
+      }
+    },
+    "/api/v1/auth/oauth2/authorize": {
+      "get": {
         "tags": [
-          "gateway"
+          "auth",
+          "auth",
+          "oauth2"
         ],
-        "summary": "Proxy Bvn Delete",
-        "operationId": "proxy_bvn_service_delete",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
-            }
-          }
-        ],
+        "summary": "Oauth Authorize",
+        "description": "🔐 OAuth2 Authorization Endpoint",
+        "operationId": "auth_get_api_v1_auth_oauth2_authorize_oauth_authorize",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
+                  "title": "Response Auth Get Api V1 Auth Oauth2 Authorize Oauth Authorize"
                 }
               }
             }
           }
-        }
-      },
-      "patch": {
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/nin/verify": {
+      "post": {
         "tags": [
-          "gateway"
+          "nin",
+          "nin"
         ],
-        "summary": "Proxy Bvn Patch",
-        "operationId": "proxy_bvn_service_patch",
-        "parameters": [
-          {
-            "name": "path",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Path"
+        "summary": "Verify Nin",
+        "description": "🇳🇬 Verify Nigerian Identity Number (NIN)",
+        "operationId": "nin_post_api_v1_nin_verify_verify_nin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NINVerifyRequest"
+              }
             }
-          }
-        ],
+          },
+          "required": true
+        },
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Nin Post Api V1 Nin Verify Verify Nin"
                 }
               }
             }
@@ -1307,22 +808,36 @@
               }
             }
           }
-        }
-      },
-      "options": {
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/nin/status/{nin}": {
+      "get": {
         "tags": [
-          "gateway"
+          "nin",
+          "nin"
         ],
-        "summary": "Proxy Bvn Options",
-        "operationId": "proxy_bvn_service_options",
+        "summary": "Get Nin Status",
+        "description": "📊 Get NIN Verification Status",
+        "operationId": "nin_get_api_v1_nin_status_nin_get_nin_status",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
         "parameters": [
           {
-            "name": "path",
+            "name": "nin",
             "in": "path",
             "required": true,
             "schema": {
               "type": "string",
-              "title": "Path"
+              "title": "Nin"
             }
           }
         ],
@@ -1332,7 +847,7 @@
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Nin Get Api V1 Nin Status Nin Get Nin Status"
                 }
               }
             }
@@ -1348,23 +863,887 @@
             }
           }
         }
+      }
+    },
+    "/api/v1/nin/lookup": {
+      "post": {
+        "tags": [
+          "nin",
+          "nin"
+        ],
+        "summary": "Lookup Nin",
+        "description": "🔍 Basic NIN Lookup",
+        "operationId": "nin_post_api_v1_nin_lookup_lookup_nin",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NINLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Nin Post Api V1 Nin Lookup Lookup Nin"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bvn/verify": {
+      "post": {
+        "tags": [
+          "bvn",
+          "bvn"
+        ],
+        "summary": "Verify Bvn",
+        "description": "🇳🇬 Verify Bank Verification Number (BVN)",
+        "operationId": "bvn_post_api_v1_bvn_verify_verify_bvn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BVNVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Bvn Post Api V1 Bvn Verify Verify Bvn"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bvn/status/{bvn}": {
+      "get": {
+        "tags": [
+          "bvn",
+          "bvn"
+        ],
+        "summary": "Get Bvn Status",
+        "description": "📊 Get BVN Verification Status",
+        "operationId": "bvn_get_api_v1_bvn_status_bvn_get_bvn_status",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "bvn",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Bvn"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Bvn Get Api V1 Bvn Status Bvn Get Bvn Status"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/bvn/lookup": {
+      "post": {
+        "tags": [
+          "bvn",
+          "bvn"
+        ],
+        "summary": "Lookup Bvn",
+        "description": "🔍 Basic BVN Lookup",
+        "operationId": "bvn_post_api_v1_bvn_lookup_lookup_bvn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BVNLookupRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Bvn Post Api V1 Bvn Lookup Lookup Bvn"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bvn/match": {
+      "post": {
+        "tags": [
+          "bvn",
+          "bvn"
+        ],
+        "summary": "Match Bvn",
+        "description": "🔗 Match BVN with User Data",
+        "operationId": "bvn_post_api_v1_bvn_match_match_bvn",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BVNMatchRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Bvn Post Api V1 Bvn Match Match Bvn"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/bvn/banks": {
+      "get": {
+        "tags": [
+          "bvn",
+          "bvn"
+        ],
+        "summary": "Get Supported Banks",
+        "description": "🏦 Get Supported Nigerian Banks",
+        "operationId": "bvn_get_api_v1_bvn_banks_get_supported_banks",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Bvn Get Api V1 Bvn Banks Get Supported Banks"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sms/send": {
+      "post": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Send Sms",
+        "description": "📱 Send SMS to Nigerian Number",
+        "operationId": "sms_post_api_v1_sms_send_send_sms",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SMSSendRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Post Api V1 Sms Send Send Sms"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sms/bulk": {
+      "post": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Send Bulk Sms",
+        "description": "📤 Send Bulk SMS Messages",
+        "operationId": "sms_post_api_v1_sms_bulk_send_bulk_sms",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SMSBulkRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Post Api V1 Sms Bulk Send Bulk Sms"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sms/otp/generate": {
+      "post": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Generate Otp",
+        "description": "🔐 Generate and Send OTP",
+        "operationId": "sms_post_api_v1_sms_otp_generate_generate_otp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OTPGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Post Api V1 Sms Otp Generate Generate Otp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sms/otp/verify": {
+      "post": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Verify Otp",
+        "description": "✅ Verify OTP Code",
+        "operationId": "sms_post_api_v1_sms_otp_verify_verify_otp",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OTPVerifyRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Post Api V1 Sms Otp Verify Verify Otp"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sms/status/{message_id}": {
+      "get": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Get Message Status",
+        "description": "📊 Check Message Delivery Status",
+        "operationId": "sms_get_api_v1_sms_status_message_id_get_message_status",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Message Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Get Api V1 Sms Status Message Id Get Message Status"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sms/balance": {
+      "get": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Get Sms Balance",
+        "description": "💰 Check SMS Credit Balance",
+        "operationId": "sms_get_api_v1_sms_balance_get_sms_balance",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Get Api V1 Sms Balance Get Sms Balance"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/sms/templates": {
+      "get": {
+        "tags": [
+          "sms",
+          "sms"
+        ],
+        "summary": "Get Message Templates",
+        "description": "📝 Get Message Templates",
+        "operationId": "sms_get_api_v1_sms_templates_get_message_templates",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Sms Get Api V1 Sms Templates Get Message Templates"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/chat": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Chat Completion",
+        "description": "🤖 Interactive Chat Completion",
+        "operationId": "ai_post_api_v1_ai_chat_chat_completion",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIChatRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Post Api V1 Ai Chat Chat Completion"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/generate": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Generate Content",
+        "description": "📝 Generate Content",
+        "operationId": "ai_post_api_v1_ai_generate_generate_content",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIGenerateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Post Api V1 Ai Generate Generate Content"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/analyze": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Analyze Text",
+        "description": "🔍 Analyze Text Content",
+        "operationId": "ai_post_api_v1_ai_analyze_analyze_text",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AIAnalyzeRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Post Api V1 Ai Analyze Analyze Text"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/translate": {
+      "post": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Translate Text",
+        "description": "🌍 Nigerian Language Translation",
+        "operationId": "ai_post_api_v1_ai_translate_translate_text",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AITranslateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Post Api V1 Ai Translate Translate Text"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/models": {
+      "get": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Get Available Models",
+        "description": "🧠 Get Available AI Models",
+        "operationId": "ai_get_api_v1_ai_models_get_available_models",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Get Api V1 Ai Models Get Available Models"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/ai/conversations/{conversation_id}": {
+      "get": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Get Conversation",
+        "description": "💬 Get Conversation History",
+        "operationId": "ai_get_api_v1_ai_conversations_conversation_id_get_conversation",
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Conversation Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Get Api V1 Ai Conversations Conversation Id Get Conversation"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/ai/usage": {
+      "get": {
+        "tags": [
+          "ai",
+          "ai"
+        ],
+        "summary": "Get Usage Statistics",
+        "description": "📊 Get Token Usage Statistics",
+        "operationId": "ai_get_api_v1_ai_usage_get_usage_statistics",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Ai Get Api V1 Ai Usage Get Usage Statistics"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ]
       }
     },
     "/api/v1/services/health": {
       "get": {
         "tags": [
-          "gateway"
+          "health",
+          "health"
         ],
         "summary": "Get Services Health",
-        "description": "💚 Platform Health Overview\n\nComprehensive health check for all backend services.\nEssential for monitoring Nigerian DPI platform status.\n\n**Returns:**\n- Overall platform status\n- Individual service health\n- Response times and availability\n- Database connectivity status\n\n**Use Cases:**\n- Platform monitoring dashboards\n- Startup integration health checks\n- DevOps service discovery",
-        "operationId": "gateway_get_api_v1_services_health_get_services_health",
+        "description": "💚 Platform Health Overview\n\nComprehensive health check for all backend services.\nEssential for monitoring Nigerian DPI platform status.",
+        "operationId": "health_get_api_v1_services_health_get_services_health",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Gateway Get Api V1 Services Health Get Services Health"
+                  "title": "Response Health Get Api V1 Services Health Get Services Health"
                 }
               }
             }
@@ -1375,40 +1754,19 @@
     "/api/v1/dpi/health": {
       "get": {
         "tags": [
-          "gateway"
+          "health",
+          "health"
         ],
         "summary": "Get Dpi Health",
-        "description": "🇳🇬 Nigerian DPI Services Health\n\nFocused health check for core DPI services.\nTailored for Nigerian startup developers.\n\n**DPI Services Monitored:**\n- NIN verification service\n- BVN validation service\n- SMS messaging service\n- AI/LLM service\n\n**Response Includes:**\n- ready_for_development: Boolean status\n- Individual service availability\n- Development environment readiness",
-        "operationId": "gateway_get_api_v1_dpi_health_get_dpi_health",
+        "description": "🇳🇬 Nigerian DPI Services Health\n\nFocused health check for core DPI services.\nTailored for Nigerian startup developers.",
+        "operationId": "health_get_api_v1_dpi_health_get_dpi_health",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Gateway Get Api V1 Dpi Health Get Dpi Health"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/services/status": {
-      "get": {
-        "tags": [
-          "gateway"
-        ],
-        "summary": "Get Services Status",
-        "description": "📊 Detailed Service Status\n\nComprehensive status report for all platform services.\nIncludes performance metrics and availability data.\n\n**Status Information:**\n- Service discovery registry\n- Response time metrics\n- Error rate statistics\n- Resource utilization\n\n**DevOps Integration:**\n- ✅ Kubernetes health checks\n- ✅ Load balancer status\n- ✅ Database connectivity\n- ✅ External API dependencies",
-        "operationId": "gateway_get_api_v1_services_status_get_services_status",
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response Gateway Get Api V1 Services Status Get Services Status"
+                  "title": "Response Health Get Api V1 Dpi Health Get Dpi Health"
                 }
               }
             }
@@ -1419,11 +1777,12 @@
     "/api/v1/services/{service_name}/health": {
       "get": {
         "tags": [
-          "gateway"
+          "health",
+          "health"
         ],
         "summary": "Get Service Health",
-        "description": "🔍 Individual Service Health\n\nDetailed health check for a specific service.\nEssential for troubleshooting and monitoring.\n\n**Supported Services:**\n- auth: Authentication service\n- sms: Nigerian SMS service\n- nin: NIN verification service\n- bvn: BVN validation service\n- ai: AI/LLM service\n\n**Health Metrics:**\n- ✅ Service availability\n- ✅ Response time\n- ✅ Database connectivity\n- ✅ External API status",
-        "operationId": "gateway_get_api_v1_services_service_name_health_get_service_health",
+        "description": "🔍 Individual Service Health\n\nDetailed health check for a specific service.\nEssential for troubleshooting and monitoring.",
+        "operationId": "health_get_api_v1_services_service_name_health_get_service_health",
         "parameters": [
           {
             "name": "service_name",
@@ -1441,7 +1800,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Gateway Get Api V1 Services Service Name Health Get Service Health"
+                  "title": "Response Health Get Api V1 Services Service Name Health Get Service Health"
                 }
               }
             }
@@ -1462,11 +1821,12 @@
     "/api/v1/services/{service_name}/metrics": {
       "get": {
         "tags": [
-          "gateway"
+          "health",
+          "health"
         ],
         "summary": "Get Service Metrics",
-        "description": "📈 Service Performance Metrics\n\nDetailed performance and usage metrics for specific service.\nCritical for capacity planning and optimization.\n\n**Metrics Included:**\n- Request volume and patterns\n- Response time percentiles\n- Error rates and types\n- Resource consumption\n- Nigerian-specific usage patterns\n\n**Use Cases:**\n- Performance optimization\n- Capacity planning\n- SLA monitoring\n- Cost analysis",
-        "operationId": "gateway_get_api_v1_services_service_name_metrics_get_service_metrics",
+        "description": "📈 Service Performance Metrics\n\nDetailed performance and usage metrics for specific service.\nCritical for capacity planning and optimization.",
+        "operationId": "health_get_api_v1_services_service_name_metrics_get_service_metrics",
         "parameters": [
           {
             "name": "service_name",
@@ -1484,7 +1844,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "title": "Response Gateway Get Api V1 Services Service Name Metrics Get Service Metrics"
+                  "title": "Response Health Get Api V1 Services Service Name Metrics Get Service Metrics"
                 }
               }
             }
@@ -1505,18 +1865,19 @@
     "/api/v1/examples/nin": {
       "get": {
         "tags": [
-          "gateway"
+          "examples",
+          "examples"
         ],
         "summary": "Nin Examples",
-        "description": "📋 NIN Verification Examples\n\nSample requests and responses for Nigerian Identity Number verification.\nEssential reference for DPI integration.\n\n**Includes:**\n- Test NIN numbers for development\n- Request/response format examples\n- Expected data structure\n- Integration patterns\n\n**Nigerian Context:** Real NIN format and validation examples",
-        "operationId": "gateway_get_api_v1_examples_nin_nin_examples",
+        "description": "📋 NIN Verification Examples",
+        "operationId": "examples_get_api_v1_examples_nin_nin_examples",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Examples Get Api V1 Examples Nin Nin Examples"
                 }
               }
             }
@@ -1527,18 +1888,65 @@
     "/api/v1/examples/sms": {
       "get": {
         "tags": [
-          "gateway"
+          "examples",
+          "examples"
         ],
         "summary": "Sms Examples",
-        "description": "📱 Nigerian SMS Examples\n\nSample SMS requests for Nigerian mobile networks.\nIncludes OTP and bulk messaging patterns.\n\n**Features:**\n- Nigerian phone number formats\n- OTP message templates\n- Bulk SMS examples\n- Network-specific optimizations\n\n**Supported Networks:** MTN, Airtel, Glo, 9mobile",
-        "operationId": "gateway_get_api_v1_examples_sms_sms_examples",
+        "description": "📱 Nigerian SMS Examples",
+        "operationId": "examples_get_api_v1_examples_sms_sms_examples",
         "responses": {
           "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
                 "schema": {
-
+                  "title": "Response Examples Get Api V1 Examples Sms Sms Examples"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/examples/auth": {
+      "get": {
+        "tags": [
+          "examples",
+          "examples"
+        ],
+        "summary": "Auth Examples",
+        "description": "🔐 OAuth2 Bearer Token Examples",
+        "operationId": "examples_get_api_v1_examples_auth_auth_examples",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Examples Get Api V1 Examples Auth Auth Examples"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/examples/integration": {
+      "get": {
+        "tags": [
+          "examples",
+          "examples"
+        ],
+        "summary": "Integration Examples",
+        "description": "🚀 Complete DPI Integration Examples",
+        "operationId": "examples_get_api_v1_examples_integration_integration_examples",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response Examples Get Api V1 Examples Integration Integration Examples"
                 }
               }
             }
@@ -1549,6 +1957,193 @@
   },
   "components": {
     "schemas": {
+      "AIAnalyzeRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "analysis_type": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Type",
+            "default": "sentiment"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text"
+        ],
+        "title": "AIAnalyzeRequest"
+      },
+      "AIChatRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id"
+          },
+          "context": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "AIChatRequest"
+      },
+      "AIGenerateRequest": {
+        "properties": {
+          "prompt": {
+            "type": "string",
+            "title": "Prompt"
+          },
+          "max_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Tokens",
+            "default": 150
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature",
+            "default": 0.7
+          }
+        },
+        "type": "object",
+        "required": [
+          "prompt"
+        ],
+        "title": "AIGenerateRequest"
+      },
+      "AITranslateRequest": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "source_language": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Language",
+            "default": "auto"
+          },
+          "target_language": {
+            "type": "string",
+            "title": "Target Language"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "target_language"
+        ],
+        "title": "AITranslateRequest"
+      },
+      "BVNLookupRequest": {
+        "properties": {
+          "bvn": {
+            "type": "string",
+            "title": "Bvn"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bvn"
+        ],
+        "title": "BVNLookupRequest"
+      },
+      "BVNMatchRequest": {
+        "properties": {
+          "bvn": {
+            "type": "string",
+            "title": "Bvn"
+          },
+          "first_name": {
+            "type": "string",
+            "title": "First Name"
+          },
+          "last_name": {
+            "type": "string",
+            "title": "Last Name"
+          },
+          "date_of_birth": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Date Of Birth"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bvn",
+          "first_name",
+          "last_name"
+        ],
+        "title": "BVNMatchRequest"
+      },
+      "BVNVerifyRequest": {
+        "properties": {
+          "bvn": {
+            "type": "string",
+            "title": "Bvn"
+          }
+        },
+        "type": "object",
+        "required": [
+          "bvn"
+        ],
+        "title": "BVNVerifyRequest"
+      },
       "HTTPValidationError": {
         "properties": {
           "detail": {
@@ -1561,6 +2156,376 @@
         },
         "type": "object",
         "title": "HTTPValidationError"
+      },
+      "NINLookupRequest": {
+        "properties": {
+          "nin": {
+            "type": "string",
+            "title": "Nin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nin"
+        ],
+        "title": "NINLookupRequest"
+      },
+      "NINVerifyRequest": {
+        "properties": {
+          "nin": {
+            "type": "string",
+            "title": "Nin"
+          }
+        },
+        "type": "object",
+        "required": [
+          "nin"
+        ],
+        "title": "NINVerifyRequest"
+      },
+      "OAuth2ClientCreate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "description": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Description"
+          },
+          "redirect_uris": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Redirect Uris",
+            "default": []
+          }
+        },
+        "type": "object",
+        "required": [
+          "name"
+        ],
+        "title": "OAuth2ClientCreate"
+      },
+      "OAuth2TokenRequest": {
+        "properties": {
+          "grant_type": {
+            "type": "string",
+            "title": "Grant Type"
+          },
+          "client_id": {
+            "type": "string",
+            "title": "Client Id"
+          },
+          "client_secret": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Client Secret"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "password": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "grant_type",
+          "client_id"
+        ],
+        "title": "OAuth2TokenRequest"
+      },
+      "OTPGenerateRequest": {
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "title": "Phone Number"
+          },
+          "length": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Length",
+            "default": 6
+          },
+          "expiry_minutes": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expiry Minutes",
+            "default": 5
+          }
+        },
+        "type": "object",
+        "required": [
+          "phone_number"
+        ],
+        "title": "OTPGenerateRequest"
+      },
+      "OTPVerifyRequest": {
+        "properties": {
+          "phone_number": {
+            "type": "string",
+            "title": "Phone Number"
+          },
+          "otp_code": {
+            "type": "string",
+            "title": "Otp Code"
+          }
+        },
+        "type": "object",
+        "required": [
+          "phone_number",
+          "otp_code"
+        ],
+        "title": "OTPVerifyRequest"
+      },
+      "PasswordReset": {
+        "properties": {
+          "new_password": {
+            "type": "string",
+            "title": "New Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "new_password"
+        ],
+        "title": "PasswordReset"
+      },
+      "SMSBulkRequest": {
+        "properties": {
+          "recipients": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Recipients"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "sender_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "recipients",
+          "message"
+        ],
+        "title": "SMSBulkRequest"
+      },
+      "SMSSendRequest": {
+        "properties": {
+          "to": {
+            "type": "string",
+            "title": "To"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message"
+          },
+          "sender_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Sender Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "to",
+          "message"
+        ],
+        "title": "SMSSendRequest"
+      },
+      "UserCreate": {
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "title": "Email"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "email",
+          "password"
+        ],
+        "title": "UserCreate"
+      },
+      "UserLogin": {
+        "properties": {
+          "identifier": {
+            "type": "string",
+            "title": "Identifier"
+          },
+          "password": {
+            "type": "string",
+            "title": "Password"
+          }
+        },
+        "type": "object",
+        "required": [
+          "identifier",
+          "password"
+        ],
+        "title": "UserLogin"
+      },
+      "UserUpdate": {
+        "properties": {
+          "email": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "email"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Email"
+          },
+          "username": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Username"
+          },
+          "first_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "First Name"
+          },
+          "last_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Name"
+          },
+          "is_active": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Active"
+          }
+        },
+        "type": "object",
+        "title": "UserUpdate"
       },
       "ValidationError": {
         "properties": {
@@ -1595,6 +2560,18 @@
         ],
         "title": "ValidationError"
       }
+    },
+    "securitySchemes": {
+      "HTTPBearer": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "JWT"
+      }
     }
-  }
+  },
+  "security": [
+    {
+      "HTTPBearer": []
+    }
+  ]
 }
