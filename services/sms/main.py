@@ -11,6 +11,7 @@ import firebase_admin
 from firebase_admin import credentials, firestore
 
 # --- Configure Logging ---
+
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Load environment variables from the .env file
@@ -22,7 +23,11 @@ import africastalking
 username = os.getenv("AT_USERNAME")
 api_key = os.getenv("AT_API_KEY")
 sender_id = os.getenv("AT_SENDER_ID")
-
+webhook_url = os.getenv("WEBHOOK_URL")
+print(webhook_url)
+#print(username)
+#print(api_key)
+#print(sender_id)
 # --- Firebase Admin SDK Configuration ---
 __app_id = os.getenv('appId')
 with open("firebase_service_acct.json", "r") as f:
@@ -185,7 +190,7 @@ async def check_balance():
     Check the current SMS balance on your account.
     """
     try:
-        user_info = await asyncio.to_thread(application_service.get_user_info)
+        user_info = await asyncio.to_thread(application_service.fetch_application_data)
         balance = user_info["UserData"]["balance"]
         return {"status": "success", "balance": balance}
     except Exception as e:
@@ -205,6 +210,7 @@ async def handle_delivery_report(request: Request):
     except json.JSONDecodeError:
         try:
             data = await request.form()
+            data = dict(data)
         except Exception:
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid data received")
 
