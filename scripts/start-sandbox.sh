@@ -364,6 +364,25 @@ main() {
         fi
     fi
     
+    # Create symlinks to .env file where needed
+    log_info "Creating .env symlinks..."
+    
+    # Symlink to docker-compose directory
+    if [ -d "deployment/docker-compose" ]; then
+        if [ ! -L "deployment/docker-compose/.env" ] && [ ! -f "deployment/docker-compose/.env" ]; then
+            ln -sf "../../.env" "deployment/docker-compose/.env"
+            log_info "Created symlink: deployment/docker-compose/.env -> ../../.env"
+        fi
+    fi
+    
+    # Symlink to monitoring directory
+    if [ -d "deployment/monitoring" ]; then
+        if [ ! -L "deployment/monitoring/.env" ] && [ ! -f "deployment/monitoring/.env" ]; then
+            ln -sf "../../.env" "deployment/monitoring/.env"
+            log_info "Created symlink: deployment/monitoring/.env -> ../../.env"
+        fi
+    fi
+    
     # Export environment variables
     export ENVIRONMENT
     set -a
